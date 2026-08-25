@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Notices · VectorOne</title>
+<meta name="description" content="Official college announcements — search, filter and read notices on VectorOne." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/dashboard.css" />
+
+<!-- Prevent theme flash: same 'cc-theme' key used across the app -->
+<script>
+  (function () {
+    var saved = localStorage.getItem('cc-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+
+<!-- ===================== TOP NAVBAR ===================== -->
+<header class="navbar">
+  <div class="navbar-left">
+    <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <a href="dashboard.html" class="navbar-brand">
+      <svg class="navbar-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="14" r="6" fill="var(--primary)" />
+      </svg>
+      <span>VectorOne</span>
+    </a>
+
+    <span class="navbar-divider" aria-hidden="true"></span>
+    <h1 class="navbar-page-title">Notices</h1>
+  </div>
+
+  <div class="navbar-center">
+    <div class="search-wrap" id="searchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="search"
+        id="globalSearch"
+        class="search-input"
+        placeholder="Search notices, events, clubs..."
+        aria-label="Search notices, events and clubs"
+        aria-expanded="false"
+        aria-controls="searchPanel"
+        aria-activedescendant=""
+        autocomplete="off"
+      />
+      <button type="button" class="search-clear" id="searchClear" aria-label="Clear search" tabindex="-1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <kbd class="search-kbd" aria-hidden="true">/</kbd>
+
+      <div class="search-panel" id="searchPanel" role="listbox" hidden>
+        <div class="search-section" id="recentSection">
+          <p class="search-section-title">Recent searches</p>
+          <ul class="search-list" id="recentSearchList">
+            <li><button type="button" class="search-item" data-query="Placement drive"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Placement drive</button></li>
+            <li><button type="button" class="search-item" data-query="Hackathon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Hackathon</button></li>
+            <li><button type="button" class="search-item" data-query="Exam datesheet"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Exam datesheet</button></li>
+          </ul>
+        </div>
+        <div class="search-section" id="resultsSection" hidden>
+          <p class="search-section-title">Results</p>
+          <ul class="search-list" id="searchResultsList"></ul>
+        </div>
+        <div class="search-empty" id="searchEmpty" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="34" height="34"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20.5 20.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>No notices found</span>
+          <small>Try a different keyword</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+
+    <div class="popover-wrap">
+      <button type="button" class="icon-btn" id="notificationBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5a6 6 0 0 1 12 0v4l1.8 3H4.2L6 13.5v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="badge" id="notificationBadge">4</span>
+      </button>
+
+      <div class="notification-panel" id="notificationPanel" role="menu" aria-label="Notifications" hidden>
+        <div class="panel-flyout-header">
+          <h2>Notifications</h2>
+          <button type="button" class="link-inline" id="markAllReadBtn">Mark all as read</button>
+        </div>
+        <ul class="notification-list" id="notificationList">
+          <li class="notification-item is-unread" data-id="n1">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text"><strong>Placement Cell</strong> posted a new notice: <em>Campus Drive — TCS NQT</em></p>
+              <span class="notification-time">10 minutes ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n2">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Your workshop <strong>Intro to UI/UX</strong> starts tomorrow at 10:00 AM.</p>
+              <span class="notification-time">1 hour ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n3">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Assignment <strong>DBMS Lab 4</strong> is due in 2 days.</p>
+              <span class="notification-time">3 hours ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n4">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text"><strong>Robotics Club</strong> approved your event registration.</p>
+              <span class="notification-time">Yesterday</span>
+            </div>
+          </li>
+          <li class="notification-item" data-id="n5">
+            <div>
+              <p class="notification-text">Semester timetable for Term 5 has been published.</p>
+              <span class="notification-time">2 days ago</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Theme toggle — identical to login/register -->
+    <button
+      type="button"
+      id="themeToggle"
+      class="icon-btn theme-toggle"
+      aria-label="Switch to light theme"
+      aria-pressed="false"
+      title="Toggle theme"
+    >
+      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="popover-wrap">
+      <button type="button" class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown">
+        <span class="avatar" aria-hidden="true">KS</span>
+        <span class="user-menu-name">Kshitij Sharma</span>
+        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+        <a href="profile.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</a>
+        <a href="settings.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Settings</a>
+        <hr />
+        <a href="login.html" role="menuitem" class="user-dropdown-danger"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ===================== LEFT SIDEBAR ===================== -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="dashboard.html" class="sidebar-link" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="notices.html" class="sidebar-link" data-nav="notices">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Notices</span>
+      </a>
+      <a href="events.html" class="sidebar-link" data-nav="events">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Events</span>
+      </a>
+      <a href="calendar.html" class="sidebar-link" data-nav="calendar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 13.5h2M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Calendar</span>
+      </a>
+      <a href="assignments.html" class="sidebar-link" data-nav="assignments">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5v2.2h6V3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Assignments</span>
+      </a>
+      <a href="resources.html" class="sidebar-link" data-nav="resources">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Resources</span>
+      </a>
+      <a href="messages.html" class="sidebar-link" data-nav="messages">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="profile.html" class="sidebar-link" data-nav="profile">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Profile</span>
+      </a>
+      <a href="settings.html" class="sidebar-link" data-nav="settings">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link sidebar-link--danger" id="logoutLink">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h2>Notices</h2>
+        <p>Stay updated with official college announcements.</p>
+      </div>
+    </div>
+
+    <!-- Search + filters -->
+    <div class="panel notices-page-toolbar">
+      <div class="page-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="noticesPageSearch" placeholder="Search notices..." aria-label="Search notices" autocomplete="off" />
+      </div>
+
+      <div class="filter-chips" id="noticesPageFilters" role="group" aria-label="Filter notices by category">
+        <button type="button" class="filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="academic">Academic</button>
+        <button type="button" class="filter-chip" data-filter="examination">Examination</button>
+        <button type="button" class="filter-chip" data-filter="placement">Placement</button>
+        <button type="button" class="filter-chip" data-filter="sports">Sports</button>
+        <button type="button" class="filter-chip" data-filter="club">Club</button>
+        <button type="button" class="filter-chip" data-filter="workshop">Workshop</button>
+        <button type="button" class="filter-chip" data-filter="scholarship">Scholarship</button>
+        <button type="button" class="filter-chip" data-filter="hostel">Hostel</button>
+      </div>
+    </div>
+
+    <!-- Notices list -->
+    <div class="notices-list" id="noticesList">
+
+      <!-- Pinned notice -->
+      <article class="notice-card notice-card--pinned">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="pin-badge"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 15.7l-5.2 2.8 1-5.8-4.2-4.1 5.8-.8L12 2.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/></svg>Pinned</span>
+            <span class="tag tag--exam">Examination</span>
+            <span class="priority priority--high">High</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Semester 5 End Term Examination Schedule Released</h3>
+        <p class="notice-card-desc">The final examination datesheet for Semester 5 is now available. Exams begin August 12 — please review your subject-wise timings and seating arrangement carefully.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Examination Cell</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 25, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Sem5_Exam_Datesheet.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Semester 5 End Term Examination Schedule Released"
+            data-category="Examination"
+            data-priority="High"
+            data-posted-by="Examination Cell"
+            data-date="Jul 25, 2026"
+            data-attachment="Sem5_Exam_Datesheet.pdf"
+            data-body="The final examination datesheet for Semester 5 has been released and is now available on the student portal.||All students are required to check their subject-wise exam timings, seating arrangement and room allocation carefully before the exam week begins. Any discrepancy in roll number or subject listing must be reported to the Examination Cell within 3 working days.||Admit cards will be issued one week prior to the first exam, subject to clearance of all outstanding academic and library dues."
+          >Read More</button>
+        </div>
+      </article>
+
+      <!-- Regular notices -->
+      <article class="notice-card" data-category="placement" data-title="campus drive tcs nqt registrations open">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--placement">Placement</span>
+            <span class="priority priority--high">High</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Campus Drive — TCS NQT Registrations Open</h3>
+        <p class="notice-card-desc">TCS is conducting an on-campus recruitment drive for final-year students. Registrations close July 30 — eligibility and package details attached.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Placement Cell</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 23, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            TCS_NQT_Eligibility.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Campus Drive — TCS NQT Registrations Open"
+            data-category="Placement"
+            data-priority="High"
+            data-posted-by="Placement Cell"
+            data-date="Jul 23, 2026"
+            data-attachment="TCS_NQT_Eligibility.pdf"
+            data-body="TCS is conducting an on-campus recruitment drive through the National Qualifier Test (NQT) for all final-year students across eligible branches.||Interested students must register on the placement portal before 11:59 PM on July 30. Only students with a minimum CGPA of 6.5 and no active academic backlog are eligible to apply.||A pre-placement talk and mock aptitude session will be conducted on July 28 in the Main Auditorium. Attendance is mandatory for all registered candidates."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="scholarship" data-title="merit scholarship applications open for 2026 27">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--scholarship">Scholarship</span>
+            <span class="priority priority--medium">Medium</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Merit Scholarship Applications Open for 2026–27</h3>
+        <p class="notice-card-desc">Applications for the Academic Merit Scholarship are now open for students with a CGPA of 8.0 or higher. Deadline to apply is August 5.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Accounts Office</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 22, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Merit_Scholarship_Form.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Merit Scholarship Applications Open for 2026–27"
+            data-category="Scholarship"
+            data-priority="Medium"
+            data-posted-by="Accounts Office"
+            data-date="Jul 22, 2026"
+            data-attachment="Merit_Scholarship_Form.pdf"
+            data-body="The Merit Scholarship Program for the 2026–27 academic year is now open for applications. The scholarship covers up to 50% of tuition fees for eligible students.||Applicants must have a minimum CGPA of 8.0 in the previous semester with no disciplinary record. The completed application form along with mark sheets must be submitted to the Accounts Office by August 5.||Shortlisted students will be notified via email and will need to appear for a brief interview during the second week of August."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="hostel" data-title="hostel mess menu revised for august">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--hostel">Hostel</span>
+            <span class="priority priority--low">Low</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Hostel Mess Menu Revised for August</h3>
+        <p class="notice-card-desc">The weekly mess menu has been updated based on student feedback collected last month. The new menu takes effect from August 1.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Hostel Warden Office</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 21, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span></span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Hostel Mess Menu Revised for August"
+            data-category="Hostel"
+            data-priority="Low"
+            data-posted-by="Hostel Warden Office"
+            data-date="Jul 21, 2026"
+            data-attachment=""
+            data-body="Based on feedback collected from residents over the last month, the hostel mess committee has revised the weekly menu to include more variety and better nutritional balance.||The new menu introduces a dedicated South Indian breakfast day, an additional salad counter at dinner, and rotates the weekend special every two weeks.||The revised menu will be effective from August 1 and will be displayed on the notice board outside each mess hall."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="club" data-title="robotics club recruitment drive">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--club">Club</span>
+            <span class="priority priority--low">Low</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Robotics Club Recruitment Drive</h3>
+        <p class="notice-card-desc">The Robotics Club is recruiting new members across all years. No prior experience required — just curiosity and enthusiasm.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Robotics Club</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 20, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span></span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Robotics Club Recruitment Drive"
+            data-category="Club"
+            data-priority="Low"
+            data-posted-by="Robotics Club"
+            data-date="Jul 20, 2026"
+            data-attachment=""
+            data-body="The Robotics Club is opening recruitment for the new academic year and is looking for enthusiastic students across all branches and years.||No prior robotics or coding experience is required — members will be trained through hands-on workshops covering electronics, embedded systems and basic automation.||Interested students can fill out the interest form at the club stall near the main block between July 20 and July 27."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="workshop" data-title="intro to ui ux design workshop registrations open">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--workshop">Workshop</span>
+            <span class="priority priority--medium">Medium</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Intro to UI/UX Design Workshop — Registrations Open</h3>
+        <p class="notice-card-desc">A hands-on two-day workshop covering design fundamentals, Figma basics and a mini project. Limited seats available.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Design Cell</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 19, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            UIUX_Workshop_Brochure.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Intro to UI/UX Design Workshop — Registrations Open"
+            data-category="Workshop"
+            data-priority="Medium"
+            data-posted-by="Design Cell"
+            data-date="Jul 19, 2026"
+            data-attachment="UIUX_Workshop_Brochure.pdf"
+            data-body="The Design Cell is organizing a two-day hands-on workshop introducing students to the fundamentals of UI/UX design, covering design thinking, wireframing and prototyping in Figma.||The workshop is open to students of all years and requires no prior design background. Participants will work in small teams to design and prototype a mini mobile app by the end of day two.||Seats are limited to 40 participants and will be allotted on a first-come, first-served basis. A participation certificate will be issued to all attendees."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="sports" data-title="inter department football trials this weekend">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--sports">Sports</span>
+            <span class="priority priority--low">Low</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Inter-Department Football Trials This Weekend</h3>
+        <p class="notice-card-desc">Trials for the inter-department football tournament will be held this Saturday at the main ground. Report by 7:30 AM.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Sports Committee</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 21, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span></span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Inter-Department Football Trials This Weekend"
+            data-category="Sports"
+            data-priority="Low"
+            data-posted-by="Sports Committee"
+            data-date="Jul 21, 2026"
+            data-attachment=""
+            data-body="Trials for the annual inter-department football tournament will be conducted this Saturday at the main ground, starting at 8:00 AM sharp.||All interested students must report by 7:30 AM for warm-up and registration. Sports shoes and a college ID card are mandatory to participate in the trials.||Selected players will be notified by evening and will begin practice sessions from the following Monday under the sports committee's coaching staff."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="examination" data-title="revised datesheet for practical examinations">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--exam">Examination</span>
+            <span class="priority priority--high">High</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Revised Datesheet for Practical Examinations</h3>
+        <p class="notice-card-desc">The practical examination schedule has been revised due to lab availability. Please check your updated slot before July 26.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Examination Cell</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 22, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            Practical_Datesheet_Revised.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Revised Datesheet for Practical Examinations"
+            data-category="Examination"
+            data-priority="High"
+            data-posted-by="Examination Cell"
+            data-date="Jul 22, 2026"
+            data-attachment="Practical_Datesheet_Revised.pdf"
+            data-body="Due to limited lab availability, the practical examination schedule originally published on July 15 has been revised for select branches and sections.||Students are advised to download the updated datesheet and cross-check their subject code, lab number and reporting time carefully, as several slots have shifted by up to two days.||Any student with a genuine timetable clash must contact the Examination Cell in writing before July 26 to be considered for a slot change."
+          >Read More</button>
+        </div>
+      </article>
+
+      <article class="notice-card" data-category="academic" data-title="semester 5 internal assessment marks published">
+        <div class="notice-card-top">
+          <div class="notice-card-badges">
+            <span class="tag tag--academic">Academic</span>
+            <span class="priority priority--medium">Medium</span>
+          </div>
+          <div class="notice-card-actions">
+            <button type="button" class="icon-btn bookmark-btn" aria-label="Bookmark this notice" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="icon-btn share-btn" aria-label="Share this notice">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <h3 class="notice-card-title">Semester 5 Internal Assessment Marks Published</h3>
+        <p class="notice-card-desc">Internal assessment marks for all Semester 5 subjects are now visible on the student portal. Discrepancies can be reported within 5 days.</p>
+        <div class="notice-card-meta">
+          <span class="notice-meta-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Posted by Academic Office</span>
+          <span class="notice-meta-dot" aria-hidden="true">•</span>
+          <span class="notice-meta-item">Jul 18, 2026</span>
+        </div>
+        <div class="notice-card-footer">
+          <span class="notice-attachment">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            IA_Marks_Sem5_Guidelines.pdf
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline btn-sm notice-readmore"
+            data-title="Semester 5 Internal Assessment Marks Published"
+            data-category="Academic"
+            data-priority="Medium"
+            data-posted-by="Academic Office"
+            data-date="Jul 18, 2026"
+            data-attachment="IA_Marks_Sem5_Guidelines.pdf"
+            data-body="Internal assessment marks for all Semester 5 subjects have been uploaded and are now visible under the 'Academics' tab of the student portal.||Students are requested to verify their marks against the components — attendance, assignments, and mid-semester tests — carefully.||Any discrepancy must be reported to the respective subject faculty with supporting evidence within 5 working days from the date of this notice, after which the marks will be considered final."
+          >Read More</button>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- Empty state (shown by JS when filters/search return zero results) -->
+    <div class="notices-page-empty" id="noticesPageEmpty" hidden>
+      <svg width="130" height="100" viewBox="0 0 160 120" fill="none" aria-hidden="true">
+        <rect x="30" y="18" width="100" height="84" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M46 40h68M46 54h68M46 68h44" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="112" cy="86" r="20" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M104 86h16M112 78v16" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" transform="rotate(45 112 86)"/>
+      </svg>
+      <p>No notices available.</p>
+      <span>Try a different keyword or clear your filters.</span>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Notices pagination">
+      <button type="button" class="pagination-btn pagination-prev" id="paginationPrev" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Previous
+      </button>
+      <div class="pagination-pages" id="paginationPages">
+        <button type="button" class="pagination-page is-active" data-page="1">1</button>
+        <button type="button" class="pagination-page" data-page="2">2</button>
+        <button type="button" class="pagination-page" data-page="3">3</button>
+      </div>
+      <button type="button" class="pagination-btn pagination-next" id="paginationNext">
+        Next
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </nav>
+
+  </main>
+
+  <!-- ===================== RIGHT SIDEBAR ===================== -->
+  <aside class="right-sidebar">
+
+    <div class="panel">
+      <h3>Today's Schedule</h3>
+      <ul class="schedule-list">
+        <li><span class="schedule-time">09:00</span><span class="schedule-dot schedule-dot--blue" aria-hidden="true"></span><span>Database Systems — Room 204</span></li>
+        <li><span class="schedule-time">11:00</span><span class="schedule-dot schedule-dot--purple" aria-hidden="true"></span><span>UI/UX Workshop — Design Lab</span></li>
+        <li><span class="schedule-time">14:00</span><span class="schedule-dot schedule-dot--green" aria-hidden="true"></span><span>Robotics Club Meetup</span></li>
+        <li><span class="schedule-time">16:30</span><span class="schedule-dot schedule-dot--orange" aria-hidden="true"></span><span>DBMS Lab 4 due</span></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Mini Calendar</h3>
+      <div class="mini-calendar" id="miniCalendar">
+        <div class="mini-calendar-header">
+          <span id="miniCalendarLabel">July 2026</span>
+        </div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid" aria-hidden="true">
+          <!-- generated by dashboard.js -->
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Upcoming Deadline</h3>
+      <div class="deadline-card">
+        <p class="deadline-title">DBMS Lab 4 Submission</p>
+        <p class="deadline-meta">Due in 2 days · Jul 28, 2026</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Latest Announcement</h3>
+      <p class="announcement-text">Semester 5 internal examinations begin from August 12. Check the academic calendar for the full schedule.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Quick Links</h3>
+      <ul class="quick-links">
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Academic Calendar</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 18h19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Library Portal</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="10.5" r="2.4" stroke="currentColor" stroke-width="1.5"/><path d="M3 19c0-2.8 2.5-4.5 5.5-4.5S14 16.2 14 19M14.5 19c0-2.1 1.7-3.6 4-3.6S21 17.4 21 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Clubs Directory</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Exam Timetable</a></li>
+      </ul>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ===================== NOTICE MODAL ===================== -->
+<div class="modal-overlay" id="noticeModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-badges" id="noticeModalBadges"></div>
+        <h2 class="modal-title" id="noticeModalTitle">Notice title</h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="noticeModalClose" aria-label="Close notice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta">
+        <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span id="noticeModalPostedBy">Posted by —</span></span>
+        <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span id="noticeModalDate">—</span></span>
+      </div>
+      <div class="modal-notice-body" id="noticeModalBody"></div>
+      <div class="modal-attachment" id="noticeModalAttachment" hidden>
+        <div class="modal-attachment-info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span id="noticeModalAttachmentName">attachment.pdf</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="noticeModalDownload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 18.5h15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          Download PDF
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="noticeModalCloseFooter">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>

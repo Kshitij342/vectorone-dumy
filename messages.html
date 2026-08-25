@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messages · VectorOne</title>
+  <meta name="description" content="Student messages and announcements in VectorOne." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/messages.css" />
+  <script>(function(){var saved=localStorage.getItem('cc-theme');var theme=saved||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',theme);})();</script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-left">
+      <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <a href="dashboard.html" class="navbar-brand"><svg class="navbar-logo" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="14" r="6" fill="var(--primary)" /></svg><span>VectorOne</span></a>
+      <span class="navbar-divider" aria-hidden="true"></span>
+      <h1 class="navbar-page-title">Messages</h1>
+    </div>
+    <div class="navbar-center"><div class="search-wrap" id="searchWrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input type="search" id="globalSearch" class="search-input" placeholder="Search conversations..." aria-label="Search conversations" autocomplete="off" /><button type="button" class="search-clear" id="searchClear" aria-label="Clear search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><kbd class="search-kbd" aria-hidden="true">/</kbd><div class="search-panel" id="searchPanel" role="listbox" hidden> <div class="search-section"><p class="search-section-title">Results</p><ul class="search-list" id="searchResultsList"></ul></div><div class="search-empty" id="searchEmpty" hidden><span>No conversations found</span><small>Try another name</small></div></div></div></div>
+    <div class="navbar-right">
+      <div class="popover-wrap"><button type="button" class="icon-btn" id="notificationBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5a6 6 0 0 1 12 0v4l1.8 3H4.2L6 13.5v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="badge" id="notificationBadge">2</span></button><div class="notification-panel" id="notificationPanel" role="menu" aria-label="Notifications" hidden><div class="panel-flyout-header"><h2>Notifications</h2><button type="button" class="link-inline" id="markAllReadBtn">Mark all as read</button></div><ul class="notification-list" id="notificationList"></ul></div></div>
+      <button type="button" id="themeToggle" class="icon-btn theme-toggle" aria-label="Switch to light theme" aria-pressed="false" title="Toggle theme"><svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      <div class="popover-wrap"><button type="button" class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown"><span class="avatar" aria-hidden="true">KS</span><span class="user-menu-name">Kshitij Sharma</span><svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="user-dropdown" id="userDropdown" role="menu" hidden><a href="profile.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</a><a href="settings.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Settings</a><hr /><a href="login.html" role="menuitem" class="user-dropdown-danger"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</a></div></div>
+    </div>
+  </header>
+  <div class="app-body">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav" aria-label="Primary">
+        <a href="dashboard.html" class="sidebar-link" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/></svg><span>Dashboard</span></a>
+        <a href="notices.html" class="sidebar-link" data-nav="notices"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Notices</span></a>
+        <a href="events.html" class="sidebar-link" data-nav="events"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Events</span></a>
+        <a href="calendar.html" class="sidebar-link" data-nav="calendar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 13.5h2M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Calendar</span></a>
+        <a href="assignments.html" class="sidebar-link" data-nav="assignments"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5v2.2h6V3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Assignments</span></a>
+        <a href="resources.html" class="sidebar-link" data-nav="resources"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Resources</span></a>
+        <a href="messages.html" class="sidebar-link is-active" data-nav="messages"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Messages</span></a>
+        <a href="profile.html" class="sidebar-link" data-nav="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Profile</span></a>
+        <a href="settings.html" class="sidebar-link" data-nav="settings"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Settings</span></a>
+      </nav>
+      <div class="sidebar-footer"><a href="login.html" class="sidebar-link sidebar-link--danger" id="logoutLink"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Logout</span></a></div>
+    </aside>
+    <main class="main-content">
+      <section class="panel">
+        <div class="messages-shell">
+          <div class="panel-list" id="chatList">
+            <div class="chat-item is-active" data-chat="rao"><div class="chat-avatar">DR</div><div class="chat-meta"><strong>Dr. Rao</strong><span>DBMS Lab 5 feedback</span></div><div class="chat-time">2m</div></div>
+            <div class="chat-item" data-chat="ananya"><div class="chat-avatar">AB</div><div class="chat-meta"><strong>Ananya</strong><span>Project team sync</span></div><div class="chat-time">18m</div></div>
+            <div class="chat-item" data-chat="placement"><div class="chat-avatar">PC</div><div class="chat-meta"><strong>Placement Cell</strong><span>Campus drive next week</span></div><div class="chat-time">1h</div></div>
+            <div class="chat-item" data-chat="affairs"><div class="chat-avatar">SA</div><div class="chat-meta"><strong>Student Affairs</strong><span>Scholarship window</span></div><div class="chat-time">2h</div></div>
+          </div>
+          <div class="panel chat-thread">
+            <div class="chat-header"><div class="chat-header-title"><h2 id="chatThreadName">Dr. Rao</h2><small id="chatThreadStatus">Online</small></div><button class="btn btn-outline" type="button">Schedule</button></div>
+            <div class="chat-bubbles" id="chatBubbles">
+              <div class="bubble incoming"><p>Your normalized ER diagram is close. Add the relationship between Student and Enrollment before submission.</p><time>9:12 AM</time></div>
+              <div class="bubble outgoing"><p>Thanks, I’ll revise the cardinality and resubmit before 11:59 PM.</p><time>9:14 AM</time></div>
+              <div class="bubble incoming"><p>Great. Don’t forget to include the composite key and the faculty assignment.</p><time>9:15 AM</time></div>
+            </div>
+            <div class="chat-composer"><input type="text" id="messageInput" placeholder="Type your message..." /><button class="btn btn-primary" type="button" id="sendMessageBtn">Send</button></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="js/dashboard.js"></script>
+  <script src="js/messages.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+/* Admin profile — page-specific styles. Referenced by admin/profile.html.
+   Extracted from the page's former inline <style> so the markup stays clean
+   and the rules can be shared/maintained in one place. */
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  gap: 20px;
+  align-items: start;
+}
+.profile-card { display: grid; gap: 16px; min-width: 0; }
+.profile-hero { display: flex; gap: 18px; align-items: center; }
+.profile-avatar {
+  display: grid;
+  flex: 0 0 72px;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+}
+.profile-hero-copy { min-width: 0; }
+.profile-hero-copy h2 { margin: 0 0 4px; font-size: 22px; overflow-wrap: anywhere; }
+.profile-hero-copy p { margin: 0; color: var(--text-secondary); }
+
+.meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.meta-item {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.meta-item span { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 12px; }
+.meta-item strong { font-size: 13px; overflow-wrap: anywhere; }
+
+.profile-section-title { margin: 0 0 12px; font-size: 15px; }
+
+@media (max-width: 900px) {
+  .profile-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .meta-grid { grid-template-columns: minmax(0, 1fr); }
+  .profile-hero { gap: 14px; }
+  .profile-avatar { flex-basis: 60px; width: 60px; height: 60px; font-size: 22px; }
+  .profile-hero-copy h2 { font-size: 19px; }
+}

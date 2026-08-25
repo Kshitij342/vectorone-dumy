@@ -1,0 +1,34 @@
+/* Admin reports — page-specific styles. Referenced by admin/reports.html.
+
+   Toolbar, table, empty state and modal come from the shared admin component
+   layer in css/admin-dashboard.css. */
+
+.reports-panel { padding: 0; overflow: hidden; }
+
+/* 6 columns: Report / Category / Owner / Last Updated / Status / Actions */
+.reports-table { min-width: 900px; }
+.reports-table td.report-name { max-width: 320px; white-space: normal; }
+.reports-table td.report-name strong { display: block; font-size: 13px; font-weight: 600; }
+.reports-table td.report-name span { display: block; margin-top: 3px; color: var(--text-secondary); font-size: 11.5px; }
+
+.report-period { display: inline-flex; padding: 4px 9px; border-radius: 7px; background: var(--scrim); color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+.report-updated { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Modal body: the report summary shown by the View action. */
+.report-summary { display: grid; gap: 12px; }
+.report-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.report-metric {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.report-metric span { color: var(--text-secondary); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+.report-metric strong { font-size: 17px; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 620px) {
+  .reports-table td.report-name { max-width: 220px; }
+}

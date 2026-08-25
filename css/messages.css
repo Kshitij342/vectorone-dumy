@@ -1,0 +1,92 @@
+/* Student messages — page-specific styles.
+   Extracted from the inline <style> that used to live in messages.html so the
+   page matches every other Student page (external css/PAGE.css + js/PAGE.js).
+   Shared shell, navbar, sidebar and switch styling come from css/dashboard.css. */
+
+.messages-shell {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+
+/* conversation list */
+.panel-list { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 0;
+  text-align: left;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.chat-item:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
+.chat-item.is-active { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--scrim);
+  color: var(--primary);
+  font-weight: 700;
+}
+.chat-meta { flex: 1; min-width: 0; }
+.chat-meta strong, .chat-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-meta strong { font-size: 13px; }
+.chat-meta span { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
+.chat-time { flex: none; color: var(--text-secondary); font-size: 11px; }
+
+/* thread */
+.chat-thread { display: grid; gap: 16px; min-width: 0; align-content: start; }
+.chat-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.chat-header-title { min-width: 0; }
+.chat-header-title h2 { font-size: 18px; margin: 0; }
+.chat-header-title small { color: var(--text-secondary); }
+.chat-bubbles { display: grid; gap: 12px; min-width: 0; }
+.bubble {
+  max-width: 72%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.bubble.incoming { justify-self: start; }
+.bubble.outgoing { justify-self: end; background: color-mix(in srgb, var(--primary) 8%, transparent); border-color: color-mix(in srgb, var(--primary) 18%, transparent); }
+.bubble p { margin: 0; font-size: 13px; line-height: 1.5; }
+.bubble time { display: block; margin-top: 6px; font-size: 11px; color: var(--text-secondary); }
+
+/* composer */
+.chat-composer { display: flex; gap: 10px; min-width: 0; }
+.chat-composer input {
+  flex: 1;
+  min-width: 0;               /* keeps the input from pushing the Send button off-screen */
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+}
+.chat-composer input:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent); }
+.chat-composer .btn { flex: none; }
+
+/* stacks to a single column on tablets and phones */
+@media (max-width: 900px) {
+  .messages-shell { grid-template-columns: minmax(0, 1fr); }
+  .bubble { max-width: 86%; }
+}
+@media (max-width: 480px) {
+  .chat-item { padding: 10px; }
+  .bubble { max-width: 92%; }
+  .chat-header .btn { flex: 1 1 100%; }
+}

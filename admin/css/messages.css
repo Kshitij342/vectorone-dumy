@@ -1,0 +1,209 @@
+/* Admin messages — page-specific styles. Referenced by admin/messages.html.
+
+   Layout: a conversation list beside a thread pane on desktop, stacking to a
+   single column on narrow screens. Mirrors the Student messaging layout so the
+   two portals feel the same, but is defined separately here — Student and Admin
+   CSS are never merged. */
+
+.messages-shell {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Fill the viewport below the navbar so the thread scrolls internally
+     instead of growing the page. */
+  min-height: 0;
+  height: calc(100vh - var(--navbar-height) - 220px);
+  min-height: 520px;
+}
+
+/* ---------- Left: conversation list ---------- */
+.message-list-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.message-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.message-toolbar input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+.message-toolbar input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.message-toolbar .btn { flex: 0 0 auto; height: 36px; padding: 0 12px; font-size: 12px; }
+
+.conversation-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.conversation-item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.conversation-item:hover { background: var(--scrim); }
+.conversation-item.is-active { border-left-color: var(--primary); background: var(--scrim); }
+.conversation-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.conversation-avatar {
+  display: grid;
+  flex: 0 0 36px;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--scrim);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.conversation-item.is-active .conversation-avatar { background: var(--card); }
+.conversation-copy { min-width: 0; flex: 1; }
+.conversation-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.conversation-top strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-top time { flex: none; color: var(--text-secondary); font-size: 10.5px; }
+.conversation-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.conversation-unread {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ---------- Right: thread ---------- */
+.message-thread-panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.thread-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.thread-header h3 { margin: 0; font-size: 15px; }
+.thread-header span { color: var(--text-secondary); font-size: 12px; }
+.thread-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.thread-actions .btn { height: 34px; padding: 0 12px; font-size: 12px; }
+
+.message-thread {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface);
+}
+.message-bubble {
+  max-width: min(72%, 520px);
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.message-bubble.is-incoming { align-self: flex-start; border-bottom-left-radius: 4px; }
+.message-bubble.is-outgoing {
+  align-self: flex-end;
+  border-color: transparent;
+  border-bottom-right-radius: 4px;
+  background: var(--primary);
+  color: #fff;
+}
+.message-bubble time { display: block; margin-top: 5px; font-size: 10.5px; opacity: .75; }
+.message-day-divider { align-self: center; color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+
+/* ---------- Composer ---------- */
+.message-composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+.message-composer input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;              /* stops the input forcing the row wider than the pane */
+  max-width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.message-composer input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.message-composer .btn { flex: 0 0 auto; height: 40px; }
+
+/* ---------- Responsive: two panes become one ---------- */
+@media (max-width: 1024px) {
+  .messages-shell { grid-template-columns: 290px minmax(0, 1fr); height: calc(100vh - var(--navbar-height) - 190px); }
+}
+@media (max-width: 860px) {
+  /* Stack: the list sits above the thread, each scrolling on its own. */
+  .messages-shell {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+  .message-list-panel { border-right: 0; border-bottom: 1px solid var(--border); }
+  .conversation-list { max-height: 280px; }
+  .message-thread { min-height: 340px; max-height: 60vh; }
+  .message-bubble { max-width: 86%; }
+}
+@media (max-width: 520px) {
+  .message-toolbar { flex-wrap: wrap; padding: 12px; }
+  .message-toolbar input { flex: 1 1 100%; }
+  .message-toolbar .btn { flex: 1 1 auto; }
+  .thread-header { padding: 12px; }
+  .thread-actions { width: 100%; }
+  .thread-actions .btn { flex: 1 1 auto; }
+  .message-thread { padding: 12px; }
+  .message-bubble { max-width: 92%; }
+  .message-composer { padding: 10px 12px; }
+  .message-composer .btn { padding: 0 14px; }
+}

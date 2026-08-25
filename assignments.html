@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Assignments · VectorOne</title>
+<meta name="description" content="Track, submit and manage all your college assignments in one place on VectorOne." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/dashboard.css" />
+<link rel="stylesheet" href="css/assignments.css" />
+
+<!-- Prevent theme flash: same 'cc-theme' key used across the app -->
+<script>
+  (function () {
+    var saved = localStorage.getItem('cc-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+
+<!-- ===================== TOP NAVBAR ===================== -->
+<header class="navbar">
+  <div class="navbar-left">
+    <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <a href="dashboard.html" class="navbar-brand">
+      <svg class="navbar-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="14" r="6" fill="var(--primary)" />
+      </svg>
+      <span>VectorOne</span>
+    </a>
+
+    <span class="navbar-divider" aria-hidden="true"></span>
+    <h1 class="navbar-page-title">Assignments</h1>
+  </div>
+
+  <div class="navbar-center">
+    <div class="search-wrap" id="searchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="search"
+        id="globalSearch"
+        class="search-input"
+        placeholder="Search notices, events, clubs..."
+        aria-label="Search notices, events and clubs"
+        aria-expanded="false"
+        aria-controls="searchPanel"
+        aria-activedescendant=""
+        autocomplete="off"
+      />
+      <button type="button" class="search-clear" id="searchClear" aria-label="Clear search" tabindex="-1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <kbd class="search-kbd" aria-hidden="true">/</kbd>
+
+      <div class="search-panel" id="searchPanel" role="listbox" hidden>
+        <div class="search-section" id="recentSection">
+          <p class="search-section-title">Recent searches</p>
+          <ul class="search-list" id="recentSearchList">
+            <li><button type="button" class="search-item" data-query="Placement drive"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Placement drive</button></li>
+            <li><button type="button" class="search-item" data-query="Hackathon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Hackathon</button></li>
+            <li><button type="button" class="search-item" data-query="Exam datesheet"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Exam datesheet</button></li>
+          </ul>
+        </div>
+        <div class="search-section" id="resultsSection" hidden>
+          <p class="search-section-title">Results</p>
+          <ul class="search-list" id="searchResultsList"></ul>
+        </div>
+        <div class="search-empty" id="searchEmpty" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="34" height="34"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20.5 20.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>No results found</span>
+          <small>Try a different keyword</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+
+    <div class="popover-wrap">
+      <button type="button" class="icon-btn" id="notificationBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5a6 6 0 0 1 12 0v4l1.8 3H4.2L6 13.5v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="badge" id="notificationBadge">3</span>
+      </button>
+
+      <div class="notification-panel" id="notificationPanel" role="menu" aria-label="Notifications" hidden>
+        <div class="panel-flyout-header">
+          <h2>Notifications</h2>
+          <button type="button" class="link-inline" id="markAllReadBtn">Mark all as read</button>
+        </div>
+        <ul class="notification-list" id="notificationList">
+          <li class="notification-item is-unread" data-id="n1">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Assignment <strong>Flutter UI Assignment</strong> is due today.</p>
+              <span class="notification-time">2 hours ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n2">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text"><strong>Dr. Neha Kapoor</strong> graded your Computer Networks Report — 27/30.</p>
+              <span class="notification-time">Yesterday</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n3">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">You have 2 overdue assignments. Submit as soon as possible.</p>
+              <span class="notification-time">2 days ago</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Theme toggle — identical to login/register -->
+    <button
+      type="button"
+      id="themeToggle"
+      class="icon-btn theme-toggle"
+      aria-label="Switch to light theme"
+      aria-pressed="false"
+      title="Toggle theme"
+    >
+      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="popover-wrap">
+      <button type="button" class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown">
+        <span class="avatar" aria-hidden="true">KS</span>
+        <span class="user-menu-name">Kshitij Sharma</span>
+        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+        <a href="profile.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</a>
+        <a href="settings.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Settings</a>
+        <hr />
+        <a href="login.html" role="menuitem" class="user-dropdown-danger"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ===================== LEFT SIDEBAR ===================== -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="dashboard.html" class="sidebar-link" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="notices.html" class="sidebar-link" data-nav="notices">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Notices</span>
+      </a>
+      <a href="events.html" class="sidebar-link" data-nav="events">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Events</span>
+      </a>
+      <a href="calendar.html" class="sidebar-link" data-nav="calendar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 13.5h2M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Calendar</span>
+      </a>
+      <a href="assignments.html" class="sidebar-link" data-nav="assignments">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5v2.2h6V3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Assignments</span>
+      </a>
+      <a href="resources.html" class="sidebar-link" data-nav="resources">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Resources</span>
+      </a>
+      <a href="messages.html" class="sidebar-link" data-nav="messages">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="profile.html" class="sidebar-link" data-nav="profile">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Profile</span>
+      </a>
+      <a href="settings.html" class="sidebar-link" data-nav="settings">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link sidebar-link--danger" id="logoutLink">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h2>Assignments</h2>
+        <p>Track, submit and manage all your college assignments in one place.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="refreshAssignmentsBtn">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20 4.5V10h-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Refresh
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="mySubmissionsBtn">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          My Submissions
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <section class="stats-grid stats-grid--assignments" aria-label="Assignment overview statistics">
+      <article class="stat-card stat-card--blue">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 9h7M8.5 13h7M8.5 17h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statTotalValue">0</p>
+        <p class="stat-label">Total Assignments</p>
+        <span class="stat-trend stat-trend--flat" id="statTotalTrend">Across 8 subjects</span>
+      </article>
+
+      <article class="stat-card stat-card--orange">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--orange" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12l3.2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statPendingValue">0</p>
+        <p class="stat-label">Pending</p>
+        <span class="stat-trend stat-trend--down" id="statPendingTrend">Needs attention</span>
+      </article>
+
+      <article class="stat-card stat-card--green">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--green" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l4.5 4.5 10.5-11" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statSubmittedValue">0</p>
+        <p class="stat-label">Submitted</p>
+        <span class="stat-trend stat-trend--up" id="statSubmittedTrend">On track</span>
+      </article>
+
+      <article class="stat-card stat-card--red">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--red" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 4.5 21 19.5H3L12 4.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10.2v4M12 16.7h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statOverdueValue">0</p>
+        <p class="stat-label">Overdue</p>
+        <span class="stat-trend stat-trend--down" id="statOverdueTrend">Submit ASAP</span>
+      </article>
+
+      <article class="stat-card stat-card--purple">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--purple" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statUpcomingValue">0</p>
+        <p class="stat-label">Upcoming Deadlines</p>
+        <span class="stat-trend stat-trend--flat" id="statUpcomingTrend">Next 7 days</span>
+      </article>
+
+      <article class="stat-card stat-card--teal">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--teal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 18l5-6 4 3.5 6.5-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <p class="stat-value" id="statAvgScoreValue">—</p>
+        <p class="stat-label">Average Score</p>
+        <span class="stat-trend stat-trend--up" id="statAvgScoreTrend">Graded assignments</span>
+      </article>
+    </section>
+
+    <!-- Search + filters -->
+    <div class="panel page-toolbar">
+      <div class="page-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="assignmentsPageSearch" placeholder="Search by title, subject, faculty or course code..." aria-label="Search assignments" autocomplete="off" />
+      </div>
+
+      <div class="filter-chips" id="assignmentsPageFilters" role="group" aria-label="Filter assignments">
+        <button type="button" class="filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="pending">Pending</button>
+        <button type="button" class="filter-chip" data-filter="submitted">Submitted</button>
+        <button type="button" class="filter-chip" data-filter="overdue">Overdue</button>
+        <button type="button" class="filter-chip" data-filter="completed">Completed</button>
+        <button type="button" class="filter-chip" data-filter="theory">Theory</button>
+        <button type="button" class="filter-chip" data-filter="practical">Practical</button>
+        <button type="button" class="filter-chip" data-filter="lab">Lab</button>
+        <button type="button" class="filter-chip" data-filter="mini-project">Mini Project</button>
+        <button type="button" class="filter-chip" data-filter="major-project">Major Project</button>
+      </div>
+    </div>
+
+    <!-- Assignment cards (rendered by js/assignments.js) -->
+    <div class="assignments-list" id="assignmentsList" aria-live="polite">
+      <!-- generated by js/assignments.js -->
+
+      <div class="assignments-page-empty" id="assignmentsPageEmpty">
+        <svg width="130" height="100" viewBox="0 0 160 120" fill="none" aria-hidden="true">
+          <rect x="30" y="18" width="100" height="84" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+          <path d="M46 40h68M46 54h68M46 68h44" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="112" cy="86" r="20" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+          <path d="M104 86h16M112 78v16" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" transform="rotate(45 112 86)"/>
+        </svg>
+        <p>No assignments found.</p>
+        <span>Try a different keyword or clear your filters.</span>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Assignments pagination" id="assignmentsPagination">
+      <button type="button" class="pagination-btn pagination-prev" id="assignmentsPaginationPrev" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Previous
+      </button>
+      <div class="pagination-pages" id="assignmentsPaginationPages"></div>
+      <button type="button" class="pagination-btn pagination-next" id="assignmentsPaginationNext">
+        Next
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </nav>
+
+  </main>
+
+  <!-- ===================== RIGHT SIDEBAR ===================== -->
+  <aside class="right-sidebar">
+
+    <div class="panel">
+      <h3>Mini Calendar</h3>
+      <div class="mini-calendar" id="miniCalendar">
+        <div class="mini-calendar-header">
+          <span id="miniCalendarLabel">July 2026</span>
+        </div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid" aria-hidden="true">
+          <!-- generated by dashboard.js -->
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Upcoming Deadlines</h3>
+      <div class="deadline-stack" id="upcomingDeadlinesList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Recently Submitted</h3>
+      <ul class="mini-list" id="recentlySubmittedList"></ul>
+    </div>
+
+    <div class="panel">
+      <h3>Pending Reviews</h3>
+      <ul class="mini-list" id="pendingReviewsList"></ul>
+    </div>
+
+    <div class="panel">
+      <h3>Subject Progress</h3>
+      <div class="subject-progress-list" id="subjectProgressList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Quick Links</h3>
+      <ul class="quick-links">
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Assignment Guidelines</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4.5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Late Submission Policy</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 18h19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Grading Rubric</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Academic Calendar</a></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Study Tips</h3>
+      <ul class="tip-list">
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Start major projects early — break them into weekly milestones.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Re-read instructions before submitting — most marks are lost on missed requirements.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Keep a backup of every submission until it's graded.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Message faculty early if you foresee a delay — don't wait for the deadline.</li>
+      </ul>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ===================== ASSIGNMENT DETAILS MODAL ===================== -->
+<div class="modal-overlay" id="assignmentDetailsOverlay" hidden>
+  <div class="modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="adModalTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-badges" id="adModalBadges"></div>
+        <h2 class="modal-title" id="adModalTitle">Assignment title</h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="adModalClose" aria-label="Close assignment details">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta">
+        <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span id="adModalFaculty">Faculty —</span></span>
+        <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span id="adModalDue">Due —</span></span>
+        <span class="modal-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg><span id="adModalMarks">Marks —</span></span>
+      </div>
+
+      <p class="modal-section-label">Description</p>
+      <div class="modal-notice-body" id="adModalDescription"></div>
+
+      <p class="modal-section-label">Instructions</p>
+      <ol class="modal-instructions" id="adModalInstructions"></ol>
+
+      <p class="modal-section-label">Attachments</p>
+      <div class="modal-attachment-list" id="adModalAttachments"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="adModalCloseFooter">Close</button>
+      <button type="button" class="btn btn-primary btn-sm" id="adModalUploadBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Upload Submission
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== UPLOAD SUBMISSION MODAL ===================== -->
+<div class="modal-overlay" id="uploadOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title" id="uploadModalTitle">Upload Submission</h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="uploadModalClose" aria-label="Close upload dialog">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="upload-assignment-name">Submitting for: <strong id="uploadAssignmentName">—</strong></p>
+
+      <label class="upload-dropzone" id="uploadDropzone" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.5V5M7.5 9.5L12 5l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="upload-dropzone-title">Drag &amp; drop your file here</span>
+        <span class="upload-dropzone-hint">or click to choose a file from your device</span>
+        <input type="file" id="uploadFileInput" multiple accept=".pdf,.docx,.zip,application/pdf,application/zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Choose file to upload" />
+      </label>
+
+      <div class="upload-format-row">
+        <div class="upload-format-badges">
+          <span class="upload-format-badge">PDF</span>
+          <span class="upload-format-badge">DOCX</span>
+          <span class="upload-format-badge">ZIP</span>
+        </div>
+        <span>Maximum file size: 25 MB</span>
+      </div>
+
+      <p class="upload-error" id="uploadError" hidden></p>
+
+      <div class="upload-file-list" id="uploadFileList"></div>
+
+      <div class="upload-progress-wrap" id="uploadProgressWrap" hidden>
+        <div class="upload-progress-label">
+          <span>Uploading…</span>
+          <span id="uploadProgressPct">0%</span>
+        </div>
+        <div class="upload-progress-track">
+          <div class="upload-progress-fill" id="uploadProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="upload-success" id="uploadSuccess">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5l4.5 4.5 10.5-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Submission uploaded successfully. Status updated to Submitted.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="uploadCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary btn-sm" id="uploadSubmitBtn" disabled>Submit Submission</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/assignments.js"></script>
+</body>
+</html>

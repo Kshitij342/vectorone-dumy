@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create account · VectorOne</title>
+  <meta name="description" content="Create your VectorOne account — notices, events and deadlines in one workspace." />
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/register.css" />
+
+  <!-- Prevent theme flash: apply saved theme before paint (same key as
+       login.html so the preference carries across both pages). -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('cc-theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ===================== THEME TOGGLE ===================== -->
+  <button
+    type="button"
+    id="themeToggle"
+    class="theme-toggle"
+    aria-label="Switch to light theme"
+    aria-pressed="false"
+    title="Toggle theme"
+  >
+    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div class="page">
+
+    <!-- ===================== LEFT: ILLUSTRATION PANEL (same as login) ===================== -->
+    <section class="showcase" aria-hidden="true">
+      <div class="showcase-inner">
+
+        <svg class="showcase-illustration" viewBox="0 0 520 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.4" class="dot" />
+            </pattern>
+            <clipPath id="cardClip"><rect x="0" y="0" width="220" height="150" rx="14"/></clipPath>
+          </defs>
+          <rect x="0" y="0" width="520" height="560" fill="url(#dotGrid)" />
+
+          <g transform="translate(48 74) rotate(-6)">
+            <rect x="0" y="0" width="222" height="150" rx="14" class="panel-card" />
+            <rect x="0" y="0" width="222" height="150" rx="14" class="panel-card-stroke" />
+            <rect x="22" y="24" width="46" height="46" rx="10" class="chip-fill" />
+            <text x="45" y="53" text-anchor="middle" class="chip-emoji">15</text>
+            <rect x="82" y="30" width="112" height="10" rx="5" class="line-strong" />
+            <rect x="82" y="48" width="80" height="8" rx="4" class="line-soft" />
+            <rect x="22" y="92" width="178" height="8" rx="4" class="line-soft" />
+            <rect x="22" y="108" width="140" height="8" rx="4" class="line-soft" />
+            <rect x="22" y="126" width="60" height="20" rx="6" class="tag-fill" />
+          </g>
+
+          <g transform="translate(268 210) rotate(4)">
+            <rect x="0" y="0" width="204" height="128" rx="14" class="panel-card panel-card--alt" />
+            <rect x="0" y="0" width="204" height="128" rx="14" class="panel-card-stroke" />
+            <circle cx="34" cy="34" r="16" class="chip-fill-alt" />
+            <path d="M34 26v10l6 6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="62" y="26" width="118" height="9" rx="4.5" class="line-strong" />
+            <rect x="62" y="43" width="90" height="7" rx="3.5" class="line-soft" />
+            <rect x="20" y="72" width="164" height="7" rx="3.5" class="line-soft" />
+            <rect x="20" y="88" width="120" height="7" rx="3.5" class="line-soft" />
+          </g>
+
+          <g transform="translate(120 300)">
+            <rect x="0" y="0" width="280" height="220" rx="18" class="cal-body" />
+            <rect x="0" y="0" width="280" height="56" rx="18" class="cal-header" />
+            <rect x="0" y="38" width="280" height="18" class="cal-header" />
+            <rect x="30" y="-14" width="10" height="34" rx="5" class="cal-ring" />
+            <rect x="240" y="-14" width="10" height="34" rx="5" class="cal-ring" />
+            <text x="24" y="35" class="cal-month">October</text>
+
+            <g class="cal-grid">
+              <circle cx="34" cy="86" r="3" /><circle cx="64" cy="86" r="3" /><circle cx="94" cy="86" r="3" />
+              <circle cx="124" cy="86" r="3" /><circle cx="154" cy="86" r="3" /><circle cx="184" cy="86" r="3" /><circle cx="214" cy="86" r="3" />
+              <circle cx="34" cy="118" r="3" /><circle cx="64" cy="118" r="3" /><circle cx="94" cy="118" r="3" />
+              <circle cx="154" cy="118" r="3" /><circle cx="184" cy="118" r="3" /><circle cx="214" cy="118" r="3" />
+              <circle cx="34" cy="150" r="3" /><circle cx="64" cy="150" r="3" /><circle cx="94" cy="150" r="3" />
+              <circle cx="124" cy="150" r="3" /><circle cx="184" cy="150" r="3" /><circle cx="214" cy="150" r="3" />
+              <circle cx="34" cy="182" r="3" /><circle cx="94" cy="182" r="3" /><circle cx="124" cy="182" r="3" />
+              <circle cx="154" cy="182" r="3" /><circle cx="184" cy="182" r="3" />
+            </g>
+
+            <circle cx="124" cy="118" r="12" class="cal-highlight" />
+            <circle cx="124" cy="118" r="3" fill="var(--card)" />
+          </g>
+
+          <path d="M160 150 C 180 190, 200 210, 230 230" class="connector" stroke-dasharray="1 8" />
+          <path d="M300 340 C 340 320, 360 280, 340 240" class="connector" stroke-dasharray="1 8" />
+        </svg>
+
+        <div class="showcase-copy">
+          <h2>Join Your Campus Digitally</h2>
+          <p>Create your VectorOne account to access notices, events, assignments, workshops, and important college updates—all from one secure platform.</p>
+        </div>
+
+        <!-- Feature highlights — identical to the login page -->
+        <ul class="feature-grid">
+          <li class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h3>Smart notices</h3>
+              <p>Important announcements land instantly, sorted by relevance.</p>
+            </div>
+          </li>
+          <li class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h3>Event calendar</h3>
+              <p>Track workshops, hackathons and college events in one view.</p>
+            </div>
+          </li>
+          <li class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.4L4.5 16h15L17.5 12.4V9A5.5 5.5 0 0 0 12 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.7 19a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h3>Real-time alerts</h3>
+              <p>Never miss a deadline or last-minute schedule change.</p>
+            </div>
+          </li>
+          <li class="feature-card">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="10.5" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M3 19c0-2.8 2.5-4.5 5.5-4.5S14 16.2 14 19M14.5 19c0-2.1 1.7-3.6 4-3.6S21 17.4 21 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <h3>Student collaboration</h3>
+              <p>Stay connected with clubs, batches and your campus community.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== RIGHT: REGISTER CARD ===================== -->
+    <main class="auth">
+      <div class="auth-card auth-card--wide">
+
+        <div class="brand">
+          <div class="brand-logo-slot" aria-hidden="true">
+            <svg class="brand-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="40" cy="14" r="5" class="logo-dot" />
+            </svg>
+          </div>
+          <h1 class="brand-name">VectorOne</h1>
+          <p class="brand-tagline">Create your student account</p>
+        </div>
+
+        <div class="form-heading">
+          <h2>Create Account</h2>
+          <p>Fill in your details to get started.</p>
+        </div>
+
+        <form id="registerForm" class="login-form" novalidate>
+
+          <!-- Full Name -->
+          <div class="field">
+            <label for="fullName">Full name</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                placeholder="Aditi Sharma"
+                autocomplete="name"
+                aria-describedby="fullNameError"
+                aria-invalid="false"
+                required
+              />
+            </div>
+            <p class="field-error" id="fullNameError" role="alert"></p>
+          </div>
+
+          <!-- College Email -->
+          <div class="field">
+            <label for="email">College email address</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3.5 6.5h17a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M3.8 7.2 12 13l8.2-5.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@college.edu"
+                autocomplete="email"
+                aria-describedby="emailError"
+                aria-invalid="false"
+                required
+              />
+            </div>
+            <p class="field-error" id="emailError" role="alert"></p>
+          </div>
+
+          <!-- Student ID + Year -->
+          <div class="field-grid">
+            <div class="field">
+              <label for="studentId">Student ID / Roll number</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="9" cy="10.5" r="2" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M6 15.2c.6-1.4 1.8-2.1 3-2.1s2.4.7 3 2.1M14.5 9.5h4M14.5 12.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <input
+                  type="text"
+                  id="studentId"
+                  name="studentId"
+                  placeholder="e.g. 21CE045"
+                  autocomplete="off"
+                  aria-describedby="studentIdError"
+                  aria-invalid="false"
+                  required
+                />
+              </div>
+              <p class="field-error" id="studentIdError" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="year">Year / Semester</label>
+              <div class="input-wrap select-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <select id="year" name="year" aria-describedby="yearError" aria-invalid="false" required>
+                  <option value="" disabled selected>Select year</option>
+                  <option value="1">First Year</option>
+                  <option value="2">Second Year</option>
+                  <option value="3">Third Year</option>
+                  <option value="4">Fourth Year</option>
+                </select>
+                <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <p class="field-error" id="yearError" role="alert"></p>
+            </div>
+          </div>
+
+          <!-- Department -->
+          <div class="field">
+            <label for="department">Department</label>
+            <div class="input-wrap select-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M7 10.8V15c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              <select id="department" name="department" aria-describedby="departmentError" aria-invalid="false" required>
+                <option value="" disabled selected>Select your department</option>
+                <option>Computer Engineering</option>
+                <option>Information Technology</option>
+                <option>Artificial Intelligence &amp; Data Science</option>
+                <option>Electronics</option>
+                <option>Mechanical</option>
+                <option>Civil</option>
+                <option>Electrical</option>
+                <option>Other</option>
+              </select>
+              <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="field-error" id="departmentError" role="alert"></p>
+          </div>
+
+          <!-- Password -->
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                aria-describedby="passwordError"
+                aria-invalid="false"
+                required
+              />
+              <button type="button" class="toggle-visibility" id="togglePassword" aria-label="Show password" aria-pressed="false">
+                <svg class="icon icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+                <svg class="icon icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2M6.2 6.4C3.9 8 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.4 4.5-1.1M12 5.5c6 0 9.5 6.5 9.5 6.5a13.4 13.4 0 0 1-2.7 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Password strength meter -->
+            <div class="strength-meter" id="strengthMeter" aria-hidden="true">
+              <span class="strength-bar"></span>
+              <span class="strength-bar"></span>
+              <span class="strength-bar"></span>
+              <span class="strength-bar"></span>
+            </div>
+            <p class="strength-label" id="strengthLabel"></p>
+            <p class="field-error" id="passwordError" role="alert"></p>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="field">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Re-enter your password"
+                autocomplete="new-password"
+                aria-describedby="confirmPasswordError"
+                aria-invalid="false"
+                required
+              />
+              <button type="button" class="toggle-visibility" id="toggleConfirmPassword" aria-label="Show password" aria-pressed="false">
+                <svg class="icon icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+                <svg class="icon icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2M6.2 6.4C3.9 8 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.4 4.5-1.1M12 5.5c6 0 9.5 6.5 9.5 6.5a13.4 13.4 0 0 1-2.7 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <p class="match-indicator" id="matchIndicator" aria-live="polite"></p>
+            <p class="field-error" id="confirmPasswordError" role="alert"></p>
+          </div>
+
+          <!-- Terms checkbox -->
+          <div class="field-row">
+            <label class="checkbox">
+              <input type="checkbox" id="terms" name="terms" required aria-describedby="termsError" />
+              <span class="checkbox-box" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span>I agree to the <a href="#" class="link-inline">Terms &amp; Conditions</a> and <a href="#" class="link-inline">Privacy Policy</a>.</span>
+            </label>
+          </div>
+          <p class="field-error" id="termsError" role="alert"></p>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span class="btn-label">Create Account</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <div class="divider"><span>or</span></div>
+
+          <!-- Google -->
+          <button type="button" class="btn btn-secondary" id="googleBtn">
+            <svg class="google-icon" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M19.6 10.23c0-.68-.06-1.36-.18-2H10v3.79h5.4a4.63 4.63 0 0 1-2 3.04v2.5h3.24c1.9-1.75 3-4.33 3-7.33Z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.97-.89 6.62-2.42l-3.24-2.5c-.9.6-2.06.96-3.38.96-2.6 0-4.8-1.75-5.59-4.11H1.06v2.58A10 10 0 0 0 10 20Z" fill="#34A853"/>
+              <path d="M4.41 11.93a5.99 5.99 0 0 1 0-3.86V5.49H1.06a10 10 0 0 0 0 9.02l3.35-2.58Z" fill="#FBBC05"/>
+              <path d="M10 3.96c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.94 9.94 0 0 0 10 0 10 10 0 0 0 1.06 5.49l3.35 2.58C5.2 5.71 7.4 3.96 10 3.96Z" fill="#EA4335"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+        </form>
+
+        <p class="footer-note">
+          Already have an account? <a href="login.html" class="link-strong">Sign In</a>
+        </p>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/register.js"></script>
+</body>
+</html>

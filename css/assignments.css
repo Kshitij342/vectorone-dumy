@@ -1,0 +1,437 @@
+/* ============================================================
+   VectorOne — Student Assignments Page Styles
+   Loaded AFTER css/dashboard.css. Reuses all shared design tokens
+   (colors, radii, shadows, motion) and shared components (.btn,
+   .panel, .tag, .priority, .filter-chip, .stat-card, .modal,
+   .pagination, .schedule-list, .deadline-card, .quick-links) as-is.
+   This file only adds the components unique to the Assignments
+   page: summary card color variants, the assignment card itself,
+   status badges, the upload dropzone, and the subject-progress /
+   study-tip widgets in the right sidebar.
+   ============================================================ */
+
+/* ============================================================
+   PAGE HEADER ACTIONS
+   ============================================================ */
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   SUMMARY CARDS — two extra accent colors beyond dashboard.css
+   (blue/green/orange/purple already exist there)
+   ============================================================ */
+.stat-card--red { --accent: var(--danger); }
+.stat-icon--red { background: var(--danger-bg); color: var(--danger); }
+
+.stat-card--teal { --accent: var(--accent-teal); }
+.stat-icon--teal { background: rgba(13, 148, 136, 0.14); color: var(--accent-teal); }
+
+.stat-trend--flat { color: var(--text-secondary); }
+
+.stats-grid--assignments { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1024px) { .stats-grid--assignments { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .stats-grid--assignments { grid-template-columns: minmax(0, 1fr); } }
+
+/* ============================================================
+   TOOLBAR (search + filter chips) — same language as
+   .notices-page-toolbar, generalized under a page-agnostic name
+   ============================================================ */
+.page-toolbar {
+  margin-bottom: 24px;
+  animation: slideUp 200ms ease 60ms both;
+}
+.page-toolbar .filter-chips { gap: 8px; }
+.page-toolbar .filter-chip { padding: 7px 14px; }
+
+/* ============================================================
+   ASSIGNMENTS LIST + CARD
+   ============================================================ */
+.assignments-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  animation: slideUp 200ms ease 100ms both;
+}
+
+.assignment-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 18px 20px;
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), border-color 200ms ease;
+}
+.assignment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: color-mix(in srgb, var(--primary) 20%, var(--border));
+}
+.assignment-card.is-filtered-out { display: none; }
+
+.assignment-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.assignment-card-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.course-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  letter-spacing: 0.02em;
+}
+
+.assignment-card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.assignment-card-actions .icon-btn { width: 34px; height: 34px; }
+.assignment-card-actions .icon-btn svg { width: 16px; height: 16px; }
+.assignment-card-actions .bookmark-btn.is-bookmarked { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); color: var(--primary); }
+.assignment-card-actions .share-btn.is-copied { color: var(--success); border-color: var(--success); background: rgba(22, 163, 74, 0.08); }
+
+.assignment-subject {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 3px;
+}
+.assignment-card-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+.assignment-faculty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.assignment-faculty svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.assignment-card-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.assignment-meta-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--scrim);
+}
+.assignment-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.assignment-meta-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+.assignment-meta-value { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.assignment-meta-value.is-overdue { color: var(--danger); }
+.assignment-meta-value.is-due-soon { color: var(--warning-text); }
+
+.assignment-card-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.assignment-footer-item { display: inline-flex; align-items: center; gap: 5px; }
+.assignment-footer-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.assignment-card-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.assignment-card-actions-row .btn-primary { flex: 1 1 auto; }
+.assignment-card-icon-actions { display: flex; align-items: center; gap: 6px; }
+.assignment-card-icon-actions .icon-btn { width: 34px; height: 34px; }
+.assignment-card-icon-actions .icon-btn svg { width: 16px; height: 16px; }
+.assignment-card-icon-actions .icon-btn.is-downloaded { border-color: var(--success); color: var(--success); }
+
+/* ---------- Status badges (like .priority, one more hue) ---------- */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status--pending { background: rgba(245, 158, 11, 0.14); color: var(--warning-text); }
+.status--submitted { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.status--overdue { background: var(--danger-bg); color: var(--danger); }
+.status--completed { background: rgba(22, 163, 74, 0.12); color: var(--success); }
+
+/* ============================================================
+   EMPTY STATE (search/filter yields nothing)
+   ============================================================ */
+.assignments-page-empty {
+  display: none;
+  grid-column: 1 / -1;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--text-secondary);
+}
+.assignments-page-empty.is-visible { display: flex; }
+.assignments-page-empty svg { margin-bottom: 14px; opacity: 0.8; }
+.assignments-page-empty p { font-size: 14.5px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.assignments-page-empty span { font-size: 12.5px; }
+
+/* ============================================================
+   RIGHT SIDEBAR — assignment-specific widgets
+   ============================================================ */
+
+/* Upcoming deadlines: stack of compact deadline-cards */
+.deadline-stack { display: flex; flex-direction: column; gap: 10px; }
+.deadline-stack .deadline-card { cursor: pointer; transition: border-color 150ms ease, transform 150ms ease; }
+.deadline-stack .deadline-card:hover { border-left-color: var(--primary); transform: translateX(2px); }
+.deadline-stack .deadline-card.is-overdue { border-left-color: var(--danger); }
+
+/* Recently submitted / Pending reviews lists (reuse schedule-list rhythm) */
+.mini-list { display: flex; flex-direction: column; gap: 12px; }
+.mini-list li { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text); }
+.mini-list-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.mini-list-dot--green { background: var(--success); }
+.mini-list-dot--blue { background: var(--primary); }
+.mini-list-title { font-weight: 600; display: block; }
+.mini-list-meta { font-size: 11px; color: var(--text-secondary); }
+.mini-list-empty { font-size: 12.5px; color: var(--text-secondary); }
+
+/* Subject progress */
+.subject-progress-list { display: flex; flex-direction: column; gap: 14px; }
+.subject-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+}
+.subject-progress-name { font-weight: 600; color: var(--text); }
+.subject-progress-pct { font-weight: 700; color: var(--text-secondary); font-size: 12px; }
+.subject-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--scrim);
+  overflow: hidden;
+}
+.subject-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 600ms var(--ease-out);
+}
+
+/* Study tips */
+.tip-list { display: flex; flex-direction: column; gap: 12px; }
+.tip-item { display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); }
+.tip-item svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: var(--warning); }
+
+/* ============================================================
+   ASSIGNMENT DETAILS MODAL — additions on top of shared .modal
+   ============================================================ */
+/* Raised to .modal.modal--wide (two classes) so it outranks the base
+   .modal cap in css/dashboard.css, which is declared later in the
+   cascade and would otherwise win at equal specificity — and capped to
+   the viewport so the wide variant cannot overflow a phone screen. */
+.modal.modal--wide { max-width: min(640px, calc(100vw - 24px)); }
+.modal-instructions { margin: 14px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.7; color: var(--text); }
+.modal-instructions li { margin-bottom: 4px; }
+.modal-attachment-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.modal-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin: 18px 0 8px;
+}
+.modal-section-label:first-child { margin-top: 0; }
+
+/* ============================================================
+   UPLOAD SUBMISSION MODAL
+   ============================================================ */
+.upload-assignment-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.upload-assignment-name strong { color: var(--text); font-weight: 700; }
+
+.upload-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 32px 20px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--scrim);
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+.upload-dropzone:hover,
+.upload-dropzone:focus-visible { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
+.upload-dropzone.is-dragover { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); }
+.upload-dropzone svg { width: 34px; height: 34px; color: var(--text-secondary); }
+.upload-dropzone-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.upload-dropzone-hint { font-size: 12px; color: var(--text-secondary); }
+.upload-dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.upload-format-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+.upload-format-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.upload-format-badge {
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.upload-file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.upload-file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 12.5px;
+  animation: cardIn 200ms var(--ease-out) both;
+}
+.upload-file-item svg.upload-file-icon { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+.upload-file-info { flex: 1 1 auto; min-width: 0; }
+.upload-file-name { font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upload-file-size { font-size: 11px; color: var(--text-secondary); }
+.upload-file-remove { flex-shrink: 0; width: 26px; height: 26px; }
+.upload-file-remove svg { width: 13px; height: 13px; }
+
+.upload-error {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.upload-progress-wrap { margin-top: 16px; }
+.upload-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
+.upload-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--scrim);
+  overflow: hidden;
+}
+.upload-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 180ms linear;
+}
+.upload-progress-fill.is-complete { background: var(--success); }
+
+.upload-success {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 600;
+}
+.upload-success.is-visible { display: flex; animation: cardIn 220ms var(--ease-out) both; }
+.upload-success svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1280px) {
+  .assignments-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .assignments-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+  .page-header-actions { width: 100%; }
+  .page-header-actions .btn { flex: 1 1 auto; }
+  .assignment-card-top { flex-direction: column; }
+  .assignment-card-actions { align-self: flex-end; }
+  .assignment-meta-grid { grid-template-columns: minmax(0, 1fr); }
+  .assignment-card-actions-row { flex-direction: column; align-items: stretch; }
+  .assignment-card-icon-actions { justify-content: space-between; }
+  .assignment-card-icon-actions .icon-btn { flex: 1 1 auto; }
+  .upload-format-row { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .assignment-meta-grid { padding: 10px 12px; }
+}

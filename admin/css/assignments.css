@@ -1,0 +1,30 @@
+/* Admin assignments — page-specific styles. Referenced by admin/assignments.html. */
+
+/* Toolbar / search / table / empty state / modal come from the shared admin
+   component layer in css/admin-dashboard.css. */
+
+.assignment-panel { padding: 0; overflow: hidden; }
+
+.assignment-table { min-width: 1160px; }
+.assignment-table td.assignment-title { max-width: 300px; white-space: normal; }
+.assignment-table td.assignment-title strong { display: block; font-size: 13px; font-weight: 600; }
+.assignment-table td.assignment-title span { display: block; margin-top: 3px; color: var(--text-secondary); font-size: 11.5px; }
+
+.assignment-course { display: inline-flex; padding: 4px 9px; border-radius: 7px; background: var(--scrim); color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+
+/* Submission progress: reviewed vs submitted. */
+.submission-meter { min-width: 140px; }
+.submission-meter .meter-label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.submission-meter .meter-label span { color: var(--text-secondary); }
+.meter-track { overflow: hidden; height: 6px; border-radius: 999px; background: var(--scrim); }
+.meter-track > span { display: block; height: 100%; border-radius: inherit; background: var(--success); transition: width 400ms ease; }
+.meter-track.is-behind > span { background: var(--warning); }
+
+/* Due date — flags overdue work using the shared danger token. */
+.due-date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.due-date.is-overdue { color: var(--danger); font-weight: 600; }
+.due-date span { display: block; margin-top: 2px; color: var(--text-secondary); font-size: 11px; }
+
+@media (max-width: 620px) {
+  .assignment-table td.assignment-title { max-width: 210px; }
+}

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Events · VectorOne</title>
+<meta name="description" content="Explore workshops, hackathons, seminars, cultural programs, placement drives and college activities on VectorOne." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/events.css" />
+
+<!-- Prevent theme flash: same 'cc-theme' key used across the app -->
+<script>
+  (function () {
+    var saved = localStorage.getItem('cc-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+
+<!-- ===================== TOP NAVBAR ===================== -->
+<header class="navbar">
+  <div class="navbar-left">
+    <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <a href="dashboard.html" class="navbar-brand">
+      <svg class="navbar-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="14" r="6" fill="var(--primary)" />
+      </svg>
+      <span>VectorOne</span>
+    </a>
+
+    <span class="navbar-divider" aria-hidden="true"></span>
+    <h1 class="navbar-page-title">Events</h1>
+  </div>
+
+  <div class="navbar-center">
+    <div class="search-wrap" id="searchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="search"
+        id="globalSearch"
+        class="search-input"
+        placeholder="Search notices, events, clubs..."
+        aria-label="Search notices, events and clubs"
+        aria-expanded="false"
+        aria-controls="searchPanel"
+        aria-activedescendant=""
+        autocomplete="off"
+      />
+      <button type="button" class="search-clear" id="searchClear" aria-label="Clear search" tabindex="-1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <kbd class="search-kbd" aria-hidden="true">/</kbd>
+
+      <div class="search-panel" id="searchPanel" role="listbox" hidden>
+        <div class="search-section" id="recentSection">
+          <p class="search-section-title">Recent searches</p>
+          <ul class="search-list" id="recentSearchList">
+            <li><button type="button" class="search-item" data-query="Hackathon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Hackathon</button></li>
+            <li><button type="button" class="search-item" data-query="Placement drive"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Placement drive</button></li>
+            <li><button type="button" class="search-item" data-query="Exam datesheet"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Exam datesheet</button></li>
+          </ul>
+        </div>
+        <div class="search-section" id="resultsSection" hidden>
+          <p class="search-section-title">Results</p>
+          <ul class="search-list" id="searchResultsList"></ul>
+        </div>
+        <div class="search-empty" id="searchEmpty" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="34" height="34"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20.5 20.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>No notices found</span>
+          <small>Try a different keyword</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+
+    <div class="popover-wrap">
+      <button type="button" class="icon-btn" id="notificationBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5a6 6 0 0 1 12 0v4l1.8 3H4.2L6 13.5v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="badge" id="notificationBadge">3</span>
+      </button>
+
+      <div class="notification-panel" id="notificationPanel" role="menu" aria-label="Notifications" hidden>
+        <div class="panel-flyout-header">
+          <h2>Notifications</h2>
+          <button type="button" class="link-inline" id="markAllReadBtn">Mark all as read</button>
+        </div>
+        <ul class="notification-list" id="notificationList">
+          <li class="notification-item is-unread" data-id="n1">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Seats for <strong>CodeSprint 2026</strong> are filling up fast.</p>
+              <span class="notification-time">20 minutes ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n2">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Your workshop <strong>AI Workshop: Building with LLMs</strong> is on Aug 3.</p>
+              <span class="notification-time">2 hours ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n3">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text"><strong>TCS Campus Placement Drive</strong> registrations close soon.</p>
+              <span class="notification-time">Yesterday</span>
+            </div>
+          </li>
+          <li class="notification-item" data-id="n4">
+            <div>
+              <p class="notification-text">Semester timetable for Term 5 has been published.</p>
+              <span class="notification-time">2 days ago</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Theme toggle — identical to login/register -->
+    <button
+      type="button"
+      id="themeToggle"
+      class="icon-btn theme-toggle"
+      aria-label="Switch to light theme"
+      aria-pressed="false"
+      title="Toggle theme"
+    >
+      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="popover-wrap">
+      <button type="button" class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown">
+        <span class="avatar" aria-hidden="true">KS</span>
+        <span class="user-menu-name">Kshitij Sharma</span>
+        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+        <a href="profile.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</a>
+        <a href="settings.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Settings</a>
+        <hr />
+        <a href="login.html" role="menuitem" class="user-dropdown-danger"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ===================== LEFT SIDEBAR ===================== -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="dashboard.html" class="sidebar-link" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="notices.html" class="sidebar-link" data-nav="notices">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Notices</span>
+      </a>
+      <a href="events.html" class="sidebar-link" data-nav="events">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Events</span>
+      </a>
+      <a href="calendar.html" class="sidebar-link" data-nav="calendar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 13.5h2M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Calendar</span>
+      </a>
+      <a href="assignments.html" class="sidebar-link" data-nav="assignments">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5v2.2h6V3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Assignments</span>
+      </a>
+      <a href="resources.html" class="sidebar-link" data-nav="resources">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Resources</span>
+      </a>
+      <a href="messages.html" class="sidebar-link" data-nav="messages">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="profile.html" class="sidebar-link" data-nav="profile">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Profile</span>
+      </a>
+      <a href="settings.html" class="sidebar-link" data-nav="settings">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link sidebar-link--danger" id="logoutLink">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h2>Upcoming Events</h2>
+        <p>Explore workshops, hackathons, seminars, cultural programs, placement drives and college activities.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="eventsRefreshBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.66-5.66M20 12a8 8 0 0 1-13.66 5.66" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3.5V7h-3.5M7 20.5V17h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Refresh
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="eventsViewCalendarBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          View Calendar
+        </button>
+      </div>
+    </div>
+
+    <!-- Featured event (rendered by events.js) -->
+    <div id="featuredEventMount"></div>
+
+    <!-- Search + filters -->
+    <div class="panel page-toolbar">
+      <div class="page-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="eventsPageSearch" placeholder="Search events..." aria-label="Search events" autocomplete="off" />
+      </div>
+
+      <div class="filter-chips" id="eventsPageFilters" role="group" aria-label="Filter events by category">
+        <button type="button" class="filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="hackathon">Hackathon</button>
+        <button type="button" class="filter-chip" data-filter="workshop">Workshop</button>
+        <button type="button" class="filter-chip" data-filter="seminar">Seminar</button>
+        <button type="button" class="filter-chip" data-filter="placement">Placement</button>
+        <button type="button" class="filter-chip" data-filter="cultural">Cultural</button>
+        <button type="button" class="filter-chip" data-filter="sports">Sports</button>
+        <button type="button" class="filter-chip" data-filter="technical">Technical</button>
+        <button type="button" class="filter-chip" data-filter="club">Club</button>
+      </div>
+    </div>
+
+    <!-- Event card grid (rendered by events.js) -->
+    <div class="events-grid" id="eventsGrid"></div>
+
+    <!-- Empty state -->
+    <div class="page-empty" id="eventsPageEmpty">
+      <svg viewBox="0 0 160 120" fill="none" aria-hidden="true" width="130" height="100">
+        <rect x="30" y="18" width="100" height="84" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M46 40h68M46 54h68M46 68h44" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="112" cy="86" r="20" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M104 86h16M112 78v16" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" transform="rotate(45 112 86)"/>
+      </svg>
+      <p>No events found.</p>
+      <span>Try a different keyword or clear your filters.</span>
+    </div>
+
+    <!-- Pagination (rendered by events.js) -->
+    <div id="paginationMount"></div>
+
+  </main>
+
+  <!-- ===================== RIGHT SIDEBAR ===================== -->
+  <aside class="right-sidebar">
+
+    <div class="panel">
+      <h3>Today's Events</h3>
+      <ul class="schedule-list">
+        <li><span class="schedule-time">10:00</span><span class="schedule-dot schedule-dot--orange" aria-hidden="true"></span><span>AI Workshop — Seminar Hall 2</span></li>
+        <li><span class="schedule-time">14:00</span><span class="schedule-dot schedule-dot--blue" aria-hidden="true"></span><span>Google Cloud Study Jam</span></li>
+        <li><span class="schedule-time">17:00</span><span class="schedule-dot schedule-dot--purple" aria-hidden="true"></span><span>Coding Club Open Meetup</span></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Upcoming Registrations</h3>
+      <div class="mini-event-list">
+        <div class="mini-event-item">
+          <span class="mini-event-dot schedule-dot--purple" aria-hidden="true"></span>
+          <div><p class="mini-event-title">CodeSprint 2026 Hackathon</p><p class="mini-event-sub">Register by Aug 5, 2026</p></div>
+        </div>
+        <div class="mini-event-item">
+          <span class="mini-event-dot schedule-dot--orange" aria-hidden="true"></span>
+          <div><p class="mini-event-title">Robotics Workshop</p><p class="mini-event-sub">Only 6 seats left</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>My Registered Events</h3>
+      <div class="mini-event-list" id="myRegistrationsList">
+        <p class="empty-hint">You haven't registered for any events yet.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Popular Categories</h3>
+      <div class="category-pills">
+        <span class="category-pill">Seminar <span>3</span></span>
+        <span class="category-pill">Workshop <span>2</span></span>
+        <span class="category-pill">Hackathon <span>1</span></span>
+        <span class="category-pill">Placement <span>1</span></span>
+        <span class="category-pill">Cultural <span>1</span></span>
+        <span class="category-pill">Sports <span>1</span></span>
+        <span class="category-pill">Technical <span>1</span></span>
+        <span class="category-pill">Club <span>1</span></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Quick Links</h3>
+      <ul class="quick-links">
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Academic Calendar</a></li>
+        <li><a href="notices.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 18h19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>All Notices</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="10.5" r="2.4" stroke="currentColor" stroke-width="1.5"/><path d="M3 19c0-2.8 2.5-4.5 5.5-4.5S14 16.2 14 19M14.5 19c0-2.1 1.7-3.6 4-3.6S21 17.4 21 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Clubs Directory</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Exam Timetable</a></li>
+      </ul>
+    </div>
+
+    <div class="panel" id="calendarPreviewPanel">
+      <h3>Calendar Preview</h3>
+      <div class="mini-calendar" id="miniCalendar">
+        <div class="mini-calendar-header">
+          <span id="miniCalendarLabel">July 2026</span>
+        </div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid" aria-hidden="true">
+          <!-- generated by events.js -->
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ===================== EVENT DETAILS MODAL ===================== -->
+<div class="modal-overlay" id="eventModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-badges" id="eventModalBadges"></div>
+        <h2 class="modal-title" id="eventModalTitle">Event title</h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="eventModalClose" aria-label="Close event details">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-event-banner" id="eventModalBanner"></div>
+      <p class="modal-description" id="eventModalDesc"></p>
+
+      <div class="modal-meta" id="eventModalMeta"></div>
+
+      <div class="modal-detail-block">
+        <h4>Schedule</h4>
+        <p id="eventModalSchedule"></p>
+      </div>
+      <div class="modal-detail-block">
+        <h4>Eligibility</h4>
+        <p id="eventModalEligibility"></p>
+      </div>
+
+      <div class="modal-attachment">
+        <div class="modal-attachment-info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span>Event_Brochure.pdf</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="eventModalDownload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 18.5h15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          Download Brochure
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer" id="eventModalFooter">
+      <button type="button" class="btn btn-outline btn-sm" id="eventModalCloseFooter">Close</button>
+      <button type="button" class="btn btn-primary btn-sm event-register" id="eventModalRegisterBtn">Register Now</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/events.js"></script>
+</body>
+</html>

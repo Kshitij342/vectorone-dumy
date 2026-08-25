@@ -1,0 +1,55 @@
+/* Admin analytics — page-specific styles. Referenced by admin/analytics.html.
+
+   The dashboard grid, .analytics-grid, .analytic-card, .bar-chart and
+   .compact-row all come from css/admin-dashboard.css. This file adds the
+   analytics-only treatments and the responsive behaviour for the chart wall. */
+
+/* Charts are the point of this page, so let them breathe more than the
+   two-up grid the shared layer uses. */
+.analytics-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+#enrollmentCharts.analytics-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+.analytic-card { min-width: 0; }
+.analytic-card .bar-chart { height: 84px; }
+.analytic-card .bar-chart span { min-width: 5px; }
+
+/* Metric rows in the right rail: label on the left, value right-aligned and
+   tabular so the numbers line up down the column. */
+#keyMetricsList .compact-row strong,
+#focusAreasList .compact-row strong {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+#keyMetricsList .compact-row span,
+#focusAreasList .compact-row span { white-space: normal; }
+
+/* Focus areas read as a priority list — give each row a subtle marker. */
+#focusAreasList .compact-row { position: relative; padding-left: 14px; }
+#focusAreasList .compact-row::before {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  content: "";
+}
+
+.analytics-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+}
+
+@media (max-width: 520px) {
+  /* Below this width a 3-bar chart in a 150px column gets unreadable, so drop
+     to a single full-width card per row rather than shrinking further. */
+  .analytics-grid,
+  #enrollmentCharts.analytics-grid { grid-template-columns: minmax(0, 1fr); }
+  .analytic-card .bar-chart { height: 72px; }
+}

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resources · VectorOne</title>
+<meta name="description" content="Access lecture notes, PDFs, presentations, lab manuals, previous year papers, ebooks and study material on VectorOne." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/resources.css" />
+
+<!-- Prevent theme flash: same 'cc-theme' key used across the app -->
+<script>
+  (function () {
+    var saved = localStorage.getItem('cc-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+
+<!-- ===================== TOP NAVBAR ===================== -->
+<header class="navbar">
+  <div class="navbar-left">
+    <button type="button" class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+
+    <a href="dashboard.html" class="navbar-brand">
+      <svg class="navbar-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="14" r="6" fill="var(--primary)" />
+      </svg>
+      <span>VectorOne</span>
+    </a>
+
+    <span class="navbar-divider" aria-hidden="true"></span>
+    <h1 class="navbar-page-title">Resources</h1>
+  </div>
+
+  <div class="navbar-center">
+    <div class="search-wrap" id="searchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="search"
+        id="globalSearch"
+        class="search-input"
+        placeholder="Search notices, events, clubs..."
+        aria-label="Search notices, events and clubs"
+        aria-expanded="false"
+        aria-controls="searchPanel"
+        aria-activedescendant=""
+        autocomplete="off"
+      />
+      <button type="button" class="search-clear" id="searchClear" aria-label="Clear search" tabindex="-1">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <kbd class="search-kbd" aria-hidden="true">/</kbd>
+
+      <div class="search-panel" id="searchPanel" role="listbox" hidden>
+        <div class="search-section" id="recentSection">
+          <p class="search-section-title">Recent searches</p>
+          <ul class="search-list" id="recentSearchList">
+            <li><button type="button" class="search-item" data-query="DBMS notes"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>DBMS notes</button></li>
+            <li><button type="button" class="search-item" data-query="Previous year papers"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Previous year papers</button></li>
+            <li><button type="button" class="search-item" data-query="Placement drive"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>Placement drive</button></li>
+          </ul>
+        </div>
+        <div class="search-section" id="resultsSection" hidden>
+          <p class="search-section-title">Results</p>
+          <ul class="search-list" id="searchResultsList"></ul>
+        </div>
+        <div class="search-empty" id="searchEmpty" hidden>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="34" height="34"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20.5 20.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8.5 11h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>No results found</span>
+          <small>Try a different keyword</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+
+    <div class="popover-wrap">
+      <button type="button" class="icon-btn" id="notificationBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notificationPanel" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9.5a6 6 0 0 1 12 0v4l1.8 3H4.2L6 13.5v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 19.5a2.6 2.6 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="badge" id="notificationBadge">3</span>
+      </button>
+
+      <div class="notification-panel" id="notificationPanel" role="menu" aria-label="Notifications" hidden>
+        <div class="panel-flyout-header">
+          <h2>Notifications</h2>
+          <button type="button" class="link-inline" id="markAllReadBtn">Mark all as read</button>
+        </div>
+        <ul class="notification-list" id="notificationList">
+          <li class="notification-item is-unread" data-id="n1">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">New resource uploaded: <strong>DBMS Unit 4 Notes</strong>.</p>
+              <span class="notification-time">1 hour ago</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n2">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text"><strong>Previous Year Papers (2025)</strong> are now available for CS301.</p>
+              <span class="notification-time">Yesterday</span>
+            </div>
+          </li>
+          <li class="notification-item is-unread" data-id="n3">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <div>
+              <p class="notification-text">Your bookmarked resource <strong>OS Lab Manual</strong> was updated.</p>
+              <span class="notification-time">2 days ago</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Theme toggle — identical to login/register -->
+    <button
+      type="button"
+      id="themeToggle"
+      class="icon-btn theme-toggle"
+      aria-label="Switch to light theme"
+      aria-pressed="false"
+      title="Toggle theme"
+    >
+      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="popover-wrap">
+      <button type="button" class="user-menu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown">
+        <span class="avatar" aria-hidden="true">KS</span>
+        <span class="user-menu-name">Kshitij Sharma</span>
+        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="user-dropdown" id="userDropdown" role="menu" hidden>
+        <a href="profile.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</a>
+        <a href="settings.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>Settings</a>
+        <hr />
+        <a href="login.html" role="menuitem" class="user-dropdown-danger"><svg viewBox="0 0 24 24" fill="none"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ===================== LEFT SIDEBAR ===================== -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="dashboard.html" class="sidebar-link" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="notices.html" class="sidebar-link" data-nav="notices">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Notices</span>
+      </a>
+      <a href="events.html" class="sidebar-link" data-nav="events">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Events</span>
+      </a>
+      <a href="calendar.html" class="sidebar-link" data-nav="calendar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 13.5h2M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Calendar</span>
+      </a>
+      <a href="assignments.html" class="sidebar-link" data-nav="assignments">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 3.5v2.2h6V3.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Assignments</span>
+      </a>
+      <a href="resources.html" class="sidebar-link" data-nav="resources">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Resources</span>
+      </a>
+      <a href="messages.html" class="sidebar-link" data-nav="messages">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="profile.html" class="sidebar-link" data-nav="profile">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Profile</span>
+      </a>
+      <a href="settings.html" class="sidebar-link" data-nav="settings">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a7.4 7.4 0 0 0 0-3l1.8-1.4-2-3.5-2.1.7a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.3a7.4 7.4 0 0 0-2.6 1.5l-2.1-.7-2 3.5L4.6 10.5a7.4 7.4 0 0 0 0 3l-1.8 1.4 2 3.5 2.1-.7c.77.66 1.65 1.16 2.6 1.5l.5 2.3h4l.5-2.3a7.4 7.4 0 0 0 2.6-1.5l2.1.7 2-3.5-1.8-1.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link sidebar-link--danger" id="logoutLink">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 16l4-4-4-4M19 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h2>Resources</h2>
+        <p>Access lecture notes, PDFs, presentations, lab manuals, previous year papers, ebooks and study material.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="resourcesRefreshBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.66-5.66M20 12a8 8 0 0 1-13.66 5.66" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3.5V7h-3.5M7 20.5V17h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Refresh
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="myDownloadsBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 18.5h15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          My Downloads
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <section class="stats-grid stats-grid--resources" aria-label="Resource library statistics">
+      <article class="stat-card stat-card--blue">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--blue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 4.5V9h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statTotalValue">0</p>
+        <p class="stat-label">Total Resources</p>
+        <span class="stat-trend stat-trend--flat" id="statTotalTrend">Across all subjects</span>
+      </article>
+
+      <article class="stat-card stat-card--teal">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--teal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statRecentValue">0</p>
+        <p class="stat-label">Recently Added</p>
+        <span class="stat-trend stat-trend--up" id="statRecentTrend">Last 14 days</span>
+      </article>
+
+      <article class="stat-card stat-card--orange">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--orange" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 18.5h15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statDownloadedTodayValue">0</p>
+        <p class="stat-label">Downloaded Today</p>
+        <span class="stat-trend stat-trend--flat" id="statDownloadedTodayTrend">By the whole batch</span>
+      </article>
+
+      <article class="stat-card stat-card--green">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--green" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statMyDownloadsValue">0</p>
+        <p class="stat-label">My Downloads</p>
+        <span class="stat-trend stat-trend--flat" id="statMyDownloadsTrend">This session</span>
+      </article>
+
+      <article class="stat-card stat-card--purple">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--purple" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.7"/><path d="M4.8 19.2c1.1-3.1 3.9-4.7 7.2-4.7s6.1 1.6 7.2 4.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statSubjectsValue">0</p>
+        <p class="stat-label">Subjects Covered</p>
+        <span class="stat-trend stat-trend--flat" id="statSubjectsTrend">Departments</span>
+      </article>
+
+      <article class="stat-card stat-card--red">
+        <div class="stat-card-top">
+          <div class="stat-icon stat-icon--red" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+        </div>
+        <p class="stat-value" id="statFavoritesValue">0</p>
+        <p class="stat-label">Favorites</p>
+        <span class="stat-trend stat-trend--flat" id="statFavoritesTrend">Bookmarked by you</span>
+      </article>
+    </section>
+
+    <!-- Search + filters + sort/view toolbar -->
+    <div class="panel page-toolbar">
+      <div class="page-search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="resourcesPageSearch" placeholder="Search by title, subject, faculty, course code, file name or tag..." aria-label="Search resources" autocomplete="off" />
+      </div>
+
+      <div class="filter-chips" id="resourcesPageFilters" role="group" aria-label="Filter resources by type">
+        <button type="button" class="filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="filter-chip" data-filter="notes">Notes</button>
+        <button type="button" class="filter-chip" data-filter="pdf">PDF</button>
+        <button type="button" class="filter-chip" data-filter="ppt">PPT</button>
+        <button type="button" class="filter-chip" data-filter="lab-manual">Lab Manual</button>
+        <button type="button" class="filter-chip" data-filter="assignments">Assignments</button>
+        <button type="button" class="filter-chip" data-filter="previous-papers">Previous Papers</button>
+        <button type="button" class="filter-chip" data-filter="ebooks">Ebooks</button>
+        <button type="button" class="filter-chip" data-filter="question-bank">Question Bank</button>
+        <button type="button" class="filter-chip" data-filter="video">Video</button>
+        <button type="button" class="filter-chip" data-filter="practical">Practical</button>
+        <button type="button" class="filter-chip" data-filter="faculty-notes">Faculty Notes</button>
+        <button type="button" class="filter-chip" data-filter="favorites">Favorites</button>
+        <button type="button" class="filter-chip" data-filter="recent">Recent</button>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="toolbar-row-left">
+          <p class="result-count" id="resultCount"><strong>0</strong> resources</p>
+        </div>
+        <div class="toolbar-row-left">
+          <div class="sort-select-wrap">
+            <svg class="sort-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h9M6 12h6M6 16h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16 15l3 3 3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 4v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <select class="sort-select" id="resourcesSortSelect" aria-label="Sort resources">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="downloads">Most Downloaded</option>
+              <option value="rating">Highest Rated</option>
+              <option value="alpha">Alphabetical</option>
+            </select>
+          </div>
+          <div class="view-toggle" role="group" aria-label="Switch view">
+            <button type="button" class="view-toggle-btn is-active" id="viewGridBtn" aria-pressed="true" aria-label="Grid view">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
+            </button>
+            <button type="button" class="view-toggle-btn" id="viewListBtn" aria-pressed="false" aria-label="List view">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resource card grid/list (rendered by resources.js) -->
+    <div class="resources-grid" id="resourcesGrid" aria-live="polite"></div>
+
+    <!-- Empty state -->
+    <div class="page-empty" id="resourcesPageEmpty">
+      <svg viewBox="0 0 160 120" fill="none" aria-hidden="true" width="130" height="100">
+        <rect x="30" y="18" width="100" height="84" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M46 40h68M46 54h68M46 68h44" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="112" cy="86" r="20" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M104 86h16M112 78v16" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" transform="rotate(45 112 86)"/>
+      </svg>
+      <p>No resources found.</p>
+      <span>Try a different keyword or clear your filters.</span>
+      <button type="button" class="btn btn-outline btn-sm" id="resetFiltersBtn">Reset Filters</button>
+    </div>
+
+    <!-- Pagination (rendered by resources.js) -->
+    <div id="paginationMount"></div>
+
+  </main>
+
+  <!-- ===================== RIGHT SIDEBAR ===================== -->
+  <aside class="right-sidebar">
+
+    <div class="panel">
+      <h3>Recent Downloads</h3>
+      <div class="mini-resource-list" id="recentDownloadsList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Popular Resources</h3>
+      <div class="mini-resource-list" id="popularResourcesList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Favorite Resources</h3>
+      <div class="mini-resource-list" id="favoriteResourcesList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Subject Progress</h3>
+      <div class="subject-progress-list" id="subjectProgressList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Quick Links</h3>
+      <ul class="quick-links">
+        <li><a href="assignments.html"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 12.5l2 2 4-4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>My Assignments</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Exam Timetable</a></li>
+        <li><a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h9.5L19 9v10.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Syllabus PDF</a></li>
+        <li><a href="notices.html"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 18h19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>All Notices</a></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Recently Uploaded</h3>
+      <div class="mini-resource-list" id="recentlyUploadedList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Storage Usage</h3>
+      <div class="storage-usage-label"><span>Used</span><strong id="storageUsageText">0 GB of 15 GB</strong></div>
+      <div class="storage-usage-bar"><div class="storage-usage-fill" id="storageUsageFill" style="width:0%"></div></div>
+      <div class="storage-breakdown" id="storageBreakdown"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Study Tips</h3>
+      <ul class="tip-list">
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Bookmark resources as you find them — it's much faster than re-searching later.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Cross-check previous year papers against the current syllabus before relying on them.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Prefer faculty notes over random internet notes for exam-aligned content.</li>
+        <li class="tip-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.45.9 1.15.9 1.9V16h5.2v-.2c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Download what you need for offline study before exam week traffic spikes.</li>
+      </ul>
+    </div>
+
+    <div class="panel" id="calendarPreviewPanel">
+      <h3>Calendar Preview</h3>
+      <div class="mini-calendar" id="miniCalendar">
+        <div class="mini-calendar-header">
+          <span id="miniCalendarLabel">July 2026</span>
+        </div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid" aria-hidden="true">
+          <!-- generated by resources.js -->
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ===================== RESOURCE PREVIEW MODAL ===================== -->
+<div class="modal-overlay" id="previewModalOverlay" hidden>
+  <div class="modal modal--preview" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-badges" id="previewModalBadges"></div>
+        <h2 class="modal-title" id="previewModalTitle">Resource title</h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" id="previewModalClose" aria-label="Close preview">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.5h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <p>Live preview isn't available in this demo. Download the file to view the full content.</p>
+      </div>
+
+      <p class="modal-description" id="previewModalDesc"></p>
+
+      <div class="modal-meta" id="previewModalMeta"></div>
+
+      <div class="resource-tags" id="previewModalTags"></div>
+
+      <div class="preview-info-grid" id="previewInfoGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="previewModalCloseFooter">Close</button>
+      <button type="button" class="icon-btn bookmark-btn" id="previewModalBookmark" aria-label="Bookmark this resource">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 4.5h11a1 1 0 0 1 1 1V20l-6.5-3.8L5.5 20V5.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="previewModalShare" aria-label="Share this resource">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 10.7l7.6-4.2M8.2 13.3l7.6 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" id="previewModalDownload">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 18.5h15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Download
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SHARE DIALOG ===================== -->
+<div class="modal-overlay" id="shareModalOverlay" hidden>
+  <div class="modal modal--narrow" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="modal-header">
+      <div><h2 class="modal-title" id="shareModalTitle">Share resource</h2></div>
+      <button type="button" class="icon-btn modal-close" id="shareModalClose" aria-label="Close share dialog">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="upload-assignment-name share-modal-target" id="shareModalResourceName">—</p>
+      <div class="share-link-row">
+        <input type="text" class="share-link-input" id="shareLinkInput" readonly aria-label="Shareable link" />
+        <button type="button" class="btn btn-outline btn-sm" id="shareCopyBtn">Copy Link</button>
+      </div>
+      <div class="share-options">
+        <button type="button" class="share-option-btn" id="shareInternalBtn">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 6.5A2 2 0 0 1 6 4.5h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-4.5 4v-4H6a2 2 0 0 1-2-2v-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Share internally with your batch
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="shareModalCloseFooter">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TOASTS ===================== -->
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+<script src="js/resources.js"></script>
+</body>
+</html>

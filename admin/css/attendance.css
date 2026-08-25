@@ -1,0 +1,21 @@
+.attendance-panel { padding: 0; overflow: hidden; }
+.table-toolbar { display: flex; flex-wrap: wrap; gap: 10px; padding: 18px; border-bottom: 1px solid var(--border); }
+.search-field { position: relative; flex: 1 1 240px; }
+.search-field svg { position: absolute; left: 12px; top: 50%; width: 17px; height: 17px; transform: translateY(-50%); color: var(--text-secondary); }
+.search-field input, .table-toolbar select { height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; }
+.search-field input { width: 100%; padding: 0 12px 0 36px; }
+.table-toolbar select { padding: 0 10px; }
+.attendance-visual { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 18px; border-bottom: 1px solid var(--border); }
+.visual-card { padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.visual-card strong { display: block; font-size: 24px; }
+.visual-card span { color: var(--text-secondary); font-size: 12px; }
+.data-table { width: 100%; min-width: 920px; border-collapse: collapse; }
+.data-table th, .data-table td { padding: 12px 14px; border-top: 1px solid var(--border); text-align: left; white-space: nowrap; }
+.data-table th { background: var(--surface); color: var(--text-secondary); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+.data-table td { color: var(--text); font-size: 12.5px; }
+.status-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 78px; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.status-chip.excellent { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+.status-chip.good { background: rgba(59, 130, 246, 0.12); color: var(--primary); }
+.status-chip.warning { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+.status-chip.critical { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+@media (max-width: 700px) { .attendance-visual { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
