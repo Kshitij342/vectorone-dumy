@@ -953,6 +953,16 @@
     renderFeaturedEvent();
     if (modalEventId === eventId) updateRegisterButton(eventModalRegisterBtn, event);
     renderMyRegistrations();
+
+    // Call backend API if authenticated
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (token && event._rawId) {
+      fetch(API_BASE + '/events/' + encodeURIComponent(event._rawId) + '/register', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      }).catch(function () {});
+    }
   }
 
   /* ============================================================
@@ -1067,6 +1077,48 @@
   renderFeaturedEvent();
   renderEventsGrid();
   renderMyRegistrations();
+
+  (function loadLiveEvents() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+    fetch(API_BASE + '/events?limit=50', { headers: headers })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const liveEvents = res.data.map(function (d, i) {
+            const dateStr = d.startDate ? new Date(d.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
+            const cat = d.category || 'Technical';
+            return {
+              id: d.eventId || ('evt-' + (i + 1)),
+              _rawId: d.id,
+              title: d.title,
+              category: cat,
+              description: d.description || '',
+              date: dateStr,
+              time: d.startTime ? (d.startTime + (d.endTime ? ' — ' + d.endTime : '')) : '10:00 AM — 1:00 PM',
+              venue: d.venue || 'Campus Main',
+              organizer: d.organizer || 'VectorOne Campus',
+              speaker: d.description ? d.description.slice(0, 80) : '',
+              eligibility: 'Open to all students',
+              schedule: 'Detailed schedule available at the venue',
+              seatsTotal: d.capacity || 100,
+              seatsLeft: d.capacity ? Math.max(0, d.capacity - (d._count?.registrations || 0)) : 40,
+              deadline: dateStr,
+              featured: i === 0
+            };
+          });
+
+          EVENTS.length = 0;
+          liveEvents.forEach(function (e) { EVENTS.push(e); });
+          renderFeaturedEvent();
+          renderEventsGrid();
+          renderMyRegistrations();
+        }
+      })
+      .catch(function () {});
+  })();
 
   /* ---------------- Button ripple (delegated — cards render dynamically) ---------------- */
   document.addEventListener('click', function (event) {

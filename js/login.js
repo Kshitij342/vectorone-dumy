@@ -124,19 +124,39 @@
     submitBtn.disabled = true;
 
     const selectedRole = document.querySelector('input[name="loginRole"]:checked')?.value || 'student';
+    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/login';
 
-    setTimeout(function () {
-      submitBtn.classList.remove('is-loading');
-      submitBtn.disabled = false;
-
-      console.log('VectorOne sign-in attempt:', {
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         email: emailInput.value.trim(),
+        password: passwordInput.value,
         role: selectedRole,
-        remember: document.getElementById('remember').checked,
-      });
+      }),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        submitBtn.classList.remove('is-loading');
+        submitBtn.disabled = false;
 
-      window.location.href = selectedRole === 'admin' ? 'admin/admin-dashboard.html' : 'dashboard.html';
-    }, 900);
+        if (result.ok && result.data.success) {
+          if (result.data.data?.token) {
+            localStorage.setItem('vectorone_token', result.data.data.token);
+            localStorage.setItem('vectorone_user', JSON.stringify(result.data.data.user));
+          }
+          window.location.href = selectedRole === 'admin' ? 'admin/admin-dashboard.html' : 'dashboard.html';
+        } else {
+          const errMsg = result.data.message || 'Invalid email or password.';
+          setFieldError(passwordInput, passwordError, errMsg);
+          passwordInput.focus();
+        }
+      })
+      .catch(function (err) {
+        submitBtn.classList.remove('is-loading');
+        submitBtn.disabled = false;
+        setFieldError(passwordInput, passwordError, 'Unable to connect to server. Ensure backend is running.');
+      });
   });
 
   /* ---------------- Google button ---------------- */

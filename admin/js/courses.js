@@ -95,6 +95,28 @@
     document.getElementById('confirmCourseModal').addEventListener('click', handler);
   }
 
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function fetchCoursesFromApi() {
+    fetch(API_BASE + '/admin/courses', { headers: getAuthHeader() })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          courses.length = 0;
+          res.data.forEach(function (c) { courses.push(c); });
+          populateFilters();
+          renderCourses();
+        }
+      })
+      .catch(function (err) {
+        console.warn('VectorOne: using local course data');
+      });
+  }
+
   document.addEventListener('click', function (event) {
     const trigger = event.target.closest('[data-action]');
     if (!trigger) return;
@@ -116,16 +138,26 @@
       modalButtons('Save Changes', function () {
         const form = document.getElementById('courseForm');
         const data = new FormData(form);
-        course.code = String(data.get('code'));
-        course.name = String(data.get('name'));
-        course.department = String(data.get('department'));
-        course.faculty = String(data.get('faculty'));
-        course.semester = String(data.get('semester'));
-        course.credits = Number(data.get('credits'));
-        course.students = Number(data.get('students'));
-        course.status = String(data.get('status'));
+        const updatedFields = {
+          code: String(data.get('code')),
+          name: String(data.get('name')),
+          department: String(data.get('department')),
+          faculty: String(data.get('faculty')),
+          semester: String(data.get('semester')),
+          credits: Number(data.get('credits')),
+          students: Number(data.get('students')),
+          status: String(data.get('status'))
+        };
+
+        Object.assign(course, updatedFields);
         renderCourses();
         closeModal();
+
+        fetch(API_BASE + '/admin/courses/' + course.code, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify(updatedFields)
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
       return;
@@ -139,6 +171,11 @@
         if (index >= 0) courses.splice(index, 1);
         renderCourses();
         closeModal();
+
+        fetch(API_BASE + '/admin/courses/' + course.code, {
+          method: 'DELETE',
+          headers: getAuthHeader()
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
     }
@@ -150,7 +187,7 @@
     modalButtons('Add Course', function () {
       const form = document.getElementById('courseForm');
       const data = new FormData(form);
-      courses.unshift({
+      const newCourse = {
         code: String(data.get('code')),
         name: String(data.get('name')),
         department: String(data.get('department')),
@@ -159,9 +196,17 @@
         credits: Number(data.get('credits')),
         students: Number(data.get('students')),
         status: String(data.get('status'))
-      });
+      };
+
+      courses.unshift(newCourse);
       renderCourses();
       closeModal();
+
+      fetch(API_BASE + '/admin/courses', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(newCourse)
+      }).catch(function (e) { console.warn(e); });
     });
     openModal();
   });
@@ -173,9 +218,13 @@
   semCourseFilter.addEventListener('change', renderCourses);
   yearCourseFilter.addEventListener('change', renderCourses);
   statusCourseFilter.addEventListener('change', renderCourses);
-  document.getElementById('refreshCoursesBtn').addEventListener('click', renderCourses);
+  document.getElementById('refreshCoursesBtn').addEventListener('click', function () {
+    fetchCoursesFromApi();
+    renderCourses();
+  });
 
   renderStats();
   populateFilters();
   renderCourses();
+  fetchCoursesFromApi();
 })();

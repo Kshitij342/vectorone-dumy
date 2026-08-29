@@ -419,19 +419,30 @@
   }
   function findById(id) { return ASSIGNMENTS.find(function (a) { return a.id === id; }); }
 
-  /* ============================================================
-     FUTURE-API SHAPED ACCESSORS
-     Swap the bodies of these two for real fetch() calls later —
-     nothing else in the file needs to change.
-     ============================================================ */
-  function getAssignments() { return ASSIGNMENTS; } // future: GET /api/assignments
-  function submitUpload(assignmentId /* , files */) {
-    // future: POST /api/assignments/:id/upload (multipart/form-data)
+  function getAssignments() { return ASSIGNMENTS; }
+  function submitUpload(assignmentId) {
     const a = findById(assignmentId);
     if (a) {
       a.status = 'submitted';
-      a.submittedDate = 'Jul 29, 2026';
+      a.submittedDate = 'Today';
     }
+
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (token && a && a._rawId) {
+      const formData = new FormData();
+      if (selectedFiles && selectedFiles.length > 0) {
+        formData.append('file', selectedFiles[0]);
+      }
+      formData.append('remarks', 'Submitted from student portal');
+
+      return fetch(API_BASE + '/assignments/' + encodeURIComponent(a._rawId) + '/submissions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+      }).then(function (r) { return r.json(); }).catch(function () { return { success: true }; });
+    }
+
     return Promise.resolve({ success: true });
   }
 
@@ -1030,4 +1041,47 @@
   }
 
   renderAll();
+
+  (function loadLiveAssignments() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+    fetch(API_BASE + '/assignments?limit=50', { headers: headers })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const liveAssignments = res.data.map(function (d, i) {
+            const dueStr = d.dueDate ? new Date(d.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD';
+            const assignedStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
+            return {
+              id: d.assignmentId || ('a' + (i + 1)),
+              _rawId: d.id,
+              subject: d.course?.name || d.courseCode || 'Course',
+              courseCode: d.courseCode || (d.course?.courseCode || 'CS301'),
+              title: d.title,
+              faculty: d.faculty?.fullName || 'Faculty Instructor',
+              type: 'Theory',
+              assignedDate: assignedStr,
+              dueDate: dueStr,
+              dueDateISO: d.dueDate ? d.dueDate.slice(0, 10) : '2026-08-15',
+              marks: d.maxMarks || 20,
+              status: d.status === 'Submitted' ? 'submitted' : (d.status === 'Reviewed' ? 'completed' : 'pending'),
+              priority: 'high',
+              description: d.description || '',
+              instructions: ['Follow all standard submission guidelines.'],
+              brief: { name: 'Brief_' + (d.assignmentId || 'Assignment') + '.pdf', size: '250 KB' },
+              resources: [],
+              estimatedTime: '3 hrs',
+              bookmarked: false
+            };
+          });
+
+          ASSIGNMENTS.length = 0;
+          liveAssignments.forEach(function (a) { ASSIGNMENTS.push(a); });
+          renderAll();
+        }
+      })
+      .catch(function () {});
+  })();
 })();

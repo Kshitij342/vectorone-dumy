@@ -142,6 +142,28 @@
     document.getElementById('confirmStudentAction').addEventListener('click', handler);
   }
 
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function fetchStudentsFromApi() {
+    fetch(API_BASE + '/admin/students?limit=100', { headers: getAuthHeader() })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          students.length = 0;
+          res.data.forEach(function (s) { students.push(s); });
+          populateDepartments();
+          renderStudents();
+        }
+      })
+      .catch(function (err) {
+        console.warn('VectorOne: using local student data (backend offline or loading)');
+      });
+  }
+
   document.addEventListener('click', function (event) {
     const trigger = event.target.closest('[data-op]');
     if (!trigger) return;
@@ -163,17 +185,27 @@
       renderModalActions('Save Changes', function () {
         const form = document.getElementById('studentForm');
         const data = new FormData(form);
-        student.id = String(data.get('id'));
-        student.name = String(data.get('name'));
-        student.dept = String(data.get('dept'));
-        student.year = String(data.get('year'));
-        student.division = String(data.get('division'));
-        student.semester = String(data.get('semester'));
-        student.email = String(data.get('email'));
-        student.phone = String(data.get('phone'));
-        student.status = String(data.get('status'));
+        const updatedFields = {
+          id: String(data.get('id')),
+          name: String(data.get('name')),
+          dept: String(data.get('dept')),
+          year: String(data.get('year')),
+          division: String(data.get('division')),
+          semester: String(data.get('semester')),
+          email: String(data.get('email')),
+          phone: String(data.get('phone')),
+          status: String(data.get('status'))
+        };
+
+        Object.assign(student, updatedFields);
         renderStudents();
         closeModal();
+
+        fetch(API_BASE + '/admin/students/' + student.id, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify(updatedFields)
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
     }
@@ -185,7 +217,7 @@
     renderModalActions('Add Student', function () {
       const form = document.getElementById('studentForm');
       const data = new FormData(form);
-      students.unshift({
+      const newStudent = {
         id: String(data.get('id')),
         name: String(data.get('name')),
         dept: String(data.get('dept')),
@@ -195,10 +227,18 @@
         email: String(data.get('email')),
         phone: String(data.get('phone')),
         attendance: 100,
-        status: 'Active'
-      });
+        status: String(data.get('status')) || 'Active'
+      };
+
+      students.unshift(newStudent);
       renderStudents();
       closeModal();
+
+      fetch(API_BASE + '/admin/students', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(newStudent)
+      }).catch(function (e) { console.warn(e); });
     });
     openModal();
   });
@@ -215,7 +255,10 @@
   document.getElementById('semesterFilter').addEventListener('change', renderStudents);
   document.getElementById('statusFilter').addEventListener('change', renderStudents);
   document.getElementById('sortStudents').addEventListener('change', renderStudents);
-  document.getElementById('refreshBtn').addEventListener('click', renderStudents);
+  document.getElementById('refreshBtn').addEventListener('click', function () {
+    fetchStudentsFromApi();
+    renderStudents();
+  });
   document.getElementById('exportBtn').addEventListener('click', function () {
     const rows = getFilteredStudents();
     const csv = ['ID,Name,Department,Year,Division,Semester,Email,Phone,Attendance,Status'];
@@ -234,4 +277,5 @@
   renderStats();
   populateDepartments();
   renderStudents();
+  fetchStudentsFromApi();
 })();

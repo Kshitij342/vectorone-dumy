@@ -543,16 +543,53 @@
     return out;
   }
 
-  // Thin mock "backend" — every call resolves a Promise after a short
-  // delay, exactly like a real fetch() would, so callers never need to
-  // change when this is wired to an actual API.
+  // API connection with fallback to local event index
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function authHeaders() {
+    const t = localStorage.getItem('vectorone_token');
+    return t ? { 'Authorization': 'Bearer ' + t } : {};
+  }
+
   function mockResolve(value, delay) {
     return new Promise(function (resolve) { setTimeout(function () { resolve(value); }, delay || 180); });
   }
 
   const Api = {
-    getCalendar: function () { return mockResolve({ today: dateKey(TODAY) }); },
-    getEvents: function (fromDate, toDate) { return mockResolve(eventsInRange(fromDate, toDate)); },
+    getCalendar: function () {
+      return fetch(API_BASE + '/calendar/events', { headers: authHeaders() })
+        .then(function (r) { return r.json(); })
+        .then(function () { return { today: dateKey(TODAY) }; })
+        .catch(function () { return { today: dateKey(TODAY) }; });
+    },
+    getEvents: function (fromDate, toDate) {
+      return fetch(API_BASE + '/calendar/events', { headers: authHeaders() })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const mapped = res.data.map(function (d) {
+              const start = d.startDate ? new Date(d.startDate) : TODAY;
+              const dk = dateKey(start);
+              return {
+                id: d.id,
+                date: dk,
+                type: d.type ? d.type.toLowerCase() : 'event',
+                title: d.title,
+                time: d.startTime ? (d.startTime + (d.endTime ? ' – ' + d.endTime : '')) : '10:00 AM – 1:00 PM',
+                location: d.location || 'Campus',
+                faculty: 'Academic Office',
+                status: 'Scheduled',
+                description: d.description || '',
+                attachment: null
+              };
+            });
+            return mapped;
+          }
+          return eventsInRange(fromDate, toDate);
+        })
+        .catch(function () {
+          return eventsInRange(fromDate, toDate);
+        });
+    },
     getToday: function () { return mockResolve(eventsOn(dateKey(TODAY))); },
     getUpcoming: function (limit) {
       const upcoming = RAW_EVENTS

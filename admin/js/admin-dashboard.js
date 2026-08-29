@@ -124,6 +124,35 @@
   }
   function animateCounters() { document.querySelectorAll('[data-target]').forEach(function (el) { const target = Number(el.dataset.target), suffix = el.dataset.suffix || ''; if (reducedMotion) { el.textContent = target.toLocaleString() + suffix; return; } const started = performance.now(), duration = 700; function frame(now) { const progress = Math.min((now - started) / duration, 1), value = target * (1 - Math.pow(1 - progress, 3)); el.textContent = (Number.isInteger(target) ? Math.round(value).toLocaleString() : value.toFixed(1)) + suffix; if (progress < 1) requestAnimationFrame(frame); } requestAnimationFrame(frame); }); }
   if (statsGrid) animateCounters();
+
+  // Load real backend stats & registrations if available
+  (function loadLiveAdminDashboard() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token || !statsGrid) return;
+
+    fetch(API_BASE + '/admin/dashboard', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && res.data) {
+          if (res.data.stats && statsGrid) {
+            statsGrid.innerHTML = res.data.stats.map(function (stat) {
+              return '<article class="stat-card stat-card--' + stat.tone + '"><div class="stat-card-top"><div class="stat-icon stat-icon--' + stat.tone + '">' + (ICONS[stat.tone] || icon) + '</div></div><p class="stat-value" data-target="' + stat.value + '" data-suffix="' + (stat.suffix || '') + '">0' + (stat.suffix || '') + '</p><p class="stat-label">' + stat.label + '</p><span class="stat-trend stat-trend--up">↗ ' + stat.trend + '</span></article>';
+            }).join('');
+            animateCounters();
+          }
+          if (res.data.registrations && registrationsList && res.data.registrations.length > 0) {
+            registrationsList.innerHTML = res.data.registrations.map(function (item) {
+              return '<div class="admin-row"><span class="admin-avatar">' + item.name.split(' ').map(function (part) { return part[0]; }).join('') + '</span><div class="row-copy"><strong>' + item.name + '</strong><span>' + item.meta + '</span></div><span class="status-tag ' + (item.status === 'Pending' ? 'is-pending' : 'is-approved') + '">' + item.status + '</span></div>';
+            }).join('');
+          }
+        }
+      })
+      .catch(function () {});
+  })();
+
   const registrationsList = document.getElementById('registrationsList');
   if (registrationsList) {
     registrationsList.innerHTML = registrations.map(function (item) { return '<div class="admin-row"><span class="admin-avatar">' + item.name.split(' ').map(function (part) { return part[0]; }).join('') + '</span><div class="row-copy"><strong>' + item.name + '</strong><span>' + item.meta + '</span></div><span class="status-tag ' + (item.status === 'Pending' ? 'is-pending' : 'is-approved') + '">' + item.status + '</span></div>'; }).join('');
@@ -387,6 +416,36 @@
       return '<form class="admin-form">' + fields + '</form>';
     }
 
+    /* ---------- API Sync ---------- */
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    function getAuthHeader() {
+      const token = localStorage.getItem('vectorone_token');
+      return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    }
+
+    const endpointMap = {
+      notice: '/admin/notices',
+      event: '/admin/events',
+      assignment: '/admin/assignments',
+      resource: '/admin/resources',
+    };
+    const apiPath = config.apiEndpoint || endpointMap[prefix];
+
+    function fetchTableData() {
+      if (!apiPath) return;
+      fetch(API_BASE + apiPath, { headers: getAuthHeader() })
+        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            rowsData.length = 0;
+            res.data.forEach(function (d) { rowsData.push(d); });
+            populateFilters();
+            renderTable();
+          }
+        })
+        .catch(function () {});
+    }
+
     /* ---------- row actions (one delegated listener, scoped to the table) ---------- */
     tableBody.addEventListener('click', function (event) {
       const button = event.target.closest('[data-action]');
@@ -405,7 +464,16 @@
         if (modalBody) modalBody.innerHTML = buildForm(row);
         setModalButtons('Save Changes', function () {
           const values = readForm();
-          if (values) Object.keys(values).forEach(function (key) { row[key] = values[key]; });
+          if (values) {
+            Object.keys(values).forEach(function (key) { row[key] = values[key]; });
+            if (apiPath && row[idKey]) {
+              fetch(API_BASE + apiPath + '/' + encodeURIComponent(row[idKey]), {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify(values)
+              }).catch(function (e) { console.warn(e); });
+            }
+          }
           renderTable();
           closeModal();
         });
@@ -416,6 +484,12 @@
         setModalButtons('Delete', function () {
           const idx = rowsData.indexOf(row);
           if (idx >= 0) rowsData.splice(idx, 1);
+          if (apiPath && row[idKey]) {
+            fetch(API_BASE + apiPath + '/' + encodeURIComponent(row[idKey]), {
+              method: 'DELETE',
+              headers: getAuthHeader()
+            }).catch(function (e) { console.warn(e); });
+          }
           renderTable();
           closeModal();
         });
@@ -439,7 +513,16 @@
         if (modalBody) modalBody.innerHTML = buildForm(null);
         setModalButtons(config.addTitle || 'Add', function () {
           const values = readForm();
-          if (values) rowsData.unshift(values);
+          if (values) {
+            rowsData.unshift(values);
+            if (apiPath) {
+              fetch(API_BASE + apiPath, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify(values)
+              }).catch(function (e) { console.warn(e); });
+            }
+          }
           renderTable();
           closeModal();
         });
@@ -447,7 +530,7 @@
       });
     }
     const refreshBtn = config.refreshId ? document.getElementById(config.refreshId) : null;
-    if (refreshBtn) refreshBtn.addEventListener('click', function () { renderStats(); renderTable(); });
+    if (refreshBtn) refreshBtn.addEventListener('click', function () { fetchTableData(); renderStats(); renderTable(); });
 
     const exportBtn = config.exportId ? document.getElementById(config.exportId) : null;
     if (exportBtn && config.csv) {
@@ -476,9 +559,10 @@
     renderStats();
     populateFilters();
     renderTable();
+    fetchTableData();
     return { render: renderTable, rows: rowsData, getFilteredRows: getFilteredRows };
   }
 
   window.VectorOneAdmin.escapeHtml = escapeHtml;
   window.VectorOneAdmin.createTablePage = createTablePage;
-}());
+})();

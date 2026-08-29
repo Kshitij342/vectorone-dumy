@@ -87,6 +87,27 @@
     document.getElementById('confirmDepartmentModal').addEventListener('click', onClick);
   }
 
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function fetchDepartmentsFromApi() {
+    fetch(API_BASE + '/admin/departments', { headers: getAuthHeader() })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          departments.length = 0;
+          res.data.forEach(function (d) { departments.push(d); });
+          renderDepartments();
+        }
+      })
+      .catch(function (err) {
+        console.warn('VectorOne: using local department data');
+      });
+  }
+
   function getDepartmentById(id) {
     return departments.find(function (dept) { return dept.id === id; });
   }
@@ -113,15 +134,25 @@
       renderModalButtons('Save Changes', function () {
         const form = document.getElementById('departmentForm');
         const data = new FormData(form);
-        dept.id = String(data.get('id'));
-        dept.name = String(data.get('name'));
-        dept.hod = String(data.get('hod'));
-        dept.faculty = Number(data.get('faculty'));
-        dept.students = Number(data.get('students'));
-        dept.courses = Number(data.get('courses'));
-        dept.status = String(data.get('status'));
+        const updatedFields = {
+          id: String(data.get('id')),
+          name: String(data.get('name')),
+          hod: String(data.get('hod')),
+          faculty: Number(data.get('faculty')),
+          students: Number(data.get('students')),
+          courses: Number(data.get('courses')),
+          status: String(data.get('status'))
+        };
+
+        Object.assign(dept, updatedFields);
         renderDepartments();
         closeModal();
+
+        fetch(API_BASE + '/admin/departments/' + dept.id, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify(updatedFields)
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
       return;
@@ -135,6 +166,11 @@
         if (idx >= 0) departments.splice(idx, 1);
         renderDepartments();
         closeModal();
+
+        fetch(API_BASE + '/admin/departments/' + dept.id, {
+          method: 'DELETE',
+          headers: getAuthHeader()
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
     }
@@ -146,7 +182,7 @@
     renderModalButtons('Add Department', function () {
       const form = document.getElementById('departmentForm');
       const data = new FormData(form);
-      departments.unshift({
+      const newDept = {
         id: String(data.get('id')),
         name: String(data.get('name')),
         hod: String(data.get('hod')),
@@ -154,19 +190,31 @@
         students: Number(data.get('students')),
         courses: Number(data.get('courses')),
         status: String(data.get('status'))
-      });
+      };
+
+      departments.unshift(newDept);
       renderDepartments();
       closeModal();
+
+      fetch(API_BASE + '/admin/departments', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(newDept)
+      }).catch(function (e) { console.warn(e); });
     });
     openModal();
   });
 
   departmentSearch.addEventListener('input', renderDepartments);
   statusDeptFilter.addEventListener('change', renderDepartments);
-  document.getElementById('refreshDepartmentsBtn').addEventListener('click', renderDepartments);
+  document.getElementById('refreshDepartmentsBtn').addEventListener('click', function () {
+    fetchDepartmentsFromApi();
+    renderDepartments();
+  });
   departmentModalClose.addEventListener('click', closeModal);
   departmentModal.addEventListener('click', function (event) { if (event.target === departmentModal) closeModal(); });
 
   renderStats();
   renderDepartments();
+  fetchDepartmentsFromApi();
 })();

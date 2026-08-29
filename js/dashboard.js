@@ -203,8 +203,81 @@
       });
       notificationBadge.textContent = '0';
       notificationBadge.classList.add('is-hidden');
+
+      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('vectorone_token');
+      if (token) {
+        fetch(API_BASE + '/notifications/read-all', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        }).catch(function () {});
+      }
     });
   }
+
+  // Live User Info & Notification Sync
+  (function syncLiveUserState() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (r) {
+        if (r.status === 401) {
+          localStorage.removeItem('vectorone_token');
+          localStorage.removeItem('vectorone_user');
+          if (!window.location.pathname.endsWith('login.html')) {
+            window.location.href = 'login.html';
+          }
+          return null;
+        }
+        return r.json();
+      })
+      .then(function (res) {
+        if (res && res.success && res.data) {
+          const user = res.data;
+          const student = user.student;
+          const fullName = student?.fullName || user.email.split('@')[0];
+          const initials = fullName.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
+
+          document.querySelectorAll('.user-menu-name').forEach(function (el) { el.textContent = fullName; });
+          document.querySelectorAll('.avatar, .user-menu-btn .avatar').forEach(function (el) { el.textContent = initials; });
+
+          // If on profile.html, update profile layout
+          const profileHero = document.querySelector('.profile-identity');
+          if (profileHero) {
+            const h2 = profileHero.querySelector('h2');
+            if (h2) h2.textContent = fullName;
+            const p = profileHero.querySelector('p');
+            if (p && student?.department) p.textContent = (student.department.name || 'Computer Science') + ' · Semester ' + (student.semester || 1);
+            const avatar = document.querySelector('.profile-avatar');
+            if (avatar) avatar.textContent = initials;
+          }
+        }
+      })
+      .catch(function () {});
+
+    // Notifications
+    fetch(API_BASE + '/notifications', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && notificationBadge) {
+          const unreadCount = res.data.filter(function (n) { return !n.isRead; }).length;
+          notificationBadge.textContent = String(unreadCount);
+          notificationBadge.classList.toggle('is-hidden', unreadCount === 0);
+
+          if (notificationList && res.data.length > 0) {
+            notificationList.innerHTML = res.data.map(function (n) {
+              return '<li class="notification-item' + (!n.isRead ? ' is-unread' : '') + '">' +
+                '<p class="notification-title">' + n.title + '</p>' +
+                '<p class="notification-body">' + (n.message || '') + '</p>' +
+                '</li>';
+            }).join('');
+          }
+        }
+      })
+      .catch(function () {});
+  })();
 
   /* ---------------- Global search ---------------- */
   const searchWrap = document.getElementById('searchWrap');
@@ -601,6 +674,27 @@
         sorted.forEach(function (row) { noticesTableBody.appendChild(row); });
       });
     }
+
+    // Live API notices fetch
+    (function loadLiveStudentDashboard() {
+      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      fetch(API_BASE + '/notices?limit=10')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            noticesTableBody.innerHTML = res.data.map(function (n) {
+              const dateStr = n.publishedAt ? new Date(n.publishedAt).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' }) : 'Recent';
+              return '<tr data-category="' + (n.category || 'Academic') + '" data-date="' + (n.publishedAt || '') + '" data-href="notices.html">' +
+                '<td><span class="tag tag--' + (n.category ? n.category.toLowerCase() : 'academic') + '">' + (n.category || 'Academic') + '</span></td>' +
+                '<td class="notice-title"><a href="notices.html">' + n.title + '</a></td>' +
+                '<td>' + (n.author?.fullName || 'Academic Office') + '</td>' +
+                '<td><time datetime="' + (n.publishedAt || '') + '">' + dateStr + '</time></td>' +
+                '</tr>';
+            }).join('');
+          }
+        })
+        .catch(function () {});
+    })();
   }
 
   /* ---------------- Recent Activity: Load More ---------------- */

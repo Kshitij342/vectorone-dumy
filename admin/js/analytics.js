@@ -154,4 +154,31 @@
   }
 
   renderAll();
+
+  // Load live analytics from API
+  (function loadLiveAnalytics() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/admin/analytics/overview', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && res.data) {
+          if (res.data.summary && summaryHost) {
+            summary.length = 0;
+            res.data.summary.forEach(function (s) { summary.push(s); });
+            renderSummary();
+          }
+          if (res.data.keyMetrics && metricsHost) {
+            keyMetrics.length = 0;
+            res.data.keyMetrics.forEach(function (k) { keyMetrics.push(k); });
+            renderList(metricsHost, keyMetrics);
+          }
+        }
+      })
+      .catch(function () {});
+  })();
 }());

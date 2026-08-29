@@ -80,6 +80,39 @@
       saveBtn.textContent = 'Saved';
       saveBtn.disabled = true;
       setTimeout(function () { saveBtn.textContent = original; saveBtn.disabled = false; }, 1200);
+
+      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('vectorone_token');
+      if (token) {
+        fetch(API_BASE + '/admin/settings', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(current)
+        }).catch(function () {});
+      }
     });
   }
+
+  // Load live admin settings from API
+  (function loadLiveAdminSettings() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/admin/settings', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && res.data) {
+          const liveSettings = Object.assign({}, DEFAULTS, res.data);
+          inputs.forEach(function (input) {
+            const key = input.getAttribute('data-setting');
+            if (key in liveSettings) reflect(input, Boolean(liveSettings[key]));
+          });
+          applySideEffects(liveSettings);
+        }
+      })
+      .catch(function () {});
+  })();
 }());

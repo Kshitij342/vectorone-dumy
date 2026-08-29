@@ -130,6 +130,28 @@
       '</form>';
   }
 
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function fetchFacultyFromApi() {
+    fetch(API_BASE + '/admin/faculty?limit=100', { headers: getAuthHeader() })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          faculty.length = 0;
+          res.data.forEach(function (f) { faculty.push(f); });
+          populateFilters();
+          renderFacultyTable();
+        }
+      })
+      .catch(function (err) {
+        console.warn('VectorOne: using local faculty data');
+      });
+  }
+
   document.addEventListener('click', function (event) {
     const button = event.target.closest('[data-action]');
     if (!button) return;
@@ -153,16 +175,26 @@
       renderModalButtons('Save Changes', function () {
         const form = document.getElementById('facultyForm');
         const data = new FormData(form);
-        member.id = data.get('id');
-        member.name = data.get('name');
-        member.department = data.get('department');
-        member.designation = data.get('designation');
-        member.email = data.get('email');
-        member.phone = data.get('phone');
-        member.status = data.get('status');
-        member.courses = data.get('courses');
+        const updatedFields = {
+          id: String(data.get('id')),
+          name: String(data.get('name')),
+          department: String(data.get('department')),
+          designation: String(data.get('designation')),
+          email: String(data.get('email')),
+          phone: String(data.get('phone')),
+          status: String(data.get('status')),
+          courses: String(data.get('courses'))
+        };
+
+        Object.assign(member, updatedFields);
         renderFacultyTable();
         closeModal();
+
+        fetch(API_BASE + '/admin/faculty/' + member.id, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify(updatedFields)
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
       return;
@@ -176,6 +208,11 @@
         if (idx >= 0) faculty.splice(idx, 1);
         renderFacultyTable();
         closeModal();
+
+        fetch(API_BASE + '/admin/faculty/' + member.id, {
+          method: 'DELETE',
+          headers: getAuthHeader()
+        }).catch(function (e) { console.warn(e); });
       });
       openModal();
     }
@@ -200,6 +237,12 @@
       faculty.unshift(newMember);
       renderFacultyTable();
       closeModal();
+
+      fetch(API_BASE + '/admin/faculty', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(newMember)
+      }).catch(function (e) { console.warn(e); });
     });
     openModal();
   });
@@ -229,8 +272,13 @@
     URL.revokeObjectURL(link.href);
   });
 
-  document.getElementById('refreshFacultyBtn').addEventListener('click', renderFacultyTable);
+  document.getElementById('refreshFacultyBtn').addEventListener('click', function () {
+    fetchFacultyFromApi();
+    renderFacultyTable();
+  });
+
   renderStats();
   populateFilters();
   renderFacultyTable();
+  fetchFacultyFromApi();
 })();

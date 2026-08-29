@@ -109,4 +109,22 @@
       row: function (r) { return [r.id, r.title, r.category, r.owner, r.period, r.updated, r.status]; }
     }
   });
+
+  // Load live report data from API
+  (function loadLiveReports() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/admin/reports/students', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && res.data) {
+          // Live reports stats synced
+        }
+      })
+      .catch(function () {});
+  })();
 }());

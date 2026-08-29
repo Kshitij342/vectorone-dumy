@@ -176,15 +176,28 @@
       const text = composerInput.value.trim();
       if (!text) return;
       const now = new Date();
-      getActive().messages.push({
+      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      const activeC = getActive();
+      activeC.messages.push({
         from: 'me',
         text: text,
-        time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+        time: timeStr
       });
       composerInput.value = '';
       renderThread();
       renderList();
       renderStats();
+
+      // Send to API
+      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('vectorone_token');
+      if (token && activeC._rawId) {
+        fetch(API_BASE + '/admin/messages', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: activeC._rawId, content: text })
+        }).catch(function () {});
+      }
     });
   }
 
@@ -221,4 +234,49 @@
   renderStats();
   renderList();
   renderThread();
+
+  // Load live messages from API
+  (function loadLiveAdminMessages() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/admin/messages', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const liveConvs = res.data.map(function (d, i) {
+            const partner = d.participants?.[0]?.user?.student?.fullName || d.participants?.[0]?.user?.faculty?.fullName || d.title || 'Campus Member';
+            const role = d.participants?.[0]?.user?.role === 'STUDENT' ? 'Student' : (d.participants?.[0]?.user?.role === 'FACULTY' ? 'Faculty' : 'Staff');
+            const msgs = (d.messages || []).map(function (m) {
+              return {
+                from: m.senderId === d.currentUserId ? 'me' : 'them',
+                text: m.content,
+                time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '10:00'
+              };
+            });
+            return {
+              id: 'c' + (i + 1),
+              _rawId: d.id,
+              name: partner,
+              role: role,
+              presence: 'Active',
+              unread: 0,
+              time: 'Recent',
+              messages: msgs.length > 0 ? msgs : [{ from: 'them', text: 'Hello, I have an administrative query.', time: '09:00' }]
+            };
+          });
+
+          conversations.length = 0;
+          liveConvs.forEach(function (c) { conversations.push(c); });
+          activeId = conversations[0].id;
+          renderStats();
+          renderList();
+          renderThread();
+        }
+      })
+      .catch(function () {});
+  })();
 }());

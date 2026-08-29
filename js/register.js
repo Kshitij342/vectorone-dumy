@@ -249,19 +249,44 @@
     submitBtn.classList.add('is-loading');
     submitBtn.disabled = true;
 
-    setTimeout(function () {
-      submitBtn.classList.remove('is-loading');
-      submitBtn.disabled = false;
+    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/register';
 
-      // No backend is wired up — this is where an API call would go.
-      console.log('VectorOne registration attempt:', {
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         fullName: fullNameInput.value.trim(),
         email: emailInput.value.trim(),
         studentId: studentIdInput.value.trim(),
         year: yearSelect.value,
         department: departmentSelect.value,
+        password: passwordInput.value,
+      }),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        submitBtn.classList.remove('is-loading');
+        submitBtn.disabled = false;
+
+        if (result.ok && result.data.success) {
+          if (result.data.data?.token) {
+            localStorage.setItem('vectorone_token', result.data.data.token);
+            localStorage.setItem('vectorone_user', JSON.stringify(result.data.data.user));
+          }
+          window.location.href = 'dashboard.html';
+        } else {
+          const errMsg = result.data.message || (result.data.errors && result.data.errors[0]) || 'Registration failed.';
+          const errorEl = document.getElementById('emailError');
+          setFieldError(emailInput, errorEl, errMsg);
+          emailInput.focus();
+        }
+      })
+      .catch(function (err) {
+        submitBtn.classList.remove('is-loading');
+        submitBtn.disabled = false;
+        const errorEl = document.getElementById('emailError');
+        setFieldError(emailInput, errorEl, 'Unable to connect to server. Ensure backend is running.');
       });
-    }, 1400);
   });
 
   /* ---------------- Google button ---------------- */

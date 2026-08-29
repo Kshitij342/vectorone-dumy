@@ -104,7 +104,23 @@
       const cancel = modalActions.querySelector('[data-dismiss]');
       const save = modalActions.querySelector('[data-save]');
       if (cancel) cancel.addEventListener('click', closeModal);
-      if (save) save.addEventListener('click', function () { readForm(); paint(); closeModal(); });
+      if (save) {
+        save.addEventListener('click', function () {
+          readForm();
+          paint();
+          closeModal();
+
+          const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+          const token = localStorage.getItem('vectorone_token');
+          if (token) {
+            fetch(API_BASE + '/admin/profile', {
+              method: 'PUT',
+              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fullName: profile.name, phone: profile.phone })
+            }).catch(function () {});
+          }
+        });
+      }
     }
     openModal();
   });
@@ -116,4 +132,27 @@
   });
 
   paint();
+
+  // Load live admin profile from API
+  (function loadLiveAdminProfile() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    if (!token) return;
+
+    fetch(API_BASE + '/admin/profile', {
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && res.data) {
+          const d = res.data;
+          profile.name = d.fullName || profile.name;
+          profile.employeeId = d.adminId || profile.employeeId;
+          profile.phone = d.phone || profile.phone;
+          if (d.user?.email) profile.email = d.user.email;
+          paint();
+        }
+      })
+      .catch(function () {});
+  })();
 }());

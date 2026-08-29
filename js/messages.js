@@ -90,6 +90,34 @@
     renderThread();
   }
 
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function fetchLiveMessages() {
+    fetch(API_BASE + '/messages', { headers: getAuthHeader() })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          // Sync with first conversation if found
+          const conv = res.data[0];
+          if (conv && conv.messages && conv.messages.length > 0) {
+            threads.rao.messages = conv.messages.map(function (m) {
+              return {
+                from: m.senderId === (JSON.parse(localStorage.getItem('vectorone_user') || '{}').id) ? 'out' : 'in',
+                text: m.text,
+                time: new Date(m.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+              };
+            });
+            renderThread();
+          }
+        }
+      })
+      .catch(function () {});
+  }
+
   function sendMessage() {
     if (!input) return;
     const text = input.value.trim();
@@ -105,6 +133,13 @@
     input.value = '';
     bubbles.scrollTop = bubbles.scrollHeight;
     input.focus();
+
+    // Send to backend API
+    fetch(API_BASE + '/messages', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify({ text: text })
+    }).catch(function (e) { console.warn(e); });
   }
 
   if (list) {
@@ -123,4 +158,5 @@
   }
 
   renderThread();
-}());
+  fetchLiveMessages();
+})();

@@ -1222,7 +1222,7 @@
   });
 
   /* ============================================================
-     INITIAL RENDER
+     INITIAL RENDER & LIVE API FETCH
      ============================================================ */
   renderSkeleton(6);
   setTimeout(function () {
@@ -1235,6 +1235,55 @@
     renderRecentlyUploaded();
     renderSubjectProgress();
     renderStorageUsage();
+
+    (function loadLiveResources() {
+      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('vectorone_token');
+      const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+      fetch(API_BASE + '/resources?limit=50', { headers: headers })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const liveResources = res.data.map(function (d, i) {
+              const ext = (d.fileExtension || 'PDF').toLowerCase();
+              const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
+              return {
+                id: d.resourceId || ('r' + (i + 1)),
+                _rawId: d.id,
+                title: d.title,
+                subject: d.department?.name || 'General Course',
+                courseCode: d.department?.deptId || 'DEP-101',
+                faculty: d.uploadedBy?.fullName || 'Faculty Member',
+                type: d.type ? d.type.toLowerCase() : 'notes',
+                format: ext,
+                fileName: d.fileName || (d.title + '.' + ext),
+                size: d.fileSize || '2.4 MB',
+                uploadDate: dateStr,
+                uploadDateISO: d.createdAt ? d.createdAt.slice(0, 10) : '2026-07-20',
+                downloads: d.downloadCount || 10,
+                rating: 4.8,
+                ratingCount: 15,
+                description: d.description || 'Academic study material provided for reference and revision.',
+                tags: ['Notes', 'Course Material']
+              };
+            });
+
+            RESOURCES.length = 0;
+            liveResources.forEach(function (r) { RESOURCES.push(r); });
+            filteredResources = sortResources(RESOURCES.slice());
+            renderResourcesGrid();
+            renderStats();
+            renderRecentDownloads();
+            renderPopularResources();
+            renderFavoriteResources();
+            renderRecentlyUploaded();
+            renderSubjectProgress();
+            renderStorageUsage();
+          }
+        })
+        .catch(function () {});
+    })();
   }, 550);
 
   /* ---------------- Button ripple (delegated — cards render dynamically) ---------------- */
