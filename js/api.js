@@ -6,7 +6,26 @@
 (function () {
   'use strict';
 
-  window.VECTORONE_API_URL = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  // Determine API base URL dynamically without hardcoding localhost in production
+  function resolveApiBaseUrl() {
+    if (window.VECTORONE_API_URL) return window.VECTORONE_API_URL;
+
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+
+    // Local development defaults
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      if (port === '5000') {
+        return `${window.location.origin}/api`;
+      }
+      return 'http://localhost:5000/api';
+    }
+
+    // Production / hosted environment fallback
+    return `${window.location.origin}/api`;
+  }
+
+  window.VECTORONE_API_URL = resolveApiBaseUrl();
 
   const TOKEN_KEY = 'vectorone_token';
   const USER_KEY = 'vectorone_user';
@@ -47,7 +66,7 @@
     },
 
     request: async function (endpoint, options = {}) {
-      const url = endpoint.startsWith('http') ? endpoint : `${window.VECTORONE_API_URL}${endpoint}`;
+      const url = endpoint.startsWith('http') ? endpoint : `${window.VECTORONE_API_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
       const token = this.getToken();
 
       const headers = Object.assign({}, options.headers || {});
@@ -66,8 +85,12 @@
         });
 
         if (response.status === 401) {
-          // Token expired or invalid
           console.warn('VectorOne: 401 Unauthorized encountered.');
+          // Don't auto-redirect on auth check pages like login/register
+          const path = window.location.pathname;
+          if (!path.endsWith('login.html') && !path.endsWith('register.html') && !path.endsWith('reset-password.html')) {
+            this.logout();
+          }
         }
 
         const data = await response.json();

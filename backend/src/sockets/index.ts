@@ -44,9 +44,20 @@ export function setupSocketIO(io: SocketIOServer): void {
     // Join a personal room for private notifications
     socket.join(`user:${userId}`);
 
-    // Join a conversation room
-    socket.on('conversation:join', ({ conversationId }: { conversationId: string }) => {
-      socket.join(`conv:${conversationId}`);
+    // Join a conversation room (with authorization check)
+    socket.on('conversation:join', async ({ conversationId }: { conversationId: string }) => {
+      try {
+        const participant = await prisma.conversationParticipant.findUnique({
+          where: { conversationId_userId: { conversationId, userId } }
+        });
+        if (participant || socket.user?.role === 'ADMIN') {
+          socket.join(`conv:${conversationId}`);
+        } else {
+          socket.emit('error', { message: 'Unauthorized access to conversation' });
+        }
+      } catch {
+        socket.emit('error', { message: 'Failed to join conversation' });
+      }
     });
 
     // Leave conversation room

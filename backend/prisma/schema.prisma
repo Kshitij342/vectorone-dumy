@@ -89,12 +89,15 @@ enum AttendanceStatus {
 // ─────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  role          Role      @default(STUDENT)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  passwordHash          String
+  googleId              String?   @unique
+  resetPasswordToken    String?
+  resetPasswordExpires  DateTime?
+  role                  Role      @default(STUDENT)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   student       Student?
   admin         Admin?

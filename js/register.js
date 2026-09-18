@@ -290,7 +290,65 @@
   });
 
   /* ---------------- Google button ---------------- */
-  document.getElementById('googleBtn').addEventListener('click', function () {
-    console.log('VectorOne: "Continue with Google" clicked — wire up OAuth here.');
-  });
+  const googleBtn = document.getElementById('googleBtn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', function () {
+      if (typeof window.google === 'undefined' || !window.google.accounts) {
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.onload = initGoogleSignIn;
+        script.onerror = function () {
+          alert('Failed to load Google Sign-In SDK. Google OAuth code implemented; real external OAuth flow unavailable without network access to Google.');
+        };
+        document.head.appendChild(script);
+      } else {
+        initGoogleSignIn();
+      }
+    });
+  }
+
+  function initGoogleSignIn() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      const clientId = window.GOOGLE_CLIENT_ID || '';
+      if (!clientId) {
+        alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
+        return;
+      }
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCallback,
+      });
+      window.google.accounts.id.prompt();
+    } else {
+      alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
+    }
+  }
+
+  async function handleGoogleCallback(response) {
+    if (!response || !response.credential) {
+      alert('Google authentication cancelled or invalid credential.');
+      return;
+    }
+    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/google';
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.data?.token) {
+          localStorage.setItem('vectorone_token', data.data.token);
+          localStorage.setItem('vectorone_user', JSON.stringify(data.data.user));
+        }
+        window.location.href = data.data.user?.role === 'ADMIN' ? 'admin/admin-dashboard.html' : 'dashboard.html';
+      } else {
+        alert(data.message || 'Google authentication failed.');
+      }
+    } catch (err) {
+      alert('Network error during Google authentication.');
+    }
+  }
 })();

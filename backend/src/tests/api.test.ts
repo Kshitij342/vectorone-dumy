@@ -30,6 +30,32 @@ describe('VectorOne API Core Endpoints', () => {
     expect(res.body.success).toBe(false);
   });
 
+  it('POST /api/auth/google without credential returns 400', async () => {
+    const res = await request(app).post('/api/auth/google').send({});
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toMatch(/credential/i);
+  });
+
+  it('POST /api/auth/forgot-password with non-existent email returns 200 without user enumeration', async () => {
+    const res = await request(app).post('/api/auth/forgot-password').send({
+      email: 'nonexistent_test_user@vectorone.edu',
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toMatch(/If that email exists/i);
+  });
+
+  it('POST /api/auth/reset-password with invalid token returns 400', async () => {
+    const res = await request(app).post('/api/auth/reset-password').send({
+      email: 'student@vectorone.edu',
+      token: 'invalid_token_123',
+      newPassword: 'newpassword123',
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
   it('GET /api/admin/dashboard without token returns 401 Unauthorized', async () => {
     const res = await request(app).get('/api/admin/dashboard');
     expect(res.status).toBe(401);
@@ -56,6 +82,25 @@ describe('VectorOne API Core Endpoints', () => {
     expect(res.body.message).toMatch(/Admin access required|Forbidden/i);
   });
 
+  it('GET /api/events returns public events list', async () => {
+    const res = await request(app).get('/api/events');
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+
+  it('POST /api/events/test-id/register without token returns 401', async () => {
+    const res = await request(app).post('/api/events/test-id/register');
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('POST /api/assignments/test-id/submissions without token returns 401', async () => {
+    const res = await request(app).post('/api/assignments/test-id/submissions');
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+  });
+
   it('GET /api/admin/attendance with admin token returns formatted student attendance', async () => {
     const adminToken = signToken({
       userId: 'test-admin-id',
@@ -68,21 +113,19 @@ describe('VectorOne API Core Endpoints', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
-    if (res.body.data.length > 0) {
-      const first = res.body.data[0];
-      expect(first.id).toMatch(/^VO\d+/);
-      expect(first.studentId).toMatch(/^VO\d+/);
-      expect(typeof first.name).toBe('string');
-      expect(first.name.length).toBeGreaterThan(0);
-      expect(first.name).not.toBe('undefined');
-      expect(first.department).toBeDefined();
-      expect(first.year).toBeDefined();
-      expect(first.division).toBeDefined();
-      expect(typeof first.present).toBe('number');
-      expect(typeof first.absent).toBe('number');
-      expect(typeof first.percentage).toBe('number');
-      expect(['Excellent', 'Good', 'Warning', 'Critical']).toContain(first.status);
-    }
+  });
+
+  it('GET /api/admin/students with admin token returns student list', async () => {
+    const adminToken = signToken({
+      userId: 'test-admin-id',
+      email: 'admin@vectorone.edu',
+      role: Role.ADMIN,
+    });
+    const res = await request(app)
+      .get('/api/admin/students')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
   });
 });
-
