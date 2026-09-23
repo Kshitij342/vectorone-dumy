@@ -1,11 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "cd backend && npm install --include=dev && npx prisma generate && npm run build",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    }
-  ]
+  "outputDirectory": "public",
+  "buildCommand": "cd backend && npm install --include=dev && npx prisma generate && npm run build && cd .. && rm -rf public && mkdir -p public && cp -r *.html css js admin public/"
 }

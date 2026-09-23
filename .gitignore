@@ -8,6 +8,8 @@ backend/.env
 
 # Build output
 backend/dist/
+public/
+.vercel/
 
 # Logs
 *.log
