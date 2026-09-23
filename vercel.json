@@ -2,17 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "cd backend && npm install --include=dev && npx prisma generate && npm run build",
-  "outputDirectory": ".",
-  "functions": {
-    "api/index.ts": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api"
     }
   ]
 }
