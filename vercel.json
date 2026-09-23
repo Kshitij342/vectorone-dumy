@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "cd backend && npm install && npm run build && npx prisma generate",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    }
+  ]
+}
