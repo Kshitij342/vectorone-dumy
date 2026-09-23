@@ -21,14 +21,14 @@ export async function register(req: Request, res: Response): Promise<void> {
     // Check if email already exists
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
-      sendError(res, 'Email is already registered', 409);
+      sendError(res, 'Registration failed. An account with these credentials already exists.', 409);
       return;
     }
 
     // Check studentId uniqueness
     const existingStudentId = await prisma.student.findUnique({ where: { studentId } });
     if (existingStudentId) {
-      sendError(res, 'Student ID is already registered', 409);
+      sendError(res, 'Registration failed. An account with these credentials already exists.', 409);
       return;
     }
 
@@ -381,7 +381,7 @@ export async function forgotPassword(req: Request, res: Response): Promise<void>
       sendSuccess(res, null, 'If that email exists, a reset link has been sent.');
     } else {
       console.warn('[FORGOT PASSWORD] SMTP credentials are not configured. Reset token (dev mode):', resetToken);
-      sendSuccess(res, { debugToken: process.env.NODE_ENV !== 'production' ? resetToken : undefined }, 'If that email exists, a reset link has been sent. (Server: SMTP not configured)');
+      sendSuccess(res, null, 'If that email exists, a reset link has been sent.');
     }
   } catch (err: any) {
     console.error('Forgot password error:', err);

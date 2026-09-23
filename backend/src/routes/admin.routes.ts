@@ -13,7 +13,7 @@ import { getAdminEvents, createAdminEvent, getAdminEventById, updateAdminEvent, 
 import { getAdminAssignments, createAdminAssignment, getAdminAssignmentById, updateAdminAssignment, deleteAdminAssignment } from '../controllers/admin/assignments.controller';
 import { getAdminResources, createAdminResource, getAdminResourceById, updateAdminResource, deleteAdminResource } from '../controllers/admin/resources.controller';
 import { getAdminMessages, getAdminMessagesByConversation, sendAdminMessage, broadcastMessage } from '../controllers/admin/messages.controller';
-import { getStudentsReport, getAttendanceReport, getAssignmentsReport, getEventsReport, getResourcesReport } from '../controllers/admin/reports.controller';
+import { getStudentsReport, getAttendanceReport, getAssignmentsReport, getEventsReport, getResourcesReport, getAdminReportsOverview } from '../controllers/admin/reports.controller';
 import { getAnalyticsOverview, getStudentAnalytics, getAttendanceAnalytics, getEventAnalytics, getResourceAnalytics } from '../controllers/admin/analytics.controller';
 import { getAdminProfile, updateAdminProfile } from '../controllers/admin/profile.controller';
 import { getAdminSettings, updateAdminSettings } from '../controllers/admin/settings.controller';
@@ -96,6 +96,7 @@ router.post('/messages', sendAdminMessage);
 router.post('/messages/broadcast', broadcastMessage);
 
 // Reports
+router.get('/reports', getAdminReportsOverview);
 router.get('/reports/students', getStudentsReport);
 router.get('/reports/attendance', getAttendanceReport);
 router.get('/reports/assignments', getAssignmentsReport);

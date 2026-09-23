@@ -91,11 +91,38 @@ export function setupSocketIO(io: SocketIOServer): void {
         text: string;
       }) => {
         try {
+          if (!userId || !socket.user) {
+            socket.emit('error', { message: 'Authentication required' });
+            return;
+          }
+
+          if (!conversationId || typeof conversationId !== 'string' || !text || typeof text !== 'string' || !text.trim()) {
+            socket.emit('error', { message: 'Invalid message payload' });
+            return;
+          }
+
+          // Check if conversation exists
+          const convo = await prisma.conversation.findUnique({ where: { id: conversationId } });
+          if (!convo) {
+            socket.emit('error', { message: 'Conversation not found' });
+            return;
+          }
+
+          // Check if user is a participant or an ADMIN
+          const participant = await prisma.conversationParticipant.findUnique({
+            where: { conversationId_userId: { conversationId, userId } },
+          });
+
+          if (!participant && socket.user.role !== 'ADMIN') {
+            socket.emit('error', { message: 'Unauthorized access to conversation' });
+            return;
+          }
+
           const message = await prisma.message.create({
             data: {
               conversationId,
               senderId: userId,
-              text,
+              text: text.trim(),
             },
             include: {
               sender: {

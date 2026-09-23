@@ -207,6 +207,7 @@ export async function deleteStudent(req: Request, res: Response): Promise<void> 
     const { id } = req.params;
     const student = await prisma.student.findFirst({
       where: { OR: [{ id }, { studentId: id }] },
+      include: { user: true },
     });
 
     if (!student) {
@@ -214,9 +215,16 @@ export async function deleteStudent(req: Request, res: Response): Promise<void> 
       return;
     }
 
+    if (student.user?.role === Role.ADMIN) {
+      sendError(res, 'Cannot delete an admin user', 403);
+      return;
+    }
+
+    await prisma.message.deleteMany({ where: { senderId: student.userId } });
     await prisma.user.delete({ where: { id: student.userId } });
     sendSuccess(res, null, 'Student deleted successfully');
   } catch (error) {
+    console.error('Error deleting student:', error);
     sendError(res, 'Failed to delete student', 500);
   }
 }

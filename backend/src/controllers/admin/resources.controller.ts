@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { prisma } from '../../config/database';
 import { sendSuccess, sendError } from '../../utils/apiResponse';
 import { ResourceType } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
 
 export async function getAdminResources(req: Request, res: Response): Promise<void> {
   try {
@@ -28,18 +30,34 @@ export async function getAdminResources(req: Request, res: Response): Promise<vo
       },
     });
 
-    const formatted = resources.map((r) => ({
-      id: r.id,
-      title: r.title,
-      description: r.description || '',
-      type: r.type,
-      course: r.course?.name || 'General',
-      department: r.department?.name || 'All Departments',
-      uploadedBy: r.uploader.fullName,
-      downloads: r.downloadCount,
-      date: r.createdAt.toISOString().split('T')[0],
-      fileUrl: r.fileUrl,
-    }));
+    const formatted = resources.map((r) => {
+      let ext = 'PDF';
+      if (r.type === ResourceType.Video) ext = 'MP4';
+      if (r.type === ResourceType.Spreadsheet) ext = 'XLSX';
+      if (r.type === ResourceType.Document) ext = 'DOCX';
+      if (r.fileName && r.fileName.includes('.')) {
+        ext = r.fileName.split('.').pop()?.toUpperCase() || ext;
+      }
+
+      const sizeStr = r.fileSize ? `${(r.fileSize / (1024 * 1024)).toFixed(1)} MB` : '2.4 MB';
+
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description || '',
+        type: r.type,
+        ext,
+        course: r.course?.name || 'General',
+        department: r.department?.name || 'Computer Science',
+        uploader: r.uploader?.fullName || 'Administrator',
+        uploadedBy: r.uploader?.fullName || 'Administrator',
+        size: sizeStr,
+        downloads: r.downloadCount,
+        status: 'Published',
+        date: r.createdAt.toISOString().split('T')[0],
+        fileUrl: r.fileUrl,
+      };
+    });
 
     sendSuccess(res, formatted);
   } catch (error) {
@@ -56,7 +74,7 @@ export async function createAdminResource(req: Request, res: Response): Promise<
       return;
     }
 
-    const { title, description, type, courseCode, department } = req.body;
+    const { title, description, type, ext, courseCode, department, uploader, status } = req.body;
     const file = req.file;
 
     let course = null;
@@ -69,11 +87,16 @@ export async function createAdminResource(req: Request, res: Response): Promise<
       dept = await prisma.department.findFirst({ where: { name: { contains: department, mode: 'insensitive' } } });
     }
 
+    let rType: ResourceType = ResourceType.PDF;
+    if (type === 'Video' || ext === 'MP4') rType = ResourceType.Video;
+    if (type === 'Presentation' || ext === 'PPTX' || type === 'Document' || ext === 'DOCX') rType = ResourceType.Document;
+    if (type === 'Spreadsheet' || ext === 'XLSX') rType = ResourceType.Spreadsheet;
+
     const resource = await prisma.resource.create({
       data: {
-        title,
+        title: title || 'Untitled Resource',
         description: description || '',
-        type: (type as ResourceType) || ResourceType.PDF,
+        type: rType,
         fileUrl: file ? `/uploads/${file.filename}` : null,
         fileName: file ? file.originalname : null,
         fileSize: file ? file.size : null,
@@ -101,7 +124,24 @@ export async function getAdminResourceById(req: Request, res: Response): Promise
       return;
     }
 
-    sendSuccess(res, resource);
+    let ext = 'PDF';
+    if (resource.type === ResourceType.Video) ext = 'MP4';
+    if (resource.type === ResourceType.Spreadsheet) ext = 'XLSX';
+    if (resource.type === ResourceType.Document) ext = 'DOCX';
+    if (resource.fileName && resource.fileName.includes('.')) {
+      ext = resource.fileName.split('.').pop()?.toUpperCase() || ext;
+    }
+
+    sendSuccess(res, {
+      ...resource,
+      ext,
+      uploader: resource.uploader?.fullName || 'Administrator',
+      uploadedBy: resource.uploader?.fullName || 'Administrator',
+      department: resource.department?.name || 'Computer Science',
+      size: resource.fileSize ? `${(resource.fileSize / (1024 * 1024)).toFixed(1)} MB` : '2.4 MB',
+      downloads: resource.downloadCount,
+      status: 'Published',
+    });
   } catch (error) {
     sendError(res, 'Failed to fetch resource', 500);
   }
@@ -110,7 +150,7 @@ export async function getAdminResourceById(req: Request, res: Response): Promise
 export async function updateAdminResource(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
-    const { title, description, type } = req.body;
+    const { title, description, type, ext } = req.body;
 
     const resource = await prisma.resource.findUnique({ where: { id } });
     if (!resource) {
@@ -118,12 +158,18 @@ export async function updateAdminResource(req: Request, res: Response): Promise<
       return;
     }
 
+    let rType = resource.type;
+    if (type === 'Video' || ext === 'MP4') rType = ResourceType.Video;
+    if (type === 'Presentation' || ext === 'PPTX' || type === 'Document' || ext === 'DOCX') rType = ResourceType.Document;
+    if (type === 'Spreadsheet' || ext === 'XLSX') rType = ResourceType.Spreadsheet;
+    if (type === 'PDF' || ext === 'PDF') rType = ResourceType.PDF;
+
     const updated = await prisma.resource.update({
       where: { id },
       data: {
         title: title !== undefined ? title : resource.title,
         description: description !== undefined ? description : resource.description,
-        type: type ? (type as ResourceType) : resource.type,
+        type: rType,
       },
     });
 
@@ -142,9 +188,21 @@ export async function deleteAdminResource(req: Request, res: Response): Promise<
       return;
     }
 
+    if (resource.fileUrl) {
+      const filePath = path.join(process.cwd(), resource.fileUrl.startsWith('/') ? resource.fileUrl.slice(1) : resource.fileUrl);
+      try {
+        if (fs.existsSync(filePath)) {
+          await fs.promises.unlink(filePath);
+        }
+      } catch (fileErr) {
+        console.warn('VectorOne deleteAdminResource file unlink warning:', fileErr);
+      }
+    }
+
     await prisma.resource.delete({ where: { id } });
     sendSuccess(res, null, 'Resource deleted successfully');
   } catch (error) {
+    console.error('VectorOne deleteAdminResource Error:', error);
     sendError(res, 'Failed to delete resource', 500);
   }
 }

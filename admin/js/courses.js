@@ -89,8 +89,9 @@
     return '<form class="course-form" id="courseForm"><label>Course Code<input name="code" value="' + source.code + '" required /></label><label>Course Name<input name="name" value="' + (source.name || '') + '" required /></label><label>Department<select name="department"><option value="Computer Science" ' + (source.department === 'Computer Science' ? 'selected' : '') + '>Computer Science</option><option value="Electronics" ' + (source.department === 'Electronics' ? 'selected' : '') + '>Electronics</option><option value="Mechanical" ' + (source.department === 'Mechanical' ? 'selected' : '') + '>Mechanical</option><option value="Business Administration" ' + (source.department === 'Business Administration' ? 'selected' : '') + '>Business Administration</option><option value="Information Technology" ' + (source.department === 'Information Technology' ? 'selected' : '') + '>Information Technology</option></select></label><label>Faculty<input name="faculty" value="' + (source.faculty || '') + '" required /></label><label>Semester<select name="semester"><option value="1" ' + (source.semester === '1' ? 'selected' : '') + '>1</option><option value="2" ' + (source.semester === '2' ? 'selected' : '') + '>2</option><option value="3" ' + (source.semester === '3' ? 'selected' : '') + '>3</option><option value="4" ' + (source.semester === '4' ? 'selected' : '') + '>4</option><option value="5" ' + (source.semester === '5' ? 'selected' : '') + '>5</option><option value="6" ' + (source.semester === '6' ? 'selected' : '') + '>6</option></select></label><label>Credits<input type="number" name="credits" value="' + (source.credits || 0) + '" /></label><label>Students<input type="number" name="students" value="' + (source.students || 0) + '" /></label><label>Status<select name="status"><option value="Active" ' + (source.status === 'Active' ? 'selected' : '') + '>Active</option><option value="Draft" ' + (source.status === 'Draft' ? 'selected' : '') + '>Draft</option><option value="Archived" ' + (source.status === 'Archived' ? 'selected' : '') + '>Archived</option></select></label></form>';
   }
 
-  function modalButtons(primaryText, handler) {
-    courseModalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelCourseModal">Cancel</button><button type="button" class="btn btn-primary" id="confirmCourseModal">' + primaryText + '</button>';
+  function modalButtons(primaryText, handler, isDanger) {
+    const btnClass = isDanger ? 'btn btn-danger' : 'btn btn-primary';
+    courseModalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelCourseModal">Cancel</button><button type="button" class="' + btnClass + '" id="confirmCourseModal">' + primaryText + '</button>';
     document.getElementById('cancelCourseModal').addEventListener('click', closeModal);
     document.getElementById('confirmCourseModal').addEventListener('click', handler);
   }
@@ -164,19 +165,66 @@
     }
 
     if (action === 'delete') {
+      if (!course) return;
       courseModalTitle.textContent = 'Delete Course';
-      courseModalBody.innerHTML = '<p>Delete <strong>' + course.name + '</strong> from the current catalog?</p>';
-      modalButtons('Delete Course', function () {
-        const index = courses.findIndex(function (item) { return item.code === course.code; });
-        if (index >= 0) courses.splice(index, 1);
-        renderCourses();
-        closeModal();
+      courseModalBody.innerHTML =
+        '<div style="padding: 4px 0;">' +
+        '<p style="margin-bottom: 8px; font-size: 14px; color: var(--text);">Are you sure you want to delete course <strong>' + course.name + '</strong> (' + course.code + ')?</p>' +
+        '<p style="color: #64748b; font-size: 13px; margin-bottom: 0;">This action permanently removes the course from the catalog.</p>' +
+        '<div id="courseModalError" style="display:none; margin-top:14px; padding:10px 14px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:8px; color:#ef4444; font-size:13px;"></div>' +
+        '</div>';
 
-        fetch(API_BASE + '/admin/courses/' + course.code, {
+      modalButtons('Delete Course', function () {
+        const confirmBtn = document.getElementById('confirmCourseModal');
+        const cancelBtn = document.getElementById('cancelCourseModal');
+        const errorEl = document.getElementById('courseModalError');
+
+        if (!confirmBtn || confirmBtn.disabled) return;
+        confirmBtn.disabled = true;
+        if (cancelBtn) cancelBtn.disabled = true;
+        confirmBtn.textContent = 'Deleting...';
+        if (errorEl) errorEl.style.display = 'none';
+
+        fetch(API_BASE + '/admin/courses/' + encodeURIComponent(course.code), {
           method: 'DELETE',
           headers: getAuthHeader()
-        }).catch(function (e) { console.warn(e); });
-      });
+        })
+          .then(function (res) {
+            return res.json().then(function (data) { return { ok: res.ok, status: res.status, data: data }; });
+          })
+          .then(function (result) {
+            if (result.ok && result.data && result.data.success) {
+              const index = courses.findIndex(function (item) { return item.code === course.code; });
+              if (index >= 0) courses.splice(index, 1);
+              renderCourses();
+              closeModal();
+              fetchCoursesFromApi();
+            } else {
+              const msg = (result.data && result.data.message) ? result.data.message : 'Failed to delete course.';
+              if (errorEl) {
+                errorEl.textContent = msg;
+                errorEl.style.display = 'block';
+              } else {
+                alert(msg);
+              }
+              confirmBtn.disabled = false;
+              if (cancelBtn) cancelBtn.disabled = false;
+              confirmBtn.textContent = 'Delete Course';
+            }
+          })
+          .catch(function (err) {
+            console.warn(err);
+            if (errorEl) {
+              errorEl.textContent = 'Unable to connect to server.';
+              errorEl.style.display = 'block';
+            } else {
+              alert('Unable to connect to server.');
+            }
+            confirmBtn.disabled = false;
+            if (cancelBtn) cancelBtn.disabled = false;
+            confirmBtn.textContent = 'Delete Course';
+          });
+      }, true);
       openModal();
     }
   });

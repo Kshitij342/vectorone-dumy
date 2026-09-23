@@ -174,6 +174,28 @@
   color: var(--primary);
 }
 
+.row-action.row-action--danger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+  border: 1px solid #ef4444;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .modal-backdrop {
     position: fixed;
     inset: 0;

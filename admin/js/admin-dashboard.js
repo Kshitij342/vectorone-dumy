@@ -431,19 +431,34 @@
     };
     const apiPath = config.apiEndpoint || endpointMap[prefix];
 
-    function fetchTableData() {
+    function fetchTableData(callback) {
       if (!apiPath) return;
       fetch(API_BASE + apiPath, { headers: getAuthHeader() })
         .then(function (res) { return res.json(); })
         .then(function (res) {
-          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-            rowsData.length = 0;
-            res.data.forEach(function (d) { rowsData.push(d); });
-            populateFilters();
-            renderTable();
+          if (res.success) {
+            const list = Array.isArray(res.data)
+              ? res.data
+              : (res.data && Array.isArray(res.data.reports) ? res.data.reports : (res.data && Array.isArray(res.data.events) ? res.data.events : null));
+            if (list) {
+              rowsData.length = 0;
+              list.forEach(function (d) { rowsData.push(d); });
+              populateFilters();
+              renderTable();
+            }
+            const statList = res.stats || (res.data && res.data.stats);
+            if (statList && Array.isArray(statList)) {
+              config.stats = statList;
+              renderStats();
+            }
+            if (typeof callback === 'function') callback(null, res);
+          } else {
+            if (typeof callback === 'function') callback(res.message || 'Fetch failed');
           }
         })
-        .catch(function () {});
+        .catch(function (err) {
+          if (typeof callback === 'function') callback(err);
+        });
     }
 
     /* ---------- row actions (one delegated listener, scoped to the table) ---------- */
@@ -461,37 +476,79 @@
         openModal();
       } else if (action === 'edit') {
         if (modalTitle) modalTitle.textContent = config.editTitle || 'Edit';
-        if (modalBody) modalBody.innerHTML = buildForm(row);
+        if (modalBody) modalBody.innerHTML = buildForm(row) + '<p class="modal-error-msg" id="tablePageError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
         setModalButtons('Save Changes', function () {
           const values = readForm();
-          if (values) {
+          const errEl = document.getElementById('tablePageError');
+          const confirmBtn = modalActions ? modalActions.querySelector('[data-modal-confirm]') : null;
+          if (!values) return;
+          if (errEl) errEl.style.display = 'none';
+          if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Saving...'; }
+
+          if (apiPath && row[idKey]) {
+            fetch(API_BASE + apiPath + '/' + encodeURIComponent(row[idKey]), {
+              method: 'PUT',
+              headers: getAuthHeader(),
+              body: JSON.stringify(values)
+            })
+              .then(function (res) { return res.json(); })
+              .then(function (res) {
+                if (res.success) {
+                  Object.keys(values).forEach(function (key) { row[key] = values[key]; });
+                  fetchTableData();
+                  closeModal();
+                } else {
+                  if (errEl) { errEl.textContent = res.message || 'Failed to update record.'; errEl.style.display = 'block'; }
+                  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Save Changes'; }
+                }
+              })
+              .catch(function (err) {
+                if (errEl) { errEl.textContent = 'Network error while updating record.'; errEl.style.display = 'block'; }
+                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Save Changes'; }
+              });
+          } else {
             Object.keys(values).forEach(function (key) { row[key] = values[key]; });
-            if (apiPath && row[idKey]) {
-              fetch(API_BASE + apiPath + '/' + encodeURIComponent(row[idKey]), {
-                method: 'PUT',
-                headers: getAuthHeader(),
-                body: JSON.stringify(values)
-              }).catch(function (e) { console.warn(e); });
-            }
+            renderTable();
+            closeModal();
           }
-          renderTable();
-          closeModal();
         });
         openModal();
       } else if (action === 'delete') {
         if (modalTitle) modalTitle.textContent = config.deleteTitle || 'Delete';
-        if (modalBody) modalBody.innerHTML = '<p>Delete <strong>' + escapeHtml(row[config.labelKey || 'title'] || row[idKey]) + '</strong>? This removes it from the current list.</p>';
+        if (modalBody) modalBody.innerHTML = '<p>Delete <strong>' + escapeHtml(row[config.labelKey || 'title'] || row[idKey]) + '</strong>? This removes it permanently.</p><p class="modal-error-msg" id="tablePageError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
         setModalButtons('Delete', function () {
-          const idx = rowsData.indexOf(row);
-          if (idx >= 0) rowsData.splice(idx, 1);
+          const errEl = document.getElementById('tablePageError');
+          const confirmBtn = modalActions ? modalActions.querySelector('[data-modal-confirm]') : null;
+          if (errEl) errEl.style.display = 'none';
+          if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Deleting...'; }
+
           if (apiPath && row[idKey]) {
             fetch(API_BASE + apiPath + '/' + encodeURIComponent(row[idKey]), {
               method: 'DELETE',
               headers: getAuthHeader()
-            }).catch(function (e) { console.warn(e); });
+            })
+              .then(function (res) { return res.json(); })
+              .then(function (res) {
+                if (res.success) {
+                  const idx = rowsData.indexOf(row);
+                  if (idx >= 0) rowsData.splice(idx, 1);
+                  fetchTableData();
+                  closeModal();
+                } else {
+                  if (errEl) { errEl.textContent = res.message || 'Failed to delete record.'; errEl.style.display = 'block'; }
+                  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Delete'; }
+                }
+              })
+              .catch(function (err) {
+                if (errEl) { errEl.textContent = 'Network error while deleting record.'; errEl.style.display = 'block'; }
+                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Delete'; }
+              });
+          } else {
+            const idx = rowsData.indexOf(row);
+            if (idx >= 0) rowsData.splice(idx, 1);
+            renderTable();
+            closeModal();
           }
-          renderTable();
-          closeModal();
         });
         openModal();
       } else if (typeof config.onAction === 'function') {
@@ -510,21 +567,40 @@
     if (addBtn && config.form) {
       addBtn.addEventListener('click', function () {
         if (modalTitle) modalTitle.textContent = config.addTitle || 'Add';
-        if (modalBody) modalBody.innerHTML = buildForm(null);
+        if (modalBody) modalBody.innerHTML = buildForm(null) + '<p class="modal-error-msg" id="tablePageError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
         setModalButtons(config.addTitle || 'Add', function () {
           const values = readForm();
-          if (values) {
+          const errEl = document.getElementById('tablePageError');
+          const confirmBtn = modalActions ? modalActions.querySelector('[data-modal-confirm]') : null;
+          if (!values) return;
+          if (errEl) errEl.style.display = 'none';
+          if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Adding...'; }
+
+          if (apiPath) {
+            fetch(API_BASE + apiPath, {
+              method: 'POST',
+              headers: getAuthHeader(),
+              body: JSON.stringify(values)
+            })
+              .then(function (res) { return res.json(); })
+              .then(function (res) {
+                if (res.success) {
+                  fetchTableData();
+                  closeModal();
+                } else {
+                  if (errEl) { errEl.textContent = res.message || 'Failed to create record.'; errEl.style.display = 'block'; }
+                  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = config.addTitle || 'Add'; }
+                }
+              })
+              .catch(function (err) {
+                if (errEl) { errEl.textContent = 'Network error while creating record.'; errEl.style.display = 'block'; }
+                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = config.addTitle || 'Add'; }
+              });
+          } else {
             rowsData.unshift(values);
-            if (apiPath) {
-              fetch(API_BASE + apiPath, {
-                method: 'POST',
-                headers: getAuthHeader(),
-                body: JSON.stringify(values)
-              }).catch(function (e) { console.warn(e); });
-            }
+            renderTable();
+            closeModal();
           }
-          renderTable();
-          closeModal();
         });
         openModal();
       });
@@ -560,7 +636,7 @@
     populateFilters();
     renderTable();
     fetchTableData();
-    return { render: renderTable, rows: rowsData, getFilteredRows: getFilteredRows };
+    return { render: renderTable, refresh: fetchTableData, rows: rowsData, getFilteredRows: getFilteredRows };
   }
 
   window.VectorOneAdmin.escapeHtml = escapeHtml;

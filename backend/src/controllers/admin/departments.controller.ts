@@ -96,22 +96,45 @@ export async function createDepartment(req: Request, res: Response): Promise<voi
   try {
     const { id, name, hod, status } = req.body;
 
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      sendError(res, 'Department name is required', 400);
+      return;
+    }
+
     let deptStatus: DepartmentStatus = DepartmentStatus.Active;
     if (status === 'Under Review') deptStatus = DepartmentStatus.UnderReview;
     if (status === 'Inactive') deptStatus = DepartmentStatus.Inactive;
 
     const count = await prisma.department.count();
+    const targetDeptId = id && String(id).trim() ? String(id).trim() : `DEP-${100 + count + 1}`;
+
+    const existing = await prisma.department.findFirst({
+      where: {
+        OR: [
+          { name: { equals: name.trim(), mode: 'insensitive' } },
+          { deptId: targetDeptId },
+        ],
+      },
+    });
+
+    if (existing) {
+      const matchType = existing.name.toLowerCase() === name.trim().toLowerCase() ? 'name' : 'ID';
+      sendError(res, `A department with this ${matchType} (${matchType === 'name' ? name.trim() : targetDeptId}) already exists`, 409);
+      return;
+    }
+
     const dept = await prisma.department.create({
       data: {
-        deptId: id || `DEP-${100 + count + 1}`,
-        name,
-        hod,
+        deptId: targetDeptId,
+        name: name.trim(),
+        hod: hod ? String(hod).trim() : null,
         status: deptStatus,
       },
     });
 
     sendSuccess(res, dept, 'Department created successfully', 201);
   } catch (error) {
+    console.error('VectorOne createDepartment Error:', error);
     sendError(res, 'Failed to create department', 500);
   }
 }
@@ -162,9 +185,35 @@ export async function deleteDepartment(req: Request, res: Response): Promise<voi
       return;
     }
 
-    await prisma.department.delete({ where: { id: d.id } });
+    const [sCount, fCount, cCount] = await Promise.all([
+      prisma.student.count({ where: { departmentId: d.id } }),
+      prisma.facultyMember.count({ where: { departmentId: d.id } }),
+      prisma.course.count({ where: { departmentId: d.id } }),
+    ]);
+
+    if (sCount > 0 || fCount > 0 || cCount > 0) {
+      const parts: string[] = [];
+      if (sCount > 0) parts.push(`${sCount} student(s)`);
+      if (fCount > 0) parts.push(`${fCount} faculty member(s)`);
+      if (cCount > 0) parts.push(`${cCount} course(s)`);
+
+      sendError(
+        res,
+        `Cannot delete department "${d.name}" because it currently has ${parts.join(', ')} assigned. Please reassign or remove them first.`,
+        409
+      );
+      return;
+    }
+
+    await prisma.$transaction([
+      prisma.resource.updateMany({ where: { departmentId: d.id }, data: { departmentId: null } }),
+      prisma.department.delete({ where: { id: d.id } }),
+    ]);
+
     sendSuccess(res, null, 'Department deleted successfully');
   } catch (error) {
+    console.error('VectorOne deleteDepartment Error:', error);
     sendError(res, 'Failed to delete department', 500);
   }
 }
+

@@ -81,8 +81,9 @@
     return '<form class="department-form" id="departmentForm"><label>Department ID<input name="id" value="' + source.id + '" required /></label><label>Name<input name="name" value="' + (source.name || '') + '" required /></label><label>HOD<input name="hod" value="' + (source.hod || '') + '" required /></label><label>Faculty count<input type="number" name="faculty" value="' + (source.faculty || 0) + '" required /></label><label>Student count<input type="number" name="students" value="' + (source.students || 0) + '" required /></label><label>Course count<input type="number" name="courses" value="' + (source.courses || 0) + '" required /></label><label>Status<select name="status"><option value="Active" ' + (source.status === 'Active' ? 'selected' : '') + '>Active</option><option value="Under Review" ' + (source.status === 'Under Review' ? 'selected' : '') + '>Under Review</option><option value="Inactive" ' + (source.status === 'Inactive' ? 'selected' : '') + '>Inactive</option></select></label></form>';
   }
 
-  function renderModalButtons(primaryLabel, onClick) {
-    departmentModalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelDepartmentModal">Cancel</button><button type="button" class="btn btn-primary" id="confirmDepartmentModal">' + primaryLabel + '</button>';
+  function renderModalButtons(primaryLabel, onClick, isDanger) {
+    const btnClass = isDanger ? 'btn btn-danger' : 'btn btn-primary';
+    departmentModalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelDepartmentModal">Cancel</button><button type="button" class="' + btnClass + '" id="confirmDepartmentModal">' + primaryLabel + '</button>';
     document.getElementById('cancelDepartmentModal').addEventListener('click', closeModal);
     document.getElementById('confirmDepartmentModal').addEventListener('click', onClick);
   }
@@ -97,7 +98,7 @@
     fetch(API_BASE + '/admin/departments', { headers: getAuthHeader() })
       .then(function (res) { return res.json(); })
       .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res.success && Array.isArray(res.data)) {
           departments.length = 0;
           res.data.forEach(function (d) { departments.push(d); });
           renderDepartments();
@@ -109,7 +110,7 @@
   }
 
   function getDepartmentById(id) {
-    return departments.find(function (dept) { return dept.id === id; });
+    return departments.find(function (dept) { return dept.id === id || dept._id === id; });
   }
 
   document.addEventListener('click', function (event) {
@@ -117,6 +118,7 @@
     if (!button) return;
 
     const dept = getDepartmentById(button.dataset.id);
+    if (!dept) return;
     const action = button.dataset.action;
 
     if (action === 'view') {
@@ -130,9 +132,11 @@
 
     if (action === 'edit') {
       departmentModalTitle.textContent = 'Edit Department';
-      departmentModalBody.innerHTML = deptForm(dept);
+      departmentModalBody.innerHTML = deptForm(dept) + '<p class="modal-error-msg" id="deptModalError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
       renderModalButtons('Save Changes', function () {
         const form = document.getElementById('departmentForm');
+        const errEl = document.getElementById('deptModalError');
+        const confirmBtn = document.getElementById('confirmDepartmentModal');
         const data = new FormData(form);
         const updatedFields = {
           id: String(data.get('id')),
@@ -144,15 +148,40 @@
           status: String(data.get('status'))
         };
 
-        Object.assign(dept, updatedFields);
-        renderDepartments();
-        closeModal();
+        if (errEl) errEl.style.display = 'none';
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Saving...';
 
-        fetch(API_BASE + '/admin/departments/' + dept.id, {
+        const targetId = dept._id || dept.id;
+        fetch(API_BASE + '/admin/departments/' + encodeURIComponent(targetId), {
           method: 'PUT',
           headers: getAuthHeader(),
           body: JSON.stringify(updatedFields)
-        }).catch(function (e) { console.warn(e); });
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            if (res.success) {
+              Object.assign(dept, updatedFields);
+              renderDepartments();
+              fetchDepartmentsFromApi();
+              closeModal();
+            } else {
+              if (errEl) {
+                errEl.textContent = res.message || 'Failed to update department.';
+                errEl.style.display = 'block';
+              }
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = 'Save Changes';
+            }
+          })
+          .catch(function (err) {
+            if (errEl) {
+              errEl.textContent = 'Network error while updating department.';
+              errEl.style.display = 'block';
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Save Changes';
+          });
       });
       openModal();
       return;
@@ -160,27 +189,56 @@
 
     if (action === 'delete') {
       departmentModalTitle.textContent = 'Delete Department';
-      departmentModalBody.innerHTML = '<p>Delete <strong>' + dept.name + '</strong>? This removes it from the current department list.</p>';
+      departmentModalBody.innerHTML = '<p>Delete <strong>' + dept.name + '</strong>? This removes it permanently from the database.</p><p class="modal-error-msg" id="deptModalError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
       renderModalButtons('Delete Department', function () {
-        const idx = departments.findIndex(function (item) { return item.id === dept.id; });
-        if (idx >= 0) departments.splice(idx, 1);
-        renderDepartments();
-        closeModal();
+        const errEl = document.getElementById('deptModalError');
+        const confirmBtn = document.getElementById('confirmDepartmentModal');
+        if (errEl) errEl.style.display = 'none';
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Deleting...';
 
-        fetch(API_BASE + '/admin/departments/' + dept.id, {
+        const targetId = dept._id || dept.id;
+        fetch(API_BASE + '/admin/departments/' + encodeURIComponent(targetId), {
           method: 'DELETE',
           headers: getAuthHeader()
-        }).catch(function (e) { console.warn(e); });
-      });
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (res) {
+            if (res.success) {
+              const idx = departments.findIndex(function (item) { return item.id === dept.id || item._id === dept._id; });
+              if (idx >= 0) departments.splice(idx, 1);
+              renderDepartments();
+              fetchDepartmentsFromApi();
+              closeModal();
+            } else {
+              if (errEl) {
+                errEl.textContent = res.message || 'Failed to delete department.';
+                errEl.style.display = 'block';
+              }
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = 'Delete Department';
+            }
+          })
+          .catch(function (err) {
+            if (errEl) {
+              errEl.textContent = 'Network error while deleting department.';
+              errEl.style.display = 'block';
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Delete Department';
+          });
+      }, true);
       openModal();
     }
   });
 
   document.getElementById('addDepartmentBtn').addEventListener('click', function () {
     departmentModalTitle.textContent = 'Add Department';
-    departmentModalBody.innerHTML = deptForm();
+    departmentModalBody.innerHTML = deptForm() + '<p class="modal-error-msg" id="deptModalError" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
     renderModalButtons('Add Department', function () {
       const form = document.getElementById('departmentForm');
+      const errEl = document.getElementById('deptModalError');
+      const confirmBtn = document.getElementById('confirmDepartmentModal');
       const data = new FormData(form);
       const newDept = {
         id: String(data.get('id')),
@@ -192,15 +250,37 @@
         status: String(data.get('status'))
       };
 
-      departments.unshift(newDept);
-      renderDepartments();
-      closeModal();
+      if (errEl) errEl.style.display = 'none';
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Adding...';
 
       fetch(API_BASE + '/admin/departments', {
         method: 'POST',
         headers: getAuthHeader(),
         body: JSON.stringify(newDept)
-      }).catch(function (e) { console.warn(e); });
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          if (res.success) {
+            fetchDepartmentsFromApi();
+            closeModal();
+          } else {
+            if (errEl) {
+              errEl.textContent = res.message || 'Failed to create department.';
+              errEl.style.display = 'block';
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Add Department';
+          }
+        })
+        .catch(function (err) {
+          if (errEl) {
+            errEl.textContent = 'Network error while creating department.';
+            errEl.style.display = 'block';
+          }
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Add Department';
+        });
     });
     openModal();
   });

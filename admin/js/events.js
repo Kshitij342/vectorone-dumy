@@ -1,27 +1,21 @@
-/* Admin events — page logic. Uses the shared table controller defined in
-   js/admin-dashboard.js (loaded first). Frontend-only demo data. */
+/* Admin events — page logic connected to PostgreSQL API. */
 (function () {
   'use strict';
   if (!window.VectorOneAdmin || !window.VectorOneAdmin.createTablePage) return;
   const esc = window.VectorOneAdmin.escapeHtml;
 
-  const events = [
-    { id: 'EVT-01', title: 'Annual Tech Symposium', summary: 'Two-day inter-college technical festival', category: 'Seminar', date: '2026-09-04', venue: 'Main Auditorium', coordinator: 'Dr. Neha Sharma', registered: 412, capacity: 500, status: 'Open' },
-    { id: 'EVT-02', title: 'Cloud Computing Workshop', summary: 'Hands-on AWS and Azure lab session', category: 'Workshop', date: '2026-09-11', venue: 'Lab Block C', coordinator: 'Prof. Rohan Verma', registered: 60, capacity: 60, status: 'Closed' },
-    { id: 'EVT-03', title: 'Alumni Mentorship Meet', summary: 'Career guidance with graduating batches', category: 'Seminar', date: '2026-09-18', venue: 'Seminar Hall 2', coordinator: 'Dr. Meera Nair', registered: 145, capacity: 250, status: 'Open' },
-    { id: 'EVT-04', title: 'Inter-Department Sports Meet', summary: 'Athletics, football and cricket finals', category: 'Cultural', date: '2026-09-25', venue: 'Sports Ground', coordinator: 'Mr. Kavish Joshi', registered: 320, capacity: 600, status: 'Open' },
-    { id: 'EVT-05', title: 'TCS Placement Drive', summary: 'Campus recruitment for final-year students', category: 'Placement', date: '2026-10-02', venue: 'Placement Cell', coordinator: 'Dr. Priya Sethi', registered: 198, capacity: 200, status: 'Open' },
-    { id: 'EVT-06', title: 'Design Thinking Bootcamp', summary: 'Product ideation and prototyping sprint', category: 'Workshop', date: '2026-08-14', venue: 'Design Studio', coordinator: 'Ms. Sanya Iyer', registered: 45, capacity: 45, status: 'Closed' }
-  ];
+  const events = [];
 
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function prettyDate(iso) {
-    const parts = String(iso).split('-');
+    if (!iso) return '—';
+    const parts = String(iso).split('T')[0].split('-');
     if (parts.length !== 3) return esc(iso);
     return MONTHS[Number(parts[1]) - 1] + ' ' + parts[2] + ', ' + parts[0];
   }
-  function isUpcoming(iso) { return new Date(iso).getTime() >= Date.now(); }
+  function isUpcoming(iso) { return iso ? new Date(iso).getTime() >= Date.now() : true; }
   function isThisMonth(iso) {
+    if (!iso) return false;
     const d = new Date(iso), n = new Date();
     return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
   }
@@ -32,12 +26,12 @@
     idKey: 'id',
     labelKey: 'title',
     data: events,
-    searchFields: ['title', 'summary', 'category', 'venue', 'coordinator'],
+    searchFields: ['title', 'summary', 'description', 'category', 'venue', 'coordinator'],
     stats: [
-      { label: 'Total Events', value: 34, trend: '6 this month', tone: 'blue' },
-      { label: 'Open for Registration', value: 21, trend: 'Accepting entries', tone: 'green' },
-      { label: 'Total Registrations', value: 1180, trend: '+94 this week', tone: 'purple' },
-      { label: 'Closed', value: 13, trend: 'Capacity reached', tone: 'orange' }
+      { label: 'Total Events', value: '0', trend: 'From database', tone: 'blue' },
+      { label: 'Open / Upcoming', value: '0', trend: 'Accepting entries', tone: 'green' },
+      { label: 'Total Registrations', value: '0', trend: 'In system', tone: 'purple' },
+      { label: 'Completed', value: '0', trend: 'Past events', tone: 'orange' }
     ],
     filters: [
       { id: 'eventCategoryFilter', field: 'category', label: 'Category' },
@@ -51,48 +45,50 @@
         }
       }
     ],
-    defaultSort: function (a, b) { return a.date.localeCompare(b.date); },
+    defaultSort: function (a, b) { return (b.date || '').localeCompare(a.date || ''); },
     columns: [
-      { cellClass: 'event-name', cell: function (r) { return '<strong>' + esc(r.title) + '</strong><span>' + esc(r.summary) + '</span>'; } },
-      { cell: function (r) { return '<span class="event-category">' + esc(r.category) + '</span>'; } },
+      { cellClass: 'event-name', cell: function (r) { return '<strong>' + esc(r.title) + '</strong><span>' + esc(r.summary || r.description || '') + '</span>'; } },
+      { cell: function (r) { return '<span class="event-category">' + esc(r.category || 'General') + '</span>'; } },
       { cellClass: 'event-date', cell: function (r) { return prettyDate(r.date) + '<span>' + (isUpcoming(r.date) ? 'Upcoming' : 'Past') + '</span>'; } },
-      { cell: function (r) { return esc(r.venue); } },
-      { cell: function (r) { return esc(r.coordinator); } },
+      { cell: function (r) { return esc(r.venue || 'Campus'); } },
+      { cell: function (r) { return esc(r.coordinator || 'Admin'); } },
       {
         cellClass: 'event-registrations',
         cell: function (r) {
-          const pct = Math.min(Math.round((r.registered / r.capacity) * 100), 100);
-          return '<div class="reg-count"><strong>' + r.registered + '</strong><span>of ' + r.capacity + '</span></div>' +
+          const cap = r.capacity || 100;
+          const reg = r.registered || 0;
+          const pct = Math.min(Math.round((reg / cap) * 100), 100);
+          return '<div class="reg-count"><strong>' + reg + '</strong><span>of ' + cap + '</span></div>' +
             '<div class="reg-bar' + (pct >= 100 ? ' is-full' : '') + '"><span style="width:' + pct + '%"></span></div>';
         }
       },
-      { cell: function (r) { return '<span class="status-badge ' + esc(r.status.toLowerCase()) + '">' + esc(r.status) + '</span>'; } }
+      { cell: function (r) { const st = (r.status || 'Upcoming').toString(); return '<span class="status-badge ' + esc(st.toLowerCase()) + '">' + esc(st) + '</span>'; } }
     ],
     detail: function (r) {
+      const cap = r.capacity || 100;
+      const reg = r.registered || 0;
       return '<div class="detail-grid">' +
         '<div><span>Event</span><strong>' + esc(r.title) + '</strong></div>' +
-        '<div><span>Category</span><strong>' + esc(r.category) + '</strong></div>' +
+        '<div><span>Category</span><strong>' + esc(r.category || 'General') + '</strong></div>' +
         '<div><span>Date</span><strong>' + prettyDate(r.date) + '</strong></div>' +
-        '<div><span>Venue</span><strong>' + esc(r.venue) + '</strong></div>' +
-        '<div><span>Coordinator</span><strong>' + esc(r.coordinator) + '</strong></div>' +
-        '<div><span>Registrations</span><strong>' + r.registered + ' / ' + r.capacity + '</strong></div>' +
-        '<div><span>Status</span><strong>' + esc(r.status) + '</strong></div>' +
-        '<div><span>Summary</span><strong>' + esc(r.summary) + '</strong></div>' +
+        '<div><span>Venue</span><strong>' + esc(r.venue || 'Campus Auditorium') + '</strong></div>' +
+        '<div><span>Coordinator</span><strong>' + esc(r.coordinator || 'Admin') + '</strong></div>' +
+        '<div><span>Registrations</span><strong>' + reg + ' / ' + cap + '</strong></div>' +
+        '<div><span>Status</span><strong>' + esc(r.status || 'Upcoming') + '</strong></div>' +
+        '<div><span>Summary</span><strong>' + esc(r.summary || r.description || '') + '</strong></div>' +
       '</div>';
     },
     form: [
       { name: 'title', label: 'Event Title', full: true, required: true },
-      { name: 'category', label: 'Category', type: 'select', options: ['Workshop', 'Seminar', 'Cultural', 'Placement'] },
+      { name: 'category', label: 'Category', type: 'select', options: ['Workshop', 'Seminar', 'Cultural', 'Placement', 'Hackathon', 'Sports'] },
       { name: 'date', label: 'Date', type: 'date', required: true },
       { name: 'venue', label: 'Venue', required: true },
-      { name: 'coordinator', label: 'Coordinator', required: true },
-      { name: 'registered', label: 'Registered', type: 'number' },
       { name: 'capacity', label: 'Capacity', type: 'number' },
-      { name: 'status', label: 'Status', type: 'select', options: ['Open', 'Closed'] },
+      { name: 'status', label: 'Status', type: 'select', options: ['Upcoming', 'Ongoing', 'Completed', 'Cancelled'] },
       { name: 'summary', label: 'Summary', type: 'textarea', full: true }
     ],
     newRecord: function (rows) {
-      return { id: 'EVT-' + String(rows.length + 1).padStart(2, '0'), title: '', category: 'Workshop', date: '', venue: '', coordinator: '', registered: 0, capacity: 100, status: 'Open', summary: '' };
+      return { id: '', title: '', category: 'Workshop', date: new Date().toISOString().slice(0, 10), venue: 'Main Auditorium', coordinator: 'Admin', registered: 0, capacity: 100, status: 'Upcoming', summary: '' };
     },
     viewTitle: 'Event Details',
     editTitle: 'Edit Event',

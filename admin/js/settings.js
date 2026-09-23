@@ -1,16 +1,13 @@
-/* Admin settings — persists the preference switches to localStorage and reflects
-   them on load. Kept separate from the Student portal's settings key so the two
-   portals don't overwrite each other. Frontend-only. */
+/* Admin settings — persists preferences to backend PostgreSQL database via API. */
 (function () {
   'use strict';
 
   const inputs = document.querySelectorAll('.settings-toggle-input');
   const saveBtn = document.getElementById('saveSettingsBtn');
 
-  // Not the settings page (no switches) — do nothing.
   if (!inputs.length) return;
 
-  const STORAGE_KEY = 'vectorone-admin-settings';
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
   const DEFAULTS = {
     assignmentReminders: true,
     eventInvites: true,
@@ -18,25 +15,18 @@
     showUnreadBadges: true
   };
 
-  function readSettings() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const stored = raw ? JSON.parse(raw) : {};
-      return Object.assign({}, DEFAULTS, stored);
-    } catch (error) {
-      return Object.assign({}, DEFAULTS);
-    }
-  }
+  let currentSettings = Object.assign({}, DEFAULTS);
 
-  function writeSettings(settings) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch (error) { /* storage may be unavailable */ }
+  function getAuthHeader() {
+    const token = localStorage.getItem('vectorone_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
   }
 
   function reflect(input, enabled) {
-    input.checked = enabled;
+    input.checked = Boolean(enabled);
     input.setAttribute('aria-checked', enabled ? 'true' : 'false');
     const wrap = input.closest('.settings-switch');
-    if (wrap) wrap.classList.toggle('is-checked', enabled);
+    if (wrap) wrap.classList.toggle('is-checked', Boolean(enabled));
   }
 
   function applySideEffects(settings) {
@@ -47,72 +37,102 @@
     });
   }
 
-  /* ---------- initial state ---------- */
-  const settings = readSettings();
-  inputs.forEach(function (input) {
-    const key = input.getAttribute('data-setting');
-    const enabled = key in settings ? Boolean(settings[key]) : Boolean(DEFAULTS[key]);
-    reflect(input, enabled);
-  });
-  applySideEffects(settings);
-
-  /* ---------- live changes persist immediately ---------- */
-  inputs.forEach(function (input) {
-    input.addEventListener('change', function () {
+  function renderAllInputs(settings) {
+    inputs.forEach(function (input) {
       const key = input.getAttribute('data-setting');
-      const current = readSettings();
-      current[key] = input.checked;
-      writeSettings(current);
-      reflect(input, input.checked);
-      applySideEffects(current);
+      const val = key in settings ? settings[key] : DEFAULTS[key];
+      reflect(input, val);
     });
-  });
-
-  /* ---------- explicit Save gives visible confirmation ---------- */
-  if (saveBtn) {
-    saveBtn.addEventListener('click', function () {
-      const current = readSettings();
-      inputs.forEach(function (input) {
-        current[input.getAttribute('data-setting')] = input.checked;
-      });
-      writeSettings(current);
-      const original = saveBtn.textContent;
-      saveBtn.textContent = 'Saved';
-      saveBtn.disabled = true;
-      setTimeout(function () { saveBtn.textContent = original; saveBtn.disabled = false; }, 1200);
-
-      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('vectorone_token');
-      if (token) {
-        fetch(API_BASE + '/admin/settings', {
-          method: 'PUT',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify(current)
-        }).catch(function () {});
-      }
-    });
+    applySideEffects(settings);
   }
 
-  // Load live admin settings from API
-  (function loadLiveAdminSettings() {
-    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-    const token = localStorage.getItem('vectorone_token');
-    if (!token) return;
-
+  function saveSettingsToApi(updatedSettings, onComplete) {
     fetch(API_BASE + '/admin/settings', {
-      headers: { 'Authorization': 'Bearer ' + token }
+      method: 'PUT',
+      headers: getAuthHeader(),
+      body: JSON.stringify(updatedSettings)
     })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success) {
+          currentSettings = Object.assign({}, currentSettings, updatedSettings);
+          if (onComplete) onComplete(true);
+        } else {
+          if (onComplete) onComplete(false, res.message || 'Failed to save settings.');
+        }
+      })
+      .catch(function (err) {
+        if (onComplete) onComplete(false, 'Network error while saving settings.');
+      });
+  }
+
+  /* ---------- initial load from API ---------- */
+  function loadLiveSettings() {
+    fetch(API_BASE + '/admin/settings', { headers: getAuthHeader() })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (res.success && res.data) {
-          const liveSettings = Object.assign({}, DEFAULTS, res.data);
-          inputs.forEach(function (input) {
-            const key = input.getAttribute('data-setting');
-            if (key in liveSettings) reflect(input, Boolean(liveSettings[key]));
+          const loaded = {};
+          Object.keys(res.data).forEach(function (k) {
+            const v = res.data[k];
+            loaded[k] = v === 'true' ? true : (v === 'false' ? false : v);
           });
-          applySideEffects(liveSettings);
+          currentSettings = Object.assign({}, DEFAULTS, loaded);
+          renderAllInputs(currentSettings);
         }
       })
-      .catch(function () {});
-  })();
-}());
+      .catch(function () {
+        renderAllInputs(currentSettings);
+      });
+  }
+
+  /* ---------- live toggle changes ---------- */
+  inputs.forEach(function (input) {
+    input.addEventListener('change', function () {
+      const key = input.getAttribute('data-setting');
+      const prevVal = currentSettings[key];
+      const newVal = input.checked;
+
+      reflect(input, newVal);
+      const patch = {};
+      patch[key] = newVal;
+      applySideEffects(Object.assign({}, currentSettings, patch));
+
+      saveSettingsToApi(patch, function (success, errMessage) {
+        if (!success) {
+          alert(errMessage || 'Failed to persist setting change to database.');
+          reflect(input, prevVal);
+          patch[key] = prevVal;
+          applySideEffects(Object.assign({}, currentSettings, patch));
+        }
+      });
+    });
+  });
+
+  /* ---------- Save button ---------- */
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function () {
+      const updated = {};
+      inputs.forEach(function (input) {
+        updated[input.getAttribute('data-setting')] = input.checked;
+      });
+
+      const originalText = saveBtn.textContent;
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+
+      saveSettingsToApi(updated, function (success, errMessage) {
+        if (success) {
+          saveBtn.textContent = 'Saved';
+          setTimeout(function () { saveBtn.textContent = originalText; saveBtn.disabled = false; }, 1200);
+        } else {
+          alert(errMessage || 'Failed to save settings.');
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+        }
+      });
+    });
+  }
+
+  loadLiveSettings();
+})();

@@ -9,7 +9,8 @@
 
 (function () {
   'use strict';
-
+  /* Auth protection is handled by js/auth-guard.js loaded in <head>.
+     Do not duplicate the token check here. */
   /* ---------------- Sidebar: auto-highlight the active page ---------------- */
   (function highlightActiveNav() {
     const currentFile = window.location.pathname.split('/').pop() || 'dashboard.html';
@@ -210,7 +211,7 @@
         fetch(API_BASE + '/notifications/read-all', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-        }).catch(function () {});
+        }).catch(function () { });
       }
     });
   }
@@ -255,7 +256,7 @@
           }
         }
       })
-      .catch(function () {});
+      .catch(function () { });
 
     // Notifications
     fetch(API_BASE + '/notifications', { headers: { 'Authorization': 'Bearer ' + token } })
@@ -276,7 +277,7 @@
           }
         }
       })
-      .catch(function () {});
+      .catch(function () { });
   })();
 
   /* ---------------- Global search ---------------- */
@@ -295,162 +296,162 @@
     // Skip dashboard-only search setup on those pages instead of crashing.
   } else {
 
-  // Small mock dataset the search filters against — frontend only.
-  // Each entry carries the same fields a real notice would (title,
-  // description, category, author) so search can rank across all of them.
-  const SEARCH_INDEX = [
-    { title: 'Campus Drive — TCS NQT registrations', description: 'On-campus recruitment drive for final-year students via the National Qualifier Test.', category: 'Placement', author: 'Placement Cell', type: 'Notice' },
-    { title: 'Semester 5 internal exam schedule', description: 'Internal assessment timetable released for all Semester 5 subjects.', category: 'Academic', author: 'Academic Office', type: 'Notice' },
-    { title: 'Revised datesheet for practicals', description: 'Updated practical examination schedule due to lab availability.', category: 'Examination', author: 'Examination Cell', type: 'Notice' },
-    { title: 'Code Sprint 2026', description: 'A 24-hour competitive programming and hackathon event.', category: 'Event', author: 'Coding Club', type: 'Event' },
-    { title: 'Intro to UI/UX Workshop', description: 'Hands-on workshop covering design fundamentals and Figma basics.', category: 'Workshop', author: 'Design Cell', type: 'Event' },
-    { title: 'Inter-Dept Football Trials', description: 'Trials for the annual inter-department football tournament.', category: 'Sports', author: 'Sports Committee', type: 'Event' },
-    { title: 'Alumni Talk: Careers in Product', description: 'A talk by alumni currently working in product management roles.', category: 'Event', author: 'Alumni Cell', type: 'Event' },
-    { title: 'Robotics Club', description: 'Student club focused on robotics and embedded systems.', category: 'Club', author: 'Robotics Club', type: 'Club' },
-    { title: 'Design Cell', description: 'Campus design and UI/UX student community.', category: 'Club', author: 'Design Cell', type: 'Club' },
-    { title: 'Photography Society', description: 'Club for photography enthusiasts across campus.', category: 'Club', author: 'Photography Society', type: 'Club' }
-  ];
+    // Small mock dataset the search filters against — frontend only.
+    // Each entry carries the same fields a real notice would (title,
+    // description, category, author) so search can rank across all of them.
+    const SEARCH_INDEX = [
+      { title: 'Campus Drive — TCS NQT registrations', description: 'On-campus recruitment drive for final-year students via the National Qualifier Test.', category: 'Placement', author: 'Placement Cell', type: 'Notice' },
+      { title: 'Semester 5 internal exam schedule', description: 'Internal assessment timetable released for all Semester 5 subjects.', category: 'Academic', author: 'Academic Office', type: 'Notice' },
+      { title: 'Revised datesheet for practicals', description: 'Updated practical examination schedule due to lab availability.', category: 'Examination', author: 'Examination Cell', type: 'Notice' },
+      { title: 'Code Sprint 2026', description: 'A 24-hour competitive programming and hackathon event.', category: 'Event', author: 'Coding Club', type: 'Event' },
+      { title: 'Intro to UI/UX Workshop', description: 'Hands-on workshop covering design fundamentals and Figma basics.', category: 'Workshop', author: 'Design Cell', type: 'Event' },
+      { title: 'Inter-Dept Football Trials', description: 'Trials for the annual inter-department football tournament.', category: 'Sports', author: 'Sports Committee', type: 'Event' },
+      { title: 'Alumni Talk: Careers in Product', description: 'A talk by alumni currently working in product management roles.', category: 'Event', author: 'Alumni Cell', type: 'Event' },
+      { title: 'Robotics Club', description: 'Student club focused on robotics and embedded systems.', category: 'Club', author: 'Robotics Club', type: 'Club' },
+      { title: 'Design Cell', description: 'Campus design and UI/UX student community.', category: 'Club', author: 'Design Cell', type: 'Club' },
+      { title: 'Photography Society', description: 'Club for photography enthusiasts across campus.', category: 'Club', author: 'Photography Society', type: 'Club' }
+    ];
 
-  // Match tiers: 0 = exact, 1 = starts-with (word boundary), 2 = contains (mid-word).
-  // The highlighted range is always snapped outward to full word boundaries,
-  // so a match can never visually split a word (e.g. "cam" in "Campus" always
-  // highlights the whole word "Campus", never just "Cam").
-  function isWordChar(ch) {
-    return !!ch && /[a-z0-9]/i.test(ch);
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, function (ch) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-    });
-  }
-
-  // Returns { tier, start, end } for the best match of query in text, or null.
-  function findMatch(text, query) {
-    if (!text || !query) return null;
-    const haystack = text.toLowerCase();
-    const needle = query.toLowerCase().trim();
-    if (!needle) return null;
-
-    const idx = haystack.indexOf(needle);
-    if (idx === -1) return null;
-
-    const boundaryBefore = idx === 0 || !isWordChar(text[idx - 1]);
-    const boundaryAfter = (idx + needle.length) >= text.length || !isWordChar(text[idx + needle.length]);
-
-    // Snap the highlighted range outward to the nearest word boundaries.
-    let start = idx;
-    while (start > 0 && isWordChar(text[start - 1])) start--;
-    let end = idx + needle.length;
-    while (end < text.length && isWordChar(text[end])) end++;
-
-    let tier;
-    if (boundaryBefore && boundaryAfter && start === idx && end === idx + needle.length) {
-      tier = 0; // exact whole word/phrase match
-    } else if (boundaryBefore) {
-      tier = 1; // starts at a word boundary — "starts-with"
-    } else {
-      tier = 2; // match begins mid-word — lowest-priority fallback
+    // Match tiers: 0 = exact, 1 = starts-with (word boundary), 2 = contains (mid-word).
+    // The highlighted range is always snapped outward to full word boundaries,
+    // so a match can never visually split a word (e.g. "cam" in "Campus" always
+    // highlights the whole word "Campus", never just "Cam").
+    function isWordChar(ch) {
+      return !!ch && /[a-z0-9]/i.test(ch);
     }
 
-    return { tier: tier, start: start, end: end };
-  }
-
-  // Wraps the full word(s) containing the match in <mark> — never a partial word.
-  function highlightText(text, query) {
-    const match = findMatch(text, query);
-    if (!match) return escapeHtml(text);
-    return (
-      escapeHtml(text.slice(0, match.start)) +
-      '<mark>' + escapeHtml(text.slice(match.start, match.end)) + '</mark>' +
-      escapeHtml(text.slice(match.end))
-    );
-  }
-
-  function bestTier(text, query) {
-    const match = findMatch(text, query);
-    return match ? match.tier : null;
-  }
-
-  function searchDataset(query) {
-    const results = [];
-    SEARCH_INDEX.forEach(function (entry) {
-      const tiers = [
-        bestTier(entry.title, query),
-        bestTier(entry.description, query),
-        bestTier(entry.category, query),
-        bestTier(entry.author, query)
-      ].filter(function (t) { return t !== null; });
-
-      if (tiers.length === 0) return;
-
-      results.push({
-        entry: entry,
-        overallTier: Math.min.apply(null, tiers),
-        titleTier: bestTier(entry.title, query)
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
       });
+    }
+
+    // Returns { tier, start, end } for the best match of query in text, or null.
+    function findMatch(text, query) {
+      if (!text || !query) return null;
+      const haystack = text.toLowerCase();
+      const needle = query.toLowerCase().trim();
+      if (!needle) return null;
+
+      const idx = haystack.indexOf(needle);
+      if (idx === -1) return null;
+
+      const boundaryBefore = idx === 0 || !isWordChar(text[idx - 1]);
+      const boundaryAfter = (idx + needle.length) >= text.length || !isWordChar(text[idx + needle.length]);
+
+      // Snap the highlighted range outward to the nearest word boundaries.
+      let start = idx;
+      while (start > 0 && isWordChar(text[start - 1])) start--;
+      let end = idx + needle.length;
+      while (end < text.length && isWordChar(text[end])) end++;
+
+      let tier;
+      if (boundaryBefore && boundaryAfter && start === idx && end === idx + needle.length) {
+        tier = 0; // exact whole word/phrase match
+      } else if (boundaryBefore) {
+        tier = 1; // starts at a word boundary — "starts-with"
+      } else {
+        tier = 2; // match begins mid-word — lowest-priority fallback
+      }
+
+      return { tier: tier, start: start, end: end };
+    }
+
+    // Wraps the full word(s) containing the match in <mark> — never a partial word.
+    function highlightText(text, query) {
+      const match = findMatch(text, query);
+      if (!match) return escapeHtml(text);
+      return (
+        escapeHtml(text.slice(0, match.start)) +
+        '<mark>' + escapeHtml(text.slice(match.start, match.end)) + '</mark>' +
+        escapeHtml(text.slice(match.end))
+      );
+    }
+
+    function bestTier(text, query) {
+      const match = findMatch(text, query);
+      return match ? match.tier : null;
+    }
+
+    function searchDataset(query) {
+      const results = [];
+      SEARCH_INDEX.forEach(function (entry) {
+        const tiers = [
+          bestTier(entry.title, query),
+          bestTier(entry.description, query),
+          bestTier(entry.category, query),
+          bestTier(entry.author, query)
+        ].filter(function (t) { return t !== null; });
+
+        if (tiers.length === 0) return;
+
+        results.push({
+          entry: entry,
+          overallTier: Math.min.apply(null, tiers),
+          titleTier: bestTier(entry.title, query)
+        });
+      });
+
+      // Rank: best overall field match first, title matches break ties,
+      // original dataset order breaks further ties for stability.
+      results.sort(function (a, b) {
+        if (a.overallTier !== b.overallTier) return a.overallTier - b.overallTier;
+        const aTitle = a.titleTier === null ? 3 : a.titleTier;
+        const bTitle = b.titleTier === null ? 3 : b.titleTier;
+        return aTitle - bTitle;
+      });
+
+      return results.map(function (r) { return r.entry; });
+    }
+
+    function renderResults(query) {
+      const matches = searchDataset(query);
+
+      searchResultsList.innerHTML = matches
+        .map(function (entry) {
+          return (
+            '<li><button type="button" class="search-item" data-query="' + escapeHtml(entry.title) + '">' +
+            '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>' +
+            '<span class="search-item-text">' + highlightText(entry.title, query) + '</span>' +
+            '<span class="search-item-type">' + entry.type + '</span>' +
+            '</button></li>'
+          );
+        })
+        .join('');
+
+      resultsSection.hidden = matches.length === 0;
+      searchEmpty.hidden = matches.length !== 0;
+      activeIndex = -1;
+    }
+
+    function openSearchPanel() {
+      searchPanel.hidden = false;
+      searchInput.setAttribute('aria-expanded', 'true');
+    }
+    function closeSearchPanel() {
+      searchPanel.hidden = true;
+      searchInput.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+    }
+
+    function updateHasValue() {
+      searchWrap.classList.toggle('has-value', searchInput.value.length > 0);
+    }
+
+    function showRecent() {
+      recentSection.hidden = false;
+      resultsSection.hidden = true;
+      searchEmpty.hidden = true;
+      activeIndex = -1;
+    }
+
+    searchInput.addEventListener('focus', function () {
+      openSearchPanel();
+      if (!searchInput.value.trim()) showRecent();
     });
 
-    // Rank: best overall field match first, title matches break ties,
-    // original dataset order breaks further ties for stability.
-    results.sort(function (a, b) {
-      if (a.overallTier !== b.overallTier) return a.overallTier - b.overallTier;
-      const aTitle = a.titleTier === null ? 3 : a.titleTier;
-      const bTitle = b.titleTier === null ? 3 : b.titleTier;
-      return aTitle - bTitle;
-    });
-
-    return results.map(function (r) { return r.entry; });
-  }
-
-  function renderResults(query) {
-    const matches = searchDataset(query);
-
-    searchResultsList.innerHTML = matches
-      .map(function (entry) {
-        return (
-          '<li><button type="button" class="search-item" data-query="' + escapeHtml(entry.title) + '">' +
-          '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/></svg>' +
-          '<span class="search-item-text">' + highlightText(entry.title, query) + '</span>' +
-          '<span class="search-item-type">' + entry.type + '</span>' +
-          '</button></li>'
-        );
-      })
-      .join('');
-
-    resultsSection.hidden = matches.length === 0;
-    searchEmpty.hidden = matches.length !== 0;
-    activeIndex = -1;
-  }
-
-  function openSearchPanel() {
-    searchPanel.hidden = false;
-    searchInput.setAttribute('aria-expanded', 'true');
-  }
-  function closeSearchPanel() {
-    searchPanel.hidden = true;
-    searchInput.setAttribute('aria-expanded', 'false');
-    activeIndex = -1;
-  }
-
-  function updateHasValue() {
-    searchWrap.classList.toggle('has-value', searchInput.value.length > 0);
-  }
-
-  function showRecent() {
-    recentSection.hidden = false;
-    resultsSection.hidden = true;
-    searchEmpty.hidden = true;
-    activeIndex = -1;
-  }
-
-  searchInput.addEventListener('focus', function () {
-    openSearchPanel();
-    if (!searchInput.value.trim()) showRecent();
-  });
-
-  // Debounce (~250ms) so rapid typing doesn't re-rank on every keystroke.
-  let searchDebounceTimer = null;
+    // Debounce (~250ms) so rapid typing doesn't re-rank on every keystroke.
+    let searchDebounceTimer = null;
     searchInput.addEventListener('input', function () {
       updateHasValue();
       const query = searchInput.value.trim();
@@ -693,7 +694,7 @@
             }).join('');
           }
         })
-        .catch(function () {});
+        .catch(function () { });
     })();
   }
 

@@ -25,7 +25,7 @@ router.get('/events/:id', getEventById);
 // Resources
 router.get('/resources', getResources);
 router.get('/resources/:id', getResourceById);
-router.get('/resources/:id/download', downloadResource);
+router.get('/resources/:id/download', authenticate, downloadResource);
 
 // Calendar
 router.get('/calendar/events', getCalendarEvents);

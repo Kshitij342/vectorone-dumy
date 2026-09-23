@@ -200,9 +200,16 @@ export async function deleteCourse(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    await prisma.assignment.deleteMany({ where: { courseId: c.id } });
+    await prisma.resource.updateMany({
+      where: { courseId: c.id },
+      data: { courseId: null },
+    });
+
     await prisma.course.delete({ where: { id: c.id } });
     sendSuccess(res, null, 'Course deleted successfully');
   } catch (error) {
+    console.error('Error deleting course:', error);
     sendError(res, 'Failed to delete course', 500);
   }
 }

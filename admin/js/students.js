@@ -89,7 +89,7 @@
         '<td>' + student.phone + '</td>' +
         '<td><span class="attendance">' + student.attendance + '%</span></td>' +
         '<td><span class="status-pill-student ' + student.status.toLowerCase() + '">' + student.status + '</span></td>' +
-        '<td><div class="student-actions"><button class="row-action" data-op="view" data-id="' + student.id + '">View</button><button class="row-action" data-op="edit" data-id="' + student.id + '">Edit</button></div></td>' +
+        '<td><div class="student-actions"><button class="row-action" data-op="view" data-id="' + student.id + '">View</button><button class="row-action" data-op="edit" data-id="' + student.id + '">Edit</button><button class="row-action row-action--danger" data-op="delete" data-id="' + student.id + '">Delete</button></div></td>' +
         '</tr>';
     }).join('');
     studentCount.textContent = rows.length + ' of ' + students.length + ' students';
@@ -136,8 +136,9 @@
       '</form>';
   }
 
-  function renderModalActions(label, handler) {
-    modalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelStudentAction">Cancel</button><button type="button" class="btn btn-primary" id="confirmStudentAction">' + label + '</button>';
+  function renderModalActions(label, handler, isDanger) {
+    const btnClass = isDanger ? 'btn btn-danger' : 'btn btn-primary';
+    modalActions.innerHTML = '<button type="button" class="btn btn-outline" id="cancelStudentAction">Cancel</button><button type="button" class="' + btnClass + '" id="confirmStudentAction">' + label + '</button>';
     document.getElementById('cancelStudentAction').addEventListener('click', closeModal);
     document.getElementById('confirmStudentAction').addEventListener('click', handler);
   }
@@ -179,7 +180,7 @@
       return;
     }
 
-    if (trigger.dataset.op === 'edit') {
+    if (trigger.dataset.op === 'edit' || trigger.dataset.action === 'edit') {
       modalTitle.textContent = 'Edit Student';
       modalContent.innerHTML = formTemplate(student);
       renderModalActions('Save Changes', function () {
@@ -207,6 +208,71 @@
           body: JSON.stringify(updatedFields)
         }).catch(function (e) { console.warn(e); });
       });
+      openModal();
+      return;
+    }
+
+    if (trigger.dataset.op === 'delete' || trigger.dataset.action === 'delete') {
+      if (!student) return;
+      modalTitle.textContent = 'Delete Student';
+      modalContent.innerHTML =
+        '<div style="padding: 4px 0;">' +
+        '<p style="margin-bottom: 8px; font-size: 14px; color: var(--text);">Are you sure you want to delete student <strong>' + (student.name || student.id) + '</strong> (' + student.id + ')?</p>' +
+        '<p style="color: #64748b; font-size: 13px; margin-bottom: 0;">This action permanently removes the student account and cannot be undone.</p>' +
+        '<div id="studentModalError" style="display:none; margin-top:14px; padding:10px 14px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:8px; color:#ef4444; font-size:13px;"></div>' +
+        '</div>';
+
+      renderModalActions('Delete Student', function () {
+        const confirmBtn = document.getElementById('confirmStudentAction');
+        const cancelBtn = document.getElementById('cancelStudentAction');
+        const errorEl = document.getElementById('studentModalError');
+
+        if (!confirmBtn || confirmBtn.disabled) return;
+        confirmBtn.disabled = true;
+        if (cancelBtn) cancelBtn.disabled = true;
+        confirmBtn.textContent = 'Deleting...';
+        if (errorEl) errorEl.style.display = 'none';
+
+        fetch(API_BASE + '/admin/students/' + encodeURIComponent(student.id), {
+          method: 'DELETE',
+          headers: getAuthHeader()
+        })
+          .then(function (res) {
+            return res.json().then(function (data) { return { ok: res.ok, status: res.status, data: data }; });
+          })
+          .then(function (result) {
+            if (result.ok && result.data && result.data.success) {
+              const idx = students.findIndex(function (item) { return item.id === student.id; });
+              if (idx >= 0) students.splice(idx, 1);
+              renderStudents();
+              closeModal();
+              fetchStudentsFromApi();
+            } else {
+              const msg = (result.data && result.data.message) ? result.data.message : 'Failed to delete student.';
+              if (errorEl) {
+                errorEl.textContent = msg;
+                errorEl.style.display = 'block';
+              } else {
+                alert(msg);
+              }
+              confirmBtn.disabled = false;
+              if (cancelBtn) cancelBtn.disabled = false;
+              confirmBtn.textContent = 'Delete Student';
+            }
+          })
+          .catch(function (err) {
+            console.warn(err);
+            if (errorEl) {
+              errorEl.textContent = 'Unable to connect to server.';
+              errorEl.style.display = 'block';
+            } else {
+              alert('Unable to connect to server.');
+            }
+            confirmBtn.disabled = false;
+            if (cancelBtn) cancelBtn.disabled = false;
+            confirmBtn.textContent = 'Delete Student';
+          });
+      }, true);
       openModal();
     }
   });

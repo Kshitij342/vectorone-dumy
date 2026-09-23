@@ -1,5 +1,4 @@
-/* Admin messages — page logic. Frontend-only demo data held in memory.
-   Handles conversation selection, search, thread rendering and sending. */
+/* Admin messages — page logic connected to PostgreSQL and Socket.IO */
 (function () {
   'use strict';
 
@@ -9,7 +8,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   };
 
-  /* ---------- elements (all guarded — the page may load partially) ---------- */
+  /* ---------- elements ---------- */
   const listHost = document.getElementById('conversationList');
   const threadHost = document.getElementById('messageThread');
   const threadTitle = document.getElementById('threadTitle');
@@ -26,77 +25,41 @@
 
   if (!listHost || !threadHost) return;
 
-  /* ---------- demo data ---------- */
-  const conversations = [
-    {
-      id: 'c1', name: 'Dr. Neha Sharma', role: 'Faculty', presence: 'Online', unread: 2, time: '09:42',
-      messages: [
-        { from: 'them', text: 'Good morning. Could you confirm the examination hall allocation for the Database Systems paper?', time: '09:20' },
-        { from: 'me', text: 'Morning, Doctor. Hall C-201 and C-202 are reserved for that slot.', time: '09:28' },
-        { from: 'them', text: 'Perfect. I will inform the invigilation team today.', time: '09:40' },
-        { from: 'them', text: 'Also, the practical marks sheet needs your sign-off before Friday.', time: '09:42' }
-      ]
-    },
-    {
-      id: 'c2', name: 'Placement Cell', role: 'Department', presence: 'Active today', unread: 1, time: '08:55',
-      messages: [
-        { from: 'them', text: 'TCS has confirmed 2 October for the campus drive. We expect around 200 registrations.', time: '08:50' },
-        { from: 'me', text: 'Noted. Please raise the venue request for the placement block.', time: '08:53' },
-        { from: 'them', text: 'Request submitted. Awaiting approval from Operations.', time: '08:55' }
-      ]
-    },
-    {
-      id: 'c3', name: 'Prof. Rohan Verma', role: 'Faculty', presence: 'Away', unread: 0, time: 'Yesterday',
-      messages: [
-        { from: 'them', text: 'Uploaded the Signals and Systems lecture series to the resources portal.', time: '16:10' },
-        { from: 'me', text: 'Thanks, Professor. I have moved it to Published.', time: '16:24' }
-      ]
-    },
-    {
-      id: 'c4', name: 'Mira Kapoor', role: 'Student', presence: 'Offline', unread: 0, time: 'Yesterday',
-      messages: [
-        { from: 'them', text: 'Sir, my registration status still shows pending. Could you check?', time: '11:02' },
-        { from: 'me', text: 'Your documents are verified. Approval will reflect within 24 hours.', time: '11:30' },
-        { from: 'them', text: 'Thank you so much!', time: '11:31' }
-      ]
-    },
-    {
-      id: 'c5', name: 'Accounts Office', role: 'Department', presence: 'Active today', unread: 0, time: 'Mon',
-      messages: [
-        { from: 'them', text: 'Fee reminder notice is ready for publishing. Awaiting your approval.', time: '14:05' },
-        { from: 'me', text: 'Approved. Publish it under Administrative.', time: '14:20' }
-      ]
-    },
-    {
-      id: 'c6', name: 'Dr. Meera Nair', role: 'Faculty', presence: 'Offline', unread: 0, time: 'Mon',
-      messages: [
-        { from: 'them', text: 'Requesting leave from 12 to 14 September for a conference.', time: '10:15' },
-        { from: 'me', text: 'Approved. Please arrange a substitute for your Thermodynamics lectures.', time: '10:40' }
-      ]
-    }
-  ];
-
-  let activeId = conversations[0].id;
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  let conversations = [];
+  let activeId = null;
   let showUnreadOnly = false;
+  let socket = null;
+
+  function getAuthToken() {
+    return localStorage.getItem('vectorone_token') || '';
+  }
+
+  function getAuthHeader() {
+    const token = getAuthToken();
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
 
   function initials(name) {
+    if (!name) return 'U';
     return name.split(' ').filter(Boolean).map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
   }
+
   function getActive() {
-    return conversations.find(function (c) { return c.id === activeId; }) || conversations[0];
+    return conversations.find(function (c) { return c.id === activeId; }) || conversations[0] || null;
   }
 
   /* ---------- stats ---------- */
   function renderStats() {
     if (!statsHost) return;
     const glyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.messages) || '';
-    const unread = conversations.reduce(function (sum, c) { return sum + c.unread; }, 0);
-    const total = conversations.reduce(function (sum, c) { return sum + c.messages.length; }, 0);
+    const unread = conversations.reduce(function (sum, c) { return sum + (c.unreadCount || 0); }, 0);
+    const total = conversations.reduce(function (sum, c) { return sum + (c.messages ? c.messages.length : 0); }, 0);
     const stats = [
       { label: 'Conversations', value: conversations.length, trend: 'Across campus', tone: 'blue' },
       { label: 'Unread', value: unread, trend: unread ? 'Needs a reply' : 'All caught up', tone: 'orange' },
-      { label: 'Total Messages', value: total, trend: 'This week', tone: 'purple' },
-      { label: 'Avg Response', value: '18m', trend: '-4m vs last week', tone: 'green' }
+      { label: 'Total Messages', value: total, trend: 'This system', tone: 'purple' },
+      { label: 'Status', value: 'Active', trend: 'Socket connected', tone: 'green' }
     ];
     statsHost.innerHTML = stats.map(function (item) {
       return '<article class="stat-card stat-card--' + item.tone + '">' +
@@ -112,10 +75,10 @@
   function visibleConversations() {
     const query = ((searchInput && searchInput.value) || '').trim().toLowerCase();
     return conversations.filter(function (c) {
-      if (showUnreadOnly && !c.unread) return false;
+      if (showUnreadOnly && !c.unreadCount) return false;
       if (!query) return true;
-      const last = c.messages.length ? c.messages[c.messages.length - 1].text : '';
-      return (c.name + ' ' + c.role + ' ' + last).toLowerCase().includes(query);
+      const last = c.lastMessage || '';
+      return ((c.name || '') + ' ' + (c.role || '') + ' ' + last).toLowerCase().includes(query);
     });
   }
 
@@ -126,14 +89,14 @@
       return;
     }
     listHost.innerHTML = items.map(function (c) {
-      const last = c.messages.length ? c.messages[c.messages.length - 1].text : '';
+      const timeStr = c.updatedAt ? new Date(c.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
       return '<button type="button" class="conversation-item' + (c.id === activeId ? ' is-active' : '') + '" data-conversation="' + esc(c.id) + '">' +
         '<span class="conversation-avatar">' + esc(initials(c.name)) + '</span>' +
         '<span class="conversation-copy">' +
-          '<span class="conversation-top"><strong>' + esc(c.name) + '</strong><time>' + esc(c.time) + '</time></span>' +
-          '<span class="conversation-preview">' + esc(last) + '</span>' +
+          '<span class="conversation-top"><strong>' + esc(c.name) + '</strong><time>' + esc(timeStr) + '</time></span>' +
+          '<span class="conversation-preview">' + esc(c.lastMessage || c.role || '') + '</span>' +
         '</span>' +
-        (c.unread ? '<span class="conversation-unread">' + c.unread + '</span>' : '') +
+        (c.unreadCount ? '<span class="conversation-unread">' + c.unreadCount + '</span>' : '') +
         '</button>';
     }).join('');
   }
@@ -141,23 +104,67 @@
   /* ---------- thread ---------- */
   function renderThread() {
     const c = getActive();
+    if (!c) {
+      if (threadTitle) threadTitle.textContent = 'No conversation selected';
+      if (threadMeta) threadMeta.textContent = '';
+      if (threadHost) threadHost.innerHTML = '<p class="empty-state">Select a conversation from the list.</p>';
+      return;
+    }
+
     if (threadTitle) threadTitle.textContent = c.name;
-    if (threadMeta) threadMeta.textContent = c.role + ' · ' + c.presence;
-    threadHost.innerHTML = c.messages.map(function (m) {
-      return '<div class="message-bubble ' + (m.from === 'me' ? 'is-outgoing' : 'is-incoming') + '">' +
-        esc(m.text) + '<time>' + esc(m.time) + '</time></div>';
-    }).join('');
-    // Jump to the newest message.
-    threadHost.scrollTop = threadHost.scrollHeight;
+    if (threadMeta) threadMeta.textContent = (c.role || 'User') + ' · Active';
+
+    if (threadHost) {
+      const msgs = c.messages || [];
+      if (!msgs.length) {
+        threadHost.innerHTML = '<p class="empty-state">No messages in this conversation yet.</p>';
+      } else {
+        threadHost.innerHTML = msgs.map(function (m) {
+          const isOutgoing = m.from === 'me' || m.from === 'out' || m.isSelf;
+          const timeStr = m.time || (m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
+          return '<div class="message-bubble ' + (isOutgoing ? 'is-outgoing' : 'is-incoming') + '">' +
+            esc(m.text) + '<time>' + esc(timeStr) + '</time></div>';
+        }).join('');
+      }
+      threadHost.scrollTop = threadHost.scrollHeight;
+    }
   }
 
   function selectConversation(id) {
     activeId = id;
     const c = getActive();
-    c.unread = 0;              // opening a thread marks it read
+    if (c) c.unreadCount = 0;
+
     renderList();
     renderThread();
     renderStats();
+
+    // Mark as read in API
+    fetch(API_BASE + '/admin/messages/' + id, { headers: getAuthHeader() }).catch(function () {});
+
+    // Socket join
+    if (socket && socket.connected) {
+      socket.emit('conversation:join', { conversationId: id });
+    }
+  }
+
+  function loadLiveAdminMessages() {
+    fetch(API_BASE + '/admin/messages', { headers: getAuthHeader() })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data)) {
+          conversations = res.data;
+          if (conversations.length > 0) {
+            if (!activeId || !conversations.some(c => c.id === activeId)) {
+              activeId = conversations[0].id;
+            }
+          }
+          renderStats();
+          renderList();
+          renderThread();
+        }
+      })
+      .catch(function (e) { console.warn('Failed to load admin messages:', e); });
   }
 
   /* ---------- events ---------- */
@@ -175,29 +182,38 @@
       if (!composerInput) return;
       const text = composerInput.value.trim();
       if (!text) return;
-      const now = new Date();
-      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
       const activeC = getActive();
-      activeC.messages.push({
-        from: 'me',
-        text: text,
-        time: timeStr
-      });
-      composerInput.value = '';
-      renderThread();
-      renderList();
-      renderStats();
+      if (!activeC) return;
 
-      // Send to API
-      const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-      const token = localStorage.getItem('vectorone_token');
-      if (token && activeC._rawId) {
-        fetch(API_BASE + '/admin/messages', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId: activeC._rawId, content: text })
-        }).catch(function () {});
-      }
+      composerInput.value = '';
+
+      fetch(API_BASE + '/admin/messages', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ conversationId: activeC.id, text: text })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          if (res.success && res.data) {
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const newMsg = {
+              id: res.data.id,
+              from: 'me',
+              isSelf: true,
+              text: res.data.text,
+              time: nowTime
+            };
+            if (!activeC.messages) activeC.messages = [];
+            activeC.messages.push(newMsg);
+            activeC.lastMessage = res.data.text;
+            activeC.updatedAt = res.data.createdAt || new Date().toISOString();
+
+            renderThread();
+            renderList();
+            renderStats();
+          }
+        })
+        .catch(function (e) { console.error('Failed to send admin message:', e); });
     });
   }
 
@@ -216,67 +232,93 @@
   if (forwardBtn && composerInput) {
     forwardBtn.addEventListener('click', function () {
       const c = getActive();
-      const last = c.messages.length ? c.messages[c.messages.length - 1].text : '';
-      composerInput.value = 'Forwarded from ' + c.name + ': ' + last;
+      const last = c && c.lastMessage ? c.lastMessage : '';
+      composerInput.value = 'Forwarded from ' + (c ? c.name : '') + ': ' + last;
       composerInput.focus();
     });
   }
-  if (composeBtn && composerInput) {
+  if (composeBtn) {
     composeBtn.addEventListener('click', function () {
-      composerInput.value = '';
-      composerInput.focus();
+      const title = prompt('Enter Announcement Title:');
+      if (!title) return;
+      const text = prompt('Enter Announcement Message:');
+      if (!text) return;
+
+      fetch(API_BASE + '/admin/messages/broadcast', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ title: title, text: text })
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            alert('Broadcast announcement published successfully!');
+            loadLiveAdminMessages();
+          } else {
+            alert(res.message || 'Failed to send broadcast');
+          }
+        })
+        .catch(() => alert('Failed to send broadcast announcement'));
     });
   }
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', function () { renderStats(); renderList(); renderThread(); });
+    refreshBtn.addEventListener('click', loadLiveAdminMessages);
   }
 
-  renderStats();
-  renderList();
-  renderThread();
+  // Socket.IO Setup
+  function initSocket() {
+    const token = getAuthToken();
+    if (!token || typeof window.io !== 'function') return;
 
-  // Load live messages from API
-  (function loadLiveAdminMessages() {
-    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-    const token = localStorage.getItem('vectorone_token');
-    if (!token) return;
+    try {
+      const socketHost = window.VECTORONE_SOCKET_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
+      socket = window.io(socketHost, {
+        auth: { token: token },
+        transports: ['websocket', 'polling']
+      });
 
-    fetch(API_BASE + '/admin/messages', {
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          const liveConvs = res.data.map(function (d, i) {
-            const partner = d.participants?.[0]?.user?.student?.fullName || d.participants?.[0]?.user?.faculty?.fullName || d.title || 'Campus Member';
-            const role = d.participants?.[0]?.user?.role === 'STUDENT' ? 'Student' : (d.participants?.[0]?.user?.role === 'FACULTY' ? 'Faculty' : 'Staff');
-            const msgs = (d.messages || []).map(function (m) {
-              return {
-                from: m.senderId === d.currentUserId ? 'me' : 'them',
-                text: m.content,
-                time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '10:00'
-              };
-            });
-            return {
-              id: 'c' + (i + 1),
-              _rawId: d.id,
-              name: partner,
-              role: role,
-              presence: 'Active',
-              unread: 0,
-              time: 'Recent',
-              messages: msgs.length > 0 ? msgs : [{ from: 'them', text: 'Hello, I have an administrative query.', time: '09:00' }]
-            };
-          });
-
-          conversations.length = 0;
-          liveConvs.forEach(function (c) { conversations.push(c); });
-          activeId = conversations[0].id;
-          renderStats();
-          renderList();
-          renderThread();
+      socket.on('connect', function () {
+        if (activeId) {
+          socket.emit('conversation:join', { conversationId: activeId });
         }
-      })
-      .catch(function () {});
-  })();
+      });
+
+      socket.on('message:received', function (data) {
+        if (!data) return;
+        const conv = conversations.find(c => c.id === data.conversationId);
+        const currentUser = JSON.parse(localStorage.getItem('vectorone_user') || '{}');
+        const isSelf = data.senderId === currentUser.id;
+
+        const newMsg = {
+          id: data.id,
+          from: isSelf ? 'me' : 'them',
+          isSelf: isSelf,
+          text: data.text,
+          time: data.time || new Date(data.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        if (conv) {
+          conv.lastMessage = data.text;
+          conv.updatedAt = data.createdAt || new Date().toISOString();
+          if (!conv.messages) conv.messages = [];
+          if (!conv.messages.some(m => m.id === data.id)) {
+            conv.messages.push(newMsg);
+          }
+        }
+
+        if (data.conversationId === activeId) {
+          if (!isSelf) {
+            renderThread();
+          }
+        }
+        renderList();
+        renderStats();
+      });
+    } catch (err) {
+      console.warn('Admin socket init warning:', err);
+    }
+  }
+
+  loadLiveAdminMessages();
+  initSocket();
 }());

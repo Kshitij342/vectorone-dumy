@@ -8,6 +8,7 @@ import path from 'path';
 import authRoutes from './routes/auth.routes';
 import studentRoutes from './routes/student.routes';
 import adminRoutes from './routes/admin.routes';
+import { authenticate } from './middleware/auth';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { generalRateLimiter } from './middleware/rateLimiter';
 
@@ -21,19 +22,21 @@ export function createApp(): Express {
     })
   );
 
-  // CORS setup
-  const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://127.0.0.1:5500,http://localhost:5500')
+  // CORS setup — strict origin matching
+  const defaultDevOrigins = 'http://localhost:3000,http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5501,http://localhost:5501';
+  const corsOrigins = (process.env.CORS_ORIGINS || defaultDevOrigins)
     .split(',')
-    .map((o) => o.trim());
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps, curl, or same-origin local files)
-        if (!origin || corsOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        // Allow requests with no origin (like server-to-server or mobile apps)
+        if (!origin || corsOrigins.includes(origin)) {
           callback(null, true);
         } else {
-          callback(null, true); // Permissive in dev mode while supporting credentials
+          callback(new Error('Not allowed by CORS'));
         }
       },
       credentials: true,
@@ -54,9 +57,9 @@ export function createApp(): Express {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // Serve static uploads
+  // Serve static uploads (protected by authentication)
   const uploadDir = process.env.UPLOAD_DIR || './uploads';
-  app.use('/uploads', express.static(path.resolve(uploadDir)));
+  app.use('/uploads', authenticate, express.static(path.resolve(uploadDir)));
 
   // General rate limiter
   app.use('/api', generalRateLimiter);

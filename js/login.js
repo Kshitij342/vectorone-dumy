@@ -193,67 +193,113 @@
   }
 
   /* ---------------- Real Google Sign-In Handler ---------------- */
+
   const googleBtn = document.getElementById('googleBtn');
-  if (googleBtn) {
-    googleBtn.addEventListener('click', function () {
-      // Check Google GSI script availability
-      if (typeof window.google === 'undefined' || !window.google.accounts) {
-        const script = document.createElement('script');
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.onload = initGoogleSignIn;
-        script.onerror = function () {
-          alert('Failed to load Google Sign-In SDK. Google OAuth code implemented; real external OAuth flow unavailable without network access to Google.');
-        };
-        document.head.appendChild(script);
-      } else {
-        initGoogleSignIn();
-      }
-    });
-  }
 
   function initGoogleSignIn() {
-    // Attempt credential authentication via Google GIS
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      const clientId = window.GOOGLE_CLIENT_ID || '';
-      if (!clientId) {
-        alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
-        return;
-      }
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCallback,
-      });
-      window.google.accounts.id.prompt();
-    } else {
-      alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
+    if (!window.google?.accounts?.id) {
+      console.error('Google Identity Services SDK failed to load.');
+      return;
     }
+
+    const clientId = window.GOOGLE_CLIENT_ID || '';
+
+    if (!clientId) {
+      console.error('Google Client ID is missing.');
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCallback,
+    });
+
+    window.google.accounts.id.renderButton(
+      googleBtn,
+      {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        width: 350
+      }
+    );
   }
 
   async function handleGoogleCallback(response) {
-    if (!response || !response.credential) {
-      alert('Google authentication cancelled or invalid credential.');
+    const tokenPayload = JSON.parse(
+      atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+    );
+
+    console.log('Google token audience:', tokenPayload.aud);
+    console.log('VectorOne Client ID:', window.GOOGLE_CLIENT_ID);
+    if (!response?.credential) {
+      alert('Google authentication failed or was cancelled.');
       return;
     }
-    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/google';
+
+    const apiUrl =
+      (window.VECTORONE_API_URL || 'http://localhost:5000/api') +
+      '/auth/google';
+
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          credential: response.credential
+        })
       });
+
       const data = await res.json();
+
       if (res.ok && data.success) {
         if (data.data?.token) {
-          localStorage.setItem('vectorone_token', data.data.token);
-          localStorage.setItem('vectorone_user', JSON.stringify(data.data.user));
+          localStorage.setItem(
+            'vectorone_token',
+            data.data.token
+          );
+
+          localStorage.setItem(
+            'vectorone_user',
+            JSON.stringify(data.data.user)
+          );
         }
-        window.location.href = data.data.user?.role === 'ADMIN' ? 'admin/admin-dashboard.html' : 'dashboard.html';
-      } else {
-        alert(data.message || 'Google authentication failed.');
+
+        window.location.href =
+          data.data.user?.role === 'ADMIN'
+            ? 'admin/admin-dashboard.html'
+            : 'dashboard.html';
+
+        return;
       }
+
+      console.error('Google login failed:', data);
+      alert(data.message || 'Google authentication failed.');
+
     } catch (err) {
-      alert('Network error during Google authentication.');
+      console.error('Google authentication error:', err);
+      alert('Unable to connect to the VectorOne backend.');
     }
+  }
+
+  /* Load Google Identity Services */
+  if (googleBtn) {
+    const googleScript = document.createElement('script');
+
+    googleScript.src = 'https://accounts.google.com/gsi/client';
+    googleScript.async = true;
+    googleScript.defer = true;
+
+    googleScript.onload = initGoogleSignIn;
+
+    googleScript.onerror = function () {
+      console.error('Failed to load Google Identity Services.');
+    };
+
+    document.head.appendChild(googleScript);
   }
 })();

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Messages · VectorOne</title>
@@ -46,25 +48,25 @@
     <main class="main-content">
       <section class="panel">
         <div class="messages-shell">
-          <div class="panel-list" id="chatList">
-            <div class="chat-item is-active" data-chat="rao"><div class="chat-avatar">DR</div><div class="chat-meta"><strong>Dr. Rao</strong><span>DBMS Lab 5 feedback</span></div><div class="chat-time">2m</div></div>
-            <div class="chat-item" data-chat="ananya"><div class="chat-avatar">AB</div><div class="chat-meta"><strong>Ananya</strong><span>Project team sync</span></div><div class="chat-time">18m</div></div>
-            <div class="chat-item" data-chat="placement"><div class="chat-avatar">PC</div><div class="chat-meta"><strong>Placement Cell</strong><span>Campus drive next week</span></div><div class="chat-time">1h</div></div>
-            <div class="chat-item" data-chat="affairs"><div class="chat-avatar">SA</div><div class="chat-meta"><strong>Student Affairs</strong><span>Scholarship window</span></div><div class="chat-time">2h</div></div>
-          </div>
+          <div class="panel-list" id="chatList"></div>
           <div class="panel chat-thread">
-            <div class="chat-header"><div class="chat-header-title"><h2 id="chatThreadName">Dr. Rao</h2><small id="chatThreadStatus">Online</small></div><button class="btn btn-outline" type="button">Schedule</button></div>
-            <div class="chat-bubbles" id="chatBubbles">
-              <div class="bubble incoming"><p>Your normalized ER diagram is close. Add the relationship between Student and Enrollment before submission.</p><time>9:12 AM</time></div>
-              <div class="bubble outgoing"><p>Thanks, I’ll revise the cardinality and resubmit before 11:59 PM.</p><time>9:14 AM</time></div>
-              <div class="bubble incoming"><p>Great. Don’t forget to include the composite key and the faculty assignment.</p><time>9:15 AM</time></div>
-            </div>
+            <div class="chat-header"><div class="chat-header-title"><h2 id="chatThreadName">Select a conversation</h2><small id="chatThreadStatus">--</small></div></div>
+            <div class="chat-bubbles" id="chatBubbles"></div>
             <div class="chat-composer"><input type="text" id="messageInput" placeholder="Type your message..." /><button class="btn btn-primary" type="button" id="sendMessageBtn">Send</button></div>
           </div>
         </div>
       </section>
     </main>
   </div>
+  <script>
+    (function() {
+      var socketHost = window.VECTORONE_SOCKET_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
+      var s = document.createElement('script');
+      s.src = socketHost + '/socket.io/socket.io.js';
+      s.async = false;
+      document.head.appendChild(s);
+    })();
+  </script>
   <script src="js/dashboard.js"></script>
   <script src="js/messages.js"></script>
 </body>

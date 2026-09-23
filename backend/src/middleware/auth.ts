@@ -19,7 +19,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
   const authHeader = req.headers.authorization;
   const token =
     (authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null) ||
-    req.cookies?.token;
+    req.cookies?.token ||
+    (typeof req.query?.token === 'string' ? req.query.token : null);
 
   if (!token) {
     sendError(res, 'Authentication required', 401);

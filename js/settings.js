@@ -18,7 +18,8 @@
       .then(function (r) {
         if (r.status === 401) {
           localStorage.removeItem('vectorone_token');
-          window.location.href = 'login.html';
+          localStorage.removeItem('vectorone_user');
+          window.location.replace('login.html');
           return null;
         }
         return r.json();

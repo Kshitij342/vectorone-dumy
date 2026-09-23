@@ -27,6 +27,14 @@
 
   window.VECTORONE_API_URL = resolveApiBaseUrl();
 
+  function resolveSocketUrl() {
+    if (window.VECTORONE_SOCKET_URL) return window.VECTORONE_SOCKET_URL;
+    const apiBase = window.VECTORONE_API_URL;
+    return apiBase.replace(/\/api\/?$/, '');
+  }
+
+  window.VECTORONE_SOCKET_URL = resolveSocketUrl();
+
   const TOKEN_KEY = 'vectorone_token';
   const USER_KEY = 'vectorone_user';
 
@@ -102,3 +110,5 @@
     },
   };
 })();
+/* Logout is handled centrally by js/auth-guard.js via event delegation.
+   Do NOT add a duplicate logoutLink listener here. */

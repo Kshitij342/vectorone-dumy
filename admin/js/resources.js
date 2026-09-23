@@ -1,5 +1,5 @@
 /* Admin resources — page logic. Uses the shared table controller defined in
-   js/admin-dashboard.js (loaded first). Frontend-only demo data. */
+   js/admin-dashboard.js (loaded first). */
 (function () {
   'use strict';
   if (!window.VectorOneAdmin || !window.VectorOneAdmin.createTablePage) return;
@@ -14,7 +14,7 @@
     { id: 'RES-06', title: 'DBMS Practice Question Bank', ext: 'PDF', type: 'PDF', department: 'Information Technology', uploader: 'Prof. Vikas Malhotra', size: '3.8 MB', downloads: 254, status: 'Draft' }
   ];
 
-  window.VectorOneAdmin.createTablePage({
+  const page = window.VectorOneAdmin.createTablePage({
     prefix: 'resource',
     statIcon: 'resources',
     idKey: 'id',
@@ -29,7 +29,7 @@
     ],
     filters: [
       { id: 'resourceTypeFilter', field: 'type', label: 'Type' },
-      { id: 'resourceDeptFilter', field: 'department', label: 'Department', auto: true }
+      { id: 'resourceDeptFilter', field: 'department', label: 'Department' }
     ],
     defaultSort: function (a, b) { return b.downloads - a.downloads; },
     columns: [
@@ -61,16 +61,27 @@
     },
     form: [
       { name: 'title', label: 'Title', full: true, required: true },
-      { name: 'type', label: 'Type', type: 'select', options: ['PDF', 'Video', 'Presentation', 'Document'] },
+      { name: 'type', label: 'Type', type: 'select', options: ['PDF', 'Video', 'Presentation', 'Document', 'Spreadsheet', 'Link', 'Other'] },
       { name: 'ext', label: 'File Extension', type: 'select', options: ['PDF', 'MP4', 'PPTX', 'DOCX', 'XLSX'] },
-      { name: 'department', label: 'Department', required: true },
+      {
+        name: 'department',
+        label: 'Department',
+        type: 'select',
+        options: function (rows) {
+          if (Array.isArray(window.VectorOneAdmin.availableDepartments) && window.VectorOneAdmin.availableDepartments.length > 0) {
+            return window.VectorOneAdmin.availableDepartments;
+          }
+          const list = [...new Set(rows.map(function (r) { return r.department; }))].filter(Boolean).sort();
+          return list.length > 0 ? list : ['Computer Science', 'Electronics', 'Mechanical', 'Business Administration', 'Civil Engineering'];
+        }
+      },
       { name: 'uploader', label: 'Uploaded By', required: true },
       { name: 'size', label: 'File Size' },
       { name: 'downloads', label: 'Downloads', type: 'number' },
       { name: 'status', label: 'Status', type: 'select', options: ['Published', 'Review', 'Draft', 'Archived'] }
     ],
     newRecord: function (rows) {
-      return { id: 'RES-' + String(rows.length + 1).padStart(2, '0'), title: '', type: 'PDF', ext: 'PDF', department: '', uploader: '', size: '0 MB', downloads: 0, status: 'Draft' };
+      return { id: 'RES-' + String(rows.length + 1).padStart(2, '0'), title: '', type: 'PDF', ext: 'PDF', department: 'Computer Science', uploader: 'Administrator', size: '0 MB', downloads: 0, status: 'Draft' };
     },
     viewTitle: 'Resource Details',
     editTitle: 'Edit Resource',
@@ -85,4 +96,31 @@
       row: function (r) { return [r.id, r.title, r.type, r.department, r.uploader, r.size, r.downloads, r.status]; }
     }
   });
+
+  /* Fetch live department list from API to populate the filter & form options */
+  (function loadDepartmentsForFilter() {
+    const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+    const token = localStorage.getItem('vectorone_token');
+    const deptSelect = document.getElementById('resourceDeptFilter');
+
+    fetch(API_BASE + '/admin/departments', {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const names = res.data.map(function (d) { return d.name; }).filter(Boolean).sort();
+          window.VectorOneAdmin.availableDepartments = names;
+
+          if (deptSelect) {
+            const current = deptSelect.value;
+            deptSelect.innerHTML = '<option value="">Department</option>' +
+              names.map(function (name) {
+                return '<option value="' + esc(name) + '"' + (name === current ? ' selected' : '') + '>' + esc(name) + '</option>';
+              }).join('');
+          }
+        }
+      })
+      .catch(function () {});
+  })();
 }());

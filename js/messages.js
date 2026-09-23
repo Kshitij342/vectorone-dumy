@@ -1,7 +1,4 @@
-/* Student messages — page logic.
-   Extracted from the inline <script> that used to live in messages.html, with
-   null guards added, the conversation list wired up, and message text inserted
-   as text rather than raw HTML. Frontend-only: threads live in memory. */
+/* Student messages — page logic with full PostgreSQL integration & Socket.IO real-time delivery */
 (function () {
   'use strict';
 
@@ -12,134 +9,212 @@
   const input = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendMessageBtn');
 
-  // Not the messages page — do nothing.
-  if (!bubbles) return;
+  if (!bubbles || !list) return;
 
-  /* Demo threads, keyed by the data-chat value on each conversation row. */
-  const threads = {
-    rao: {
-      name: 'Dr. Rao',
-      status: 'Online',
-      messages: [
-        { from: 'in', text: 'Your normalized ER diagram is close. Add the relationship between Student and Enrollment before submission.', time: '9:12 AM' },
-        { from: 'out', text: 'Thanks, I’ll revise the cardinality and resubmit before 11:59 PM.', time: '9:14 AM' },
-        { from: 'in', text: 'Great. Don’t forget to include the composite key and the faculty assignment.', time: '9:15 AM' }
-      ]
-    },
-    ananya: {
-      name: 'Ananya',
-      status: 'Last seen 18m ago',
-      messages: [
-        { from: 'in', text: 'Are we still meeting at 4 to split the project modules?', time: '8:40 AM' },
-        { from: 'out', text: 'Yes — library, second floor. I’ll bring the API notes.', time: '8:52 AM' },
-        { from: 'in', text: 'Perfect. I’ll take the frontend and you take the schema.', time: '8:55 AM' }
-      ]
-    },
-    placement: {
-      name: 'Placement Cell',
-      status: 'Official channel',
-      messages: [
-        { from: 'in', text: 'TCS campus drive is confirmed for 2 October. Registration closes on 25 September.', time: 'Yesterday' },
-        { from: 'out', text: 'Registered. Is the aptitude round online or on campus?', time: 'Yesterday' },
-        { from: 'in', text: 'On campus, in the placement block. Carry your ID card and two resume copies.', time: 'Yesterday' }
-      ]
-    },
-    affairs: {
-      name: 'Student Affairs',
-      status: 'Official channel',
-      messages: [
-        { from: 'in', text: 'The merit-cum-means scholarship window is open until the end of the month.', time: 'Mon' },
-        { from: 'out', text: 'Which documents do I need to submit?', time: 'Mon' },
-        { from: 'in', text: 'Income certificate, last semester marksheet and a copy of your fee receipt.', time: 'Mon' }
-      ]
+  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+  let conversations = [];
+  let activeConvId = null;
+  let socket = null;
+
+  function getAuthToken() {
+    return localStorage.getItem('vectorone_token') || '';
+  }
+
+  function getAuthHeader() {
+    const token = getAuthToken();
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  function initials(name) {
+    if (!name) return 'U';
+    return name.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function esc(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function getActiveConv() {
+    return conversations.find(c => c.id === activeConvId) || conversations[0] || null;
+  }
+
+  function renderList() {
+    if (!list) return;
+    if (conversations.length === 0) {
+      list.innerHTML = '<div class="chat-item"><div class="chat-meta"><strong>No conversations yet</strong><span>Start a chat or announcement</span></div></div>';
+      return;
     }
-  };
 
-  let activeKey = 'rao';
+    list.innerHTML = conversations.map(c => {
+      const isActive = c.id === activeConvId;
+      const timeStr = c.updatedAt ? new Date(c.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+      return `<div class="chat-item ${isActive ? 'is-active' : ''}" data-chat="${esc(c.id)}">
+        <div class="chat-avatar">${esc(initials(c.name))}</div>
+        <div class="chat-meta">
+          <strong>${esc(c.name)}</strong>
+          <span>${esc(c.lastMessage || c.role || '')}</span>
+        </div>
+        ${timeStr ? `<div class="chat-time">${esc(timeStr)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
 
   function addBubble(message) {
+    if (!bubbles) return;
     const bubble = document.createElement('div');
-    bubble.className = 'bubble ' + (message.from === 'out' ? 'outgoing' : 'incoming');
+    bubble.className = 'bubble ' + (message.from === 'out' || message.isSelf ? 'outgoing' : 'incoming');
     const body = document.createElement('p');
-    body.textContent = message.text;          // text, not innerHTML — no injection
+    body.textContent = message.text;
     const stamp = document.createElement('time');
-    stamp.textContent = message.time;
+    stamp.textContent = message.time || (message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '');
     bubble.appendChild(body);
     bubble.appendChild(stamp);
     bubbles.appendChild(bubble);
   }
 
   function renderThread() {
-    const thread = threads[activeKey];
-    if (!thread) return;
-    if (threadName) threadName.textContent = thread.name;
-    if (threadStatus) threadStatus.textContent = thread.status;
-    bubbles.innerHTML = '';
-    thread.messages.forEach(addBubble);
-    bubbles.scrollTop = bubbles.scrollHeight;
-  }
-
-  function selectThread(key) {
-    if (!threads[key]) return;
-    activeKey = key;
-    if (list) {
-      list.querySelectorAll('[data-chat]').forEach(function (item) {
-        item.classList.toggle('is-active', item.dataset.chat === key);
-      });
+    const conv = getActiveConv();
+    if (!conv) {
+      if (threadName) threadName.textContent = 'No conversation selected';
+      if (threadStatus) threadStatus.textContent = '';
+      if (bubbles) bubbles.innerHTML = '';
+      return;
     }
-    renderThread();
+
+    if (threadName) threadName.textContent = conv.name;
+    if (threadStatus) threadStatus.textContent = conv.role + ' · Active';
+    if (bubbles) {
+      bubbles.innerHTML = '';
+      (conv.messages || []).forEach(addBubble);
+      bubbles.scrollTop = bubbles.scrollHeight;
+    }
   }
 
-  const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-  function getAuthHeader() {
-    const token = localStorage.getItem('vectorone_token');
-    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  function selectThread(convId) {
+    activeConvId = convId;
+    renderList();
+    renderThread();
+
+    // Mark as read in backend
+    fetch(API_BASE + '/messages/' + convId + '/read', {
+      method: 'POST',
+      headers: getAuthHeader()
+    }).catch(() => {});
+
+    // Join Socket.IO room if connected
+    if (socket && socket.connected) {
+      socket.emit('conversation:join', { conversationId: convId });
+    }
   }
 
   function fetchLiveMessages() {
     fetch(API_BASE + '/messages', { headers: getAuthHeader() })
-      .then(function (res) { return res.json(); })
-      .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          // Sync with first conversation if found
-          const conv = res.data[0];
-          if (conv && conv.messages && conv.messages.length > 0) {
-            threads.rao.messages = conv.messages.map(function (m) {
-              return {
-                from: m.senderId === (JSON.parse(localStorage.getItem('vectorone_user') || '{}').id) ? 'out' : 'in',
-                text: m.text,
-                time: new Date(m.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-              };
-            });
-            renderThread();
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data)) {
+          conversations = res.data;
+          if (conversations.length > 0) {
+            if (!activeConvId || !conversations.some(c => c.id === activeConvId)) {
+              activeConvId = conversations[0].id;
+            }
           }
+          renderList();
+          renderThread();
         }
       })
-      .catch(function () {});
+      .catch(e => console.warn('Failed to fetch messages:', e));
   }
 
   function sendMessage() {
     if (!input) return;
     const text = input.value.trim();
     if (!text) return;
-    const message = {
-      from: 'out',
-      text: text,
-      time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-    };
-    const thread = threads[activeKey];
-    if (thread) thread.messages.push(message);
-    addBubble(message);
-    input.value = '';
-    bubbles.scrollTop = bubbles.scrollHeight;
-    input.focus();
+    const activeC = getActiveConv();
+    if (!activeC) return;
 
-    // Send to backend API
+    input.value = '';
+
     fetch(API_BASE + '/messages', {
       method: 'POST',
       headers: getAuthHeader(),
-      body: JSON.stringify({ text: text })
-    }).catch(function (e) { console.warn(e); });
+      body: JSON.stringify({ conversationId: activeC.id, text: text })
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          const msgObj = {
+            id: res.data.id,
+            from: 'out',
+            isSelf: true,
+            text: res.data.text,
+            time: new Date(res.data.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+          };
+          if (!activeC.messages) activeC.messages = [];
+          activeC.messages.push(msgObj);
+          activeC.lastMessage = res.data.text;
+          activeC.updatedAt = res.data.createdAt;
+          addBubble(msgObj);
+          renderList();
+          if (bubbles) bubbles.scrollTop = bubbles.scrollHeight;
+        }
+      })
+      .catch(e => console.error('Failed to send message:', e));
+  }
+
+  // Socket.IO Setup
+  function initSocket() {
+    const token = getAuthToken();
+    if (!token || typeof window.io !== 'function') return;
+
+    try {
+      const socketHost = window.VECTORONE_SOCKET_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
+      socket = window.io(socketHost, {
+        auth: { token: token },
+        transports: ['websocket', 'polling']
+      });
+
+      socket.on('connect', () => {
+        if (activeConvId) {
+          socket.emit('conversation:join', { conversationId: activeConvId });
+        }
+      });
+
+      socket.on('message:received', (data) => {
+        if (!data) return;
+        const conv = conversations.find(c => c.id === data.conversationId);
+        const currentUser = JSON.parse(localStorage.getItem('vectorone_user') || '{}');
+        const isSelf = data.senderId === currentUser.id;
+
+        const newMsg = {
+          id: data.id,
+          from: isSelf ? 'out' : 'in',
+          isSelf: isSelf,
+          text: data.text,
+          time: data.time || new Date(data.createdAt || Date.now()).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        };
+
+        if (conv) {
+          conv.lastMessage = data.text;
+          conv.updatedAt = data.createdAt || new Date().toISOString();
+          if (!conv.messages) conv.messages = [];
+          if (!conv.messages.some(m => m.id === data.id)) {
+            conv.messages.push(newMsg);
+          }
+        }
+
+        if (data.conversationId === activeConvId) {
+          if (!isSelf) {
+            addBubble(newMsg);
+            if (bubbles) bubbles.scrollTop = bubbles.scrollHeight;
+          }
+        }
+        renderList();
+      });
+    } catch (err) {
+      console.warn('Socket.IO connection warning:', err);
+    }
   }
 
   if (list) {
@@ -153,10 +228,13 @@
   if (sendBtn) sendBtn.addEventListener('click', sendMessage);
   if (input) {
     input.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter') { event.preventDefault(); sendMessage(); }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+      }
     });
   }
 
-  renderThread();
   fetchLiveMessages();
+  initSocket();
 })();

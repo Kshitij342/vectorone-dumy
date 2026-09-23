@@ -1,5 +1,4 @@
-/* Admin profile — page logic. Frontend-only; edits live in memory for the session.
-   Reuses the shared modal styling from css/admin-dashboard.css. */
+/* Admin profile — page logic connected to PostgreSQL API with real DB persistence. */
 (function () {
   'use strict';
 
@@ -19,33 +18,32 @@
   const avatarEl = document.getElementById('profileAvatar');
   const metaEl = document.getElementById('profileMeta');
 
-  // Not the profile page — do nothing.
   if (!editBtn || !modal) return;
 
-  /* Editable profile fields. Labels match the read-only meta grid. */
   const profile = {
-    name: 'Aarav Deshmukh',
-    title: 'College Administrator',
+    name: 'College Administrator',
+    title: 'System Administrator',
     office: 'Operations Office',
     employeeId: 'ADM-2048',
     department: 'Operations & Student Services',
     access: 'Full admin',
-    email: 'aarav.deshmukh@vectorone.edu',
+    email: 'admin@vectorone.edu',
     phone: '+91 98765 44012'
   };
 
   const fields = [
-    { name: 'name', label: 'Full Name', full: true },
+    { name: 'name', label: 'Full Name', full: true, required: true },
     { name: 'title', label: 'Role Title' },
     { name: 'office', label: 'Office' },
     { name: 'employeeId', label: 'Employee ID' },
     { name: 'department', label: 'Department', full: true },
     { name: 'access', label: 'Access Level' },
-    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'email', label: 'Email', type: 'email', required: true },
     { name: 'phone', label: 'Phone' }
   ];
 
   function initials(name) {
+    if (!name) return 'AD';
     return name.split(' ').filter(Boolean).map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
   }
 
@@ -65,6 +63,8 @@
         return '<div class="meta-item"><span>' + esc(pair[0]) + '</span><strong>' + esc(pair[1]) + '</strong></div>';
       }).join('');
     }
+    document.querySelectorAll('.user-menu-name').forEach(function (el) { el.textContent = profile.name; });
+    document.querySelectorAll('.user-menu-btn .avatar').forEach(function (el) { el.textContent = initials(profile.name); });
   }
 
   function openModal() {
@@ -82,59 +82,32 @@
     const controls = fields.map(function (f) {
       const cls = f.full ? ' class="full-width"' : '';
       return '<label' + cls + '>' + esc(f.label) +
-        '<input name="' + f.name + '" type="' + (f.type || 'text') + '" value="' + esc(profile[f.name]) + '" /></label>';
+        '<input name="' + f.name + '" type="' + (f.type || 'text') + '" value="' + esc(profile[f.name]) + '"' + (f.required ? ' required' : '') + ' /></label>';
     }).join('');
-    return '<form class="admin-form">' + controls + '</form>';
+    return '<form class="admin-form">' + controls + '</form><p class="modal-error-msg" id="profileErrorMsg" style="color: #ef4444; margin-top: 10px; display: none;"></p>';
   }
 
-  function readForm() {
+  function readFormValues() {
     const form = modalBody && modalBody.querySelector('form');
-    if (!form) return;
-    fields.forEach(function (f) {
-      const input = form.querySelector('[name="' + f.name + '"]');
-      if (input && input.value.trim()) profile[f.name] = input.value.trim();
-    });
+    if (!form) return null;
+    const data = new FormData(form);
+    const out = {};
+    data.forEach(function (val, key) { out[key] = val; });
+    return out;
   }
 
-  editBtn.addEventListener('click', function () {
-    if (modalBody) modalBody.innerHTML = buildForm();
-    if (modalActions) {
-      modalActions.innerHTML = '<button type="button" class="btn btn-outline" data-dismiss>Cancel</button>' +
-        '<button type="button" class="btn btn-primary" data-save>Save Changes</button>';
-      const cancel = modalActions.querySelector('[data-dismiss]');
-      const save = modalActions.querySelector('[data-save]');
-      if (cancel) cancel.addEventListener('click', closeModal);
-      if (save) {
-        save.addEventListener('click', function () {
-          readForm();
-          paint();
-          closeModal();
+  function syncLocalUser() {
+    try {
+      const raw = localStorage.getItem('vectorone_user');
+      const u = raw ? JSON.parse(raw) : {};
+      u.fullName = profile.name;
+      u.name = profile.name;
+      u.email = profile.email;
+      localStorage.setItem('vectorone_user', JSON.stringify(u));
+    } catch (e) {}
+  }
 
-          const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
-          const token = localStorage.getItem('vectorone_token');
-          if (token) {
-            fetch(API_BASE + '/admin/profile', {
-              method: 'PUT',
-              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ fullName: profile.name, phone: profile.phone })
-            }).catch(function () {});
-          }
-        });
-      }
-    }
-    openModal();
-  });
-
-  if (modalClose) modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !modal.hidden) closeModal();
-  });
-
-  paint();
-
-  // Load live admin profile from API
-  (function loadLiveAdminProfile() {
+  function loadLiveAdminProfile() {
     const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
     const token = localStorage.getItem('vectorone_token');
     if (!token) return;
@@ -147,12 +120,81 @@
         if (res.success && res.data) {
           const d = res.data;
           profile.name = d.fullName || profile.name;
-          profile.employeeId = d.adminId || profile.employeeId;
-          profile.phone = d.phone || profile.phone;
-          if (d.user?.email) profile.email = d.user.email;
+          profile.email = d.email || profile.email;
+          if (d.adminId) profile.employeeId = d.adminId;
+          syncLocalUser();
           paint();
         }
       })
       .catch(function () {});
-  })();
+  }
+
+  editBtn.addEventListener('click', function () {
+    if (modalBody) modalBody.innerHTML = buildForm();
+    if (modalActions) {
+      modalActions.innerHTML = '<button type="button" class="btn btn-outline" data-dismiss>Cancel</button>' +
+        '<button type="button" class="btn btn-primary" data-save>Save Changes</button>';
+      const cancel = modalActions.querySelector('[data-dismiss]');
+      const save = modalActions.querySelector('[data-save]');
+      if (cancel) cancel.addEventListener('click', closeModal);
+      if (save) {
+        save.addEventListener('click', function () {
+          const values = readFormValues();
+          const errEl = document.getElementById('profileErrorMsg');
+          if (errEl) errEl.style.display = 'none';
+
+          if (!values || !values.name || !values.name.trim()) {
+            if (errEl) { errEl.textContent = 'Full Name is required.'; errEl.style.display = 'block'; }
+            return;
+          }
+
+          save.disabled = true;
+          save.textContent = 'Saving...';
+
+          const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+          const token = localStorage.getItem('vectorone_token');
+
+          fetch(API_BASE + '/admin/profile', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fullName: values.name.trim(),
+              email: values.email ? values.email.trim() : profile.email
+            })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res.success && res.data) {
+                profile.name = res.data.fullName || values.name.trim();
+                profile.email = res.data.email || values.email || profile.email;
+                if (values.title) profile.title = values.title;
+                if (values.office) profile.office = values.office;
+                if (values.phone) profile.phone = values.phone;
+                syncLocalUser();
+                paint();
+                closeModal();
+              } else {
+                if (errEl) { errEl.textContent = res.message || 'Failed to save profile.'; errEl.style.display = 'block'; }
+                save.disabled = false;
+                save.textContent = 'Save Changes';
+              }
+            })
+            .catch(function () {
+              if (errEl) { errEl.textContent = 'Network error while saving profile.'; errEl.style.display = 'block'; }
+              save.disabled = false;
+              save.textContent = 'Save Changes';
+            });
+        });
+      }
+    }
+    openModal();
+  });
+
+  if (modalClose) modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  loadLiveAdminProfile();
 }());

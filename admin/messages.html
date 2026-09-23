@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="../js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Messages · VectorOne</title>
@@ -30,6 +32,15 @@
     </main>
   </div>
   <div class="modal-backdrop" id="messageModal" hidden><section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="messageModalTitle"><div class="modal-header"><h2 id="messageModalTitle">Message</h2><button type="button" class="modal-close" id="messageModalClose" aria-label="Close">×</button></div><div id="messageModalBody"></div><div class="modal-actions" id="messageModalActions"></div></section></div>
+  <script>
+    (function() {
+      var socketHost = window.VECTORONE_SOCKET_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : window.location.origin);
+      var s = document.createElement('script');
+      s.src = socketHost + '/socket.io/socket.io.js';
+      s.async = false;
+      document.head.appendChild(s);
+    })();
+  </script>
   <script src="js/admin-dashboard.js"></script>
   <script src="js/messages.js"></script>
 </body>

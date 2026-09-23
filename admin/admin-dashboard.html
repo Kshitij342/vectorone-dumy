@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="../js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard · VectorOne</title>
@@ -58,8 +60,8 @@
       <section class="stats-grid admin-stats-grid" id="statsGrid" aria-label="Institution overview"></section>
       <section class="admin-dashboard-grid">
         <div class="admin-primary-column">
-          <section class="panel admin-panel"><div class="panel-heading"><div><h3>Recent Student Registrations</h3><p>New learners awaiting review</p></div><button class="link-inline" type="button">View all</button></div><div class="admin-list" id="registrationsList"></div></section>
-          <section class="panel admin-panel"><div class="panel-heading"><div><h3>Operations Overview</h3><p>Attendance, growth, assignments and events</p></div><button class="link-inline" type="button">View analytics</button></div><div class="analytics-grid" id="analyticsGrid"></div></section>
+          <section class="panel admin-panel"><div class="panel-heading"><div><h3>Recent Student Registrations</h3><p>New learners awaiting review</p></div><a href="students.html" class="link-inline">View all</a></div><div class="admin-list" id="registrationsList"></div></section>
+          <section class="panel admin-panel"><div class="panel-heading"><div><h3>Operations Overview</h3><p>Attendance, growth, assignments and events</p></div><a href="analytics.html" class="link-inline">View analytics</a></div><div class="analytics-grid" id="analyticsGrid"></div></section>
           <section class="panel admin-panel"><div class="panel-heading"><div><h3>Recent Notices & Upcoming Events</h3><p>Latest campus communications</p></div></div><div class="split-feed"><div id="noticesList"></div><div id="eventsList"></div></div></section>
           <section class="panel admin-panel"><div class="panel-heading"><div><h3>Academic Operations</h3><p>Assignment reviews, faculty activity and announcements</p></div></div><div class="split-feed admin-operations"><div id="reviewsList"></div><div id="facultyActivityList"></div><div id="announcementsList"></div></div></section>
           <section class="panel admin-panel"><div class="panel-heading"><div><h3>System Activity Timeline</h3><p>Recent administrative activity</p></div></div><ol class="activity-timeline" id="activityTimeline"></ol></section>
@@ -70,7 +72,7 @@
           <section class="panel"><h3>Recent Notifications</h3><div class="compact-list" id="sidebarNotifications"></div></section>
           <section class="panel"><h3>System Status</h3><div class="system-status" id="systemStatus"></div></section>
           <section class="panel"><h3>Upcoming Deadlines</h3><div class="compact-list" id="deadlinesList"></div></section>
-          <section class="panel"><h3>Quick Links</h3><div class="quick-links"><a href="#reports">Reports</a><a href="#analytics">Analytics</a><a href="#settings">System settings</a></div></section>
+          <section class="panel"><h3>Quick Links</h3><div class="quick-links"><a href="reports.html">Reports</a><a href="analytics.html">Analytics</a><a href="settings.html">System settings</a></div></section>
         </aside>
       </section>
     </main>
