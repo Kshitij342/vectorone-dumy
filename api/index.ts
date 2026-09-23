@@ -2,4 +2,6 @@ import { createApp } from '../backend/src/app';
 
 const app = createApp();
 
-export default app;
+export default (req: any, res: any) => {
+  return app(req, res);
+};
