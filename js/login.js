@@ -249,7 +249,18 @@
         })
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error('Non-JSON response received from Google auth endpoint:', res.status, text);
+        data = {
+          success: false,
+          message: `Server returned HTTP ${res.status} (${res.statusText || 'Non-JSON response'})`
+        };
+      }
 
       if (res.ok && data.success) {
         if (data.data?.token) {
