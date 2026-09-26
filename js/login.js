@@ -132,7 +132,8 @@
       submitBtn.disabled = true;
 
       const selectedRole = document.querySelector('input[name="loginRole"]:checked')?.value || 'student';
-      const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/login';
+      const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+      const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/login';
 
       fetch(apiUrl, {
         method: 'POST',
@@ -177,7 +178,8 @@
       const targetEmail = prompt('Enter your email address to receive a password reset link:', emailVal);
       if (!targetEmail) return;
 
-      const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/forgot-password';
+      const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+      const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/forgot-password';
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -228,20 +230,13 @@
   }
 
   async function handleGoogleCallback(response) {
-    const tokenPayload = JSON.parse(
-      atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
-    );
-
-    console.log('Google token audience:', tokenPayload.aud);
-    console.log('VectorOne Client ID:', window.GOOGLE_CLIENT_ID);
     if (!response?.credential) {
       alert('Google authentication failed or was cancelled.');
       return;
     }
 
-    const apiUrl =
-      (window.VECTORONE_API_URL || 'http://localhost:5000/api') +
-      '/auth/google';
+    const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+    const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/google';
 
     try {
       const res = await fetch(apiUrl, {
@@ -282,7 +277,11 @@
 
     } catch (err) {
       console.error('Google authentication error:', err);
-      alert('Unable to connect to the VectorOne backend.');
+      const isNetworkError = err instanceof TypeError || err.name === 'TypeError';
+      const msg = isNetworkError
+        ? 'Unable to connect to the VectorOne backend. Please check your network connection.'
+        : (err.message || 'Google authentication failed.');
+      alert(msg);
     }
   }
 

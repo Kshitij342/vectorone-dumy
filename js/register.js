@@ -249,7 +249,8 @@
     submitBtn.classList.add('is-loading');
     submitBtn.disabled = true;
 
-    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/register';
+    const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+    const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/register';
 
     fetch(apiUrl, {
       method: 'POST',
@@ -330,7 +331,8 @@
       alert('Google authentication cancelled or invalid credential.');
       return;
     }
-    const apiUrl = (window.VECTORONE_API_URL || 'http://localhost:5000/api') + '/auth/google';
+    const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+    const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/google';
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
