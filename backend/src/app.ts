@@ -62,10 +62,10 @@ export function createApp(): Express {
   app.use('/uploads', authenticate, express.static(path.resolve(uploadDir)));
 
   // General rate limiter
-  app.use('/api', generalRateLimiter);
+  app.use(['/api', '/'], generalRateLimiter);
 
   // Health check
-  app.get('/api/health', (_req, res) => {
+  app.get(['/api/health', '/health'], (_req, res) => {
     res.json({
       success: true,
       service: 'VectorOne API',
@@ -75,7 +75,7 @@ export function createApp(): Express {
   });
 
   // API Documentation placeholder / spec
-  app.get('/api/docs', (_req, res) => {
+  app.get(['/api/docs', '/docs'], (_req, res) => {
     res.json({
       service: 'VectorOne College Management API',
       version: '1.0.0',
@@ -88,10 +88,15 @@ export function createApp(): Express {
     });
   });
 
-  // Mount API Routes
+  // Mount API Routes (supports both /api/* and stripped /* path prefixes from Vercel Functions)
   app.use('/api/auth', authRoutes);
+  app.use('/auth', authRoutes);
+
   app.use('/api/admin', adminRoutes);
+  app.use('/admin', adminRoutes);
+
   app.use('/api', studentRoutes);
+  app.use('/', studentRoutes);
 
   // 404 & Error Handling
   app.use(notFound);
