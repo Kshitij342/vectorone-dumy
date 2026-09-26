@@ -290,67 +290,115 @@
       });
   });
 
-  /* ---------------- Google button ---------------- */
+  /* ---------------- Google Sign-Up (same flow as login.js) ---------------- */
+
   const googleBtn = document.getElementById('googleBtn');
-  if (googleBtn) {
-    googleBtn.addEventListener('click', function () {
-      if (typeof window.google === 'undefined' || !window.google.accounts) {
-        const script = document.createElement('script');
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.onload = initGoogleSignIn;
-        script.onerror = function () {
-          alert('Failed to load Google Sign-In SDK. Google OAuth code implemented; real external OAuth flow unavailable without network access to Google.');
-        };
-        document.head.appendChild(script);
-      } else {
-        initGoogleSignIn();
-      }
-    });
-  }
 
+  /**
+   * Called once the Google Identity Services SDK has loaded.
+   * Mirrors the implementation in login.js exactly.
+   */
   function initGoogleSignIn() {
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      const clientId = window.GOOGLE_CLIENT_ID || '';
-      if (!clientId) {
-        alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
-        return;
-      }
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCallback,
-      });
-      window.google.accounts.id.prompt();
-    } else {
-      alert('Google OAuth code implemented; real external OAuth flow not tested because credentials/configuration are unavailable.');
-    }
-  }
-
-  async function handleGoogleCallback(response) {
-    if (!response || !response.credential) {
-      alert('Google authentication cancelled or invalid credential.');
+    if (!window.google?.accounts?.id) {
+      console.error('VectorOne: Google Identity Services SDK is not available.');
       return;
     }
-    const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+
+    const clientId = window.GOOGLE_CLIENT_ID || '';
+    if (!clientId) {
+      console.error('VectorOne: window.GOOGLE_CLIENT_ID is not set on this page.');
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCallback,
+    });
+
+    if (googleBtn) {
+      window.google.accounts.id.renderButton(
+        googleBtn,
+        {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signup_with',
+          shape: 'rectangular',
+          width: 350,
+        }
+      );
+    }
+  }
+
+  /**
+   * Receives the Google credential, POSTs it to /api/auth/google,
+   * stores the JWT and user, then redirects to dashboard.html.
+   * Registration via Google always creates a STUDENT — never redirects to admin.
+   */
+  async function handleGoogleCallback(response) {
+    if (!response?.credential) {
+      console.error('VectorOne: Google callback received without a credential.');
+      alert('Google authentication failed or was cancelled.');
+      return;
+    }
+
+    const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5000/api'
+      : `${window.location.origin}/api`;
     const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/google';
+
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: response.credential }),
       });
-      const data = await res.json();
+
+      let data;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error('VectorOne: Non-JSON response from /api/auth/google:', res.status, text);
+        data = {
+          success: false,
+          message: `Server returned HTTP ${res.status} (${res.statusText || 'Non-JSON response'})`,
+        };
+      }
+
       if (res.ok && data.success) {
         if (data.data?.token) {
           localStorage.setItem('vectorone_token', data.data.token);
           localStorage.setItem('vectorone_user', JSON.stringify(data.data.user));
         }
-        window.location.href = data.data.user?.role === 'ADMIN' ? 'admin/admin-dashboard.html' : 'dashboard.html';
-      } else {
-        alert(data.message || 'Google authentication failed.');
+        // Google registration always creates a student — always go to dashboard
+        window.location.href = 'dashboard.html';
+        return;
       }
+
+      console.error('VectorOne: Google sign-up failed:', data);
+      alert(data.message || 'Google sign-up failed. Please try again.');
+
     } catch (err) {
-      alert('Network error during Google authentication.');
+      console.error('VectorOne: Google authentication error:', err);
+      const isNetworkError = err instanceof TypeError || err.name === 'TypeError';
+      alert(isNetworkError
+        ? 'Unable to connect to the VectorOne backend. Please check your connection.'
+        : (err.message || 'Google sign-up failed.'));
     }
+  }
+
+  /* Load Google Identity Services SDK on page start (same as login.js) */
+  if (googleBtn) {
+    const googleScript = document.createElement('script');
+    googleScript.src = 'https://accounts.google.com/gsi/client';
+    googleScript.async = true;
+    googleScript.defer = true;
+    googleScript.onload = initGoogleSignIn;
+    googleScript.onerror = function () {
+      console.error('VectorOne: Failed to load Google Identity Services SDK.');
+    };
+    document.head.appendChild(googleScript);
   }
 })();
