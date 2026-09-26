@@ -48,7 +48,8 @@ export function createApp(): Express {
           return;
         }
         // Allow any *.vercel.app deployment of this project
-        if (/^https:\/\/vectorone-dumy[a-z0-9-]*\.vercel\.app$/.test(origin)) {
+        // Covers both old slug (vectorone-dumy-*) and new slug (vectorone-three, vectorone-*)
+        if (/^https:\/\/vectorone[a-z0-9-]*\.vercel\.app$/.test(origin)) {
           callback(null, true);
           return;
         }

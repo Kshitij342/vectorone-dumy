@@ -154,17 +154,26 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     const { credential, idToken } = req.body;
     const tokenToVerify = credential || idToken;
 
+    // Stage 1: credential received
+    console.log('[googleAuth] Stage 1: credential present =', !!tokenToVerify);
+
     if (!tokenToVerify) {
       sendError(res, 'Google credential token is required', 400);
       return;
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
+
+    // Stage 2: server-side client ID check
+    console.log('[googleAuth] Stage 2: GOOGLE_CLIENT_ID present =', !!clientId);
+
     if (!clientId) {
       sendError(res, 'Google OAuth is not configured on the server (missing GOOGLE_CLIENT_ID)', 500);
       return;
     }
 
+    // Stage 3: ID token verification
+    console.log('[googleAuth] Stage 3: verifyIdToken starting');
     const client = new OAuth2Client(clientId);
     let ticket;
     try {
@@ -172,13 +181,16 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
         idToken: tokenToVerify,
         audience: clientId,
       });
+      console.log('[googleAuth] Stage 3: verifyIdToken succeeded');
     } catch (err: any) {
+      console.error('[googleAuth] Stage 3: verifyIdToken FAILED —', err.message);
       sendError(res, `Invalid Google credential token: ${err.message || err}`, 401);
       return;
     }
 
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
+      console.error('[googleAuth] Stage 3: token payload invalid or missing email');
       sendError(res, 'Invalid Google token payload', 401);
       return;
     }
@@ -188,7 +200,8 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     const fullName = payload.name || payload.given_name || email.split('@')[0];
     const picture = payload.picture;
 
-    // Check if user exists by googleId or email
+    // Stage 4: database user lookup
+    console.log('[googleAuth] Stage 4: database user lookup');
     let user = await prisma.user.findFirst({
       where: { OR: [{ googleId }, { email }] },
       include: {
@@ -197,10 +210,12 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
         faculty: true,
       }
     });
+    console.log('[googleAuth] Stage 4: user found =', !!user, '| role =', user?.role ?? 'none');
 
     if (user) {
       // Link googleId if missing
       if (!user.googleId) {
+        console.log('[googleAuth] Stage 4a: linking googleId to existing user');
         user = await prisma.user.update({
           where: { id: user.id },
           data: { googleId },
@@ -212,9 +227,11 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
         });
       }
     } else {
-      // Create new STUDENT account (NEVER ADMIN)
+      // Stage 5: create new STUDENT account (NEVER ADMIN)
+      console.log('[googleAuth] Stage 5: creating new student account');
       let defaultDept = await prisma.department.findFirst();
       if (!defaultDept) {
+        console.log('[googleAuth] Stage 5: no department found, creating default');
         defaultDept = await prisma.department.create({
           data: {
             deptId: 'DEP-GEN',
@@ -223,7 +240,6 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
         });
       }
 
-      // Generate unique student ID
       const randomDigits = Math.floor(100000 + Math.random() * 900000);
       const studentId = `VO-G${randomDigits}`;
 
@@ -255,15 +271,21 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
           faculty: true,
         }
       });
+      console.log('[googleAuth] Stage 5: student created, id =', user.id);
     }
 
+    // Stage 6: sign JWT
+    console.log('[googleAuth] Stage 6: signing JWT, JWT_SECRET present =', !!process.env.JWT_SECRET);
     const token = signToken({ userId: user.id, role: user.role, email: user.email });
+    console.log('[googleAuth] Stage 6: JWT signed successfully');
 
+    // Stage 7: send response
     const profile =
       user.role === Role.STUDENT
         ? { fullName: user.student?.fullName, studentId: user.student?.studentId, department: user.student?.department?.name }
         : { fullName: user.admin?.fullName };
 
+    console.log('[googleAuth] Stage 7: sending success response');
     sendSuccess(res, {
       token,
       user: {
@@ -275,7 +297,10 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
       }
     }, 'Google authentication successful');
   } catch (err: any) {
-    sendError(res, 'Google authentication failed: ' + (err.message || err), 500);
+    // Log the full error so it appears in Vercel runtime logs
+    console.error('[googleAuth] UNCAUGHT ERROR —', err.message);
+    console.error('[googleAuth] stack —', err.stack);
+    sendError(res, 'Google authentication failed: ' + (err.message || String(err)), 500);
   }
 }
 
