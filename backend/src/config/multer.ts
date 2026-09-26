@@ -2,12 +2,16 @@ import multer, { StorageEngine } from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
+const UPLOAD_DIR = process.env.VERCEL ? '/tmp/uploads' : (process.env.UPLOAD_DIR || './uploads');
 const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10);
 
-// Ensure upload directory exists
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// Ensure upload directory exists safely
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+} catch (_err) {
+  // Ignore filesystem creation errors in serverless environment
 }
 
 const ALLOWED_MIME_TYPES: Record<string, string[]> = {
