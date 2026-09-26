@@ -29,15 +29,30 @@ export function createApp(): Express {
     .map((o) => o.trim())
     .filter(Boolean);
 
+  // Always allow the configured FRONTEND_URL (covers Vercel production domain)
+  if (process.env.FRONTEND_URL && !corsOrigins.includes(process.env.FRONTEND_URL)) {
+    corsOrigins.push(process.env.FRONTEND_URL.trim());
+  }
+
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (like server-to-server or mobile apps)
-        if (!origin || corsOrigins.includes(origin)) {
+        // Allow requests with no origin (server-to-server, Vercel health probes, mobile apps)
+        if (!origin) {
           callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
+          return;
         }
+        // Allow exact matches from the list
+        if (corsOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        // Allow any *.vercel.app deployment of this project
+        if (/^https:\/\/vectorone-dumy[a-z0-9-]*\.vercel\.app$/.test(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error(`CORS: origin '${origin}' not allowed`));
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
