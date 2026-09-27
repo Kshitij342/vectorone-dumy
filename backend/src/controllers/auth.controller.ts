@@ -7,6 +7,7 @@ import { prisma } from '../config/database';
 import { signToken } from '../config/jwt';
 import { sendSuccess, sendError } from '../utils/apiResponse';
 import { Role } from '@prisma/client';
+import { isAllowedCollegeEmail, isVerifiedCollegeGoogleAccount } from '../utils/emailValidator';
 
 /**
  * POST /api/auth/register
@@ -17,6 +18,12 @@ export async function register(req: Request, res: Response): Promise<void> {
     const { fullName, email, studentId, year, department, password, role } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    // Check college email domain restriction
+    if (!isAllowedCollegeEmail(normalizedEmail)) {
+      sendError(res, 'Registration is restricted to official college email accounts.', 400);
+      return;
+    }
 
     // Check if email already exists
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
@@ -195,12 +202,20 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Stage 3b: Verify Google email verification status and college domain whitelist
+    const verification = isVerifiedCollegeGoogleAccount(payload);
+    if (!verification.allowed) {
+      console.error('[googleAuth] Stage 3b: Verification rejected —', verification.reason);
+      sendError(res, verification.reason || 'Only verified college email accounts can use Google Sign-In.', 403);
+      return;
+    }
+
     const googleId = payload.sub;
     const email = payload.email.toLowerCase().trim();
     const fullName = payload.name || payload.given_name || email.split('@')[0];
     const picture = payload.picture;
 
-    // Stage 4: database user lookup
+    // Stage 4: database user lookup (Roster Verification)
     console.log('[googleAuth] Stage 4: database user lookup');
     let user = await prisma.user.findFirst({
       where: { OR: [{ googleId }, { email }] },
@@ -212,66 +227,24 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     });
     console.log('[googleAuth] Stage 4: user found =', !!user, '| role =', user?.role ?? 'none');
 
-    if (user) {
-      // Link googleId if missing
-      if (!user.googleId) {
-        console.log('[googleAuth] Stage 4a: linking googleId to existing user');
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { googleId },
-          include: {
-            student: { include: { department: true } },
-            admin: true,
-            faculty: true,
-          }
-        });
-      }
-    } else {
-      // Stage 5: create new STUDENT account (NEVER ADMIN)
-      console.log('[googleAuth] Stage 5: creating new student account');
-      let defaultDept = await prisma.department.findFirst();
-      if (!defaultDept) {
-        console.log('[googleAuth] Stage 5: no department found, creating default');
-        defaultDept = await prisma.department.create({
-          data: {
-            deptId: 'DEP-GEN',
-            name: 'General Science & Humanities',
-          }
-        });
-      }
+    if (!user) {
+      console.error('[googleAuth] Stage 4: User not registered in database —', email);
+      sendError(res, 'Your college account is not registered in VectorOne. Contact the administrator.', 403);
+      return;
+    }
 
-      const randomDigits = Math.floor(100000 + Math.random() * 900000);
-      const studentId = `VO-G${randomDigits}`;
-
-      const randomPassword = crypto.randomBytes(16).toString('hex');
-      const passwordHash = await bcrypt.hash(randomPassword, 12);
-
-      user = await prisma.user.create({
-        data: {
-          email,
-          googleId,
-          passwordHash,
-          role: Role.STUDENT,
-          student: {
-            create: {
-              studentId,
-              fullName,
-              year: 1,
-              semester: 1,
-              division: 'A',
-              avatarUrl: picture,
-              departmentId: defaultDept.id,
-            }
-          },
-          settings: { create: {} }
-        },
+    // Link googleId if missing
+    if (!user.googleId) {
+      console.log('[googleAuth] Stage 4a: linking googleId to existing user');
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { googleId },
         include: {
           student: { include: { department: true } },
           admin: true,
           faculty: true,
         }
       });
-      console.log('[googleAuth] Stage 5: student created, id =', user.id);
     }
 
     // Stage 6: sign JWT

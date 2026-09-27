@@ -733,6 +733,23 @@ describe('VectorOne API Core Endpoints', () => {
       expect(res.body.message).toBe('Registration failed. An account with these credentials already exists.');
     });
 
+    it('registration with non-college email domain is rejected with 400', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          fullName: 'Personal Email User',
+          email: 'user@gmail.com',
+          studentId: 'VO888888',
+          year: 1,
+          department: 'Computer Science',
+          password: 'Password@123',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/restricted to official college email/i);
+    });
+
     it('forgot-password does not leak debugToken in response', async () => {
       const res = await request(app)
         .post('/api/auth/forgot-password')
