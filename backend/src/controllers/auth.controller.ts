@@ -206,7 +206,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     const verification = isVerifiedCollegeGoogleAccount(payload);
     if (!verification.allowed) {
       console.error('[googleAuth] Stage 3b: Verification rejected —', verification.reason);
-      sendError(res, verification.reason || 'Only verified college email accounts can use Google Sign-In.', 403);
+      sendError(res, verification.reason || 'Only verified college email addresses are allowed.', 403);
       return;
     }
 

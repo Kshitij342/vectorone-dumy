@@ -750,6 +750,23 @@ describe('VectorOne API Core Endpoints', () => {
       expect(res.body.message).toMatch(/restricted to official college email/i);
     });
 
+    it('g) admin login remains unaffected', async () => {
+      const adminUser = await prisma.user.findFirst({ where: { role: Role.ADMIN } });
+      if (!adminUser) return;
+
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: adminUser.email,
+          password: 'Admin@123',
+          role: 'admin',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.user.role).toBe(Role.ADMIN);
+    });
+
     it('forgot-password does not leak debugToken in response', async () => {
       const res = await request(app)
         .post('/api/auth/forgot-password')

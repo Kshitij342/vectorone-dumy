@@ -1,7 +1,7 @@
 /**
  * Helper to validate whether an email address belongs to an authorized college domain.
  * Domain list is driven by COLLEGE_EMAIL_DOMAINS env var (comma-separated).
- * Defaults to 'vectorone.edu' if no env var is specified.
+ * Defaults to 'tsecmumbai.in, .edu, vectorone.edu' if no env var is specified.
  */
 export function getAllowedCollegeDomains(): string[] {
   const envVal = process.env.COLLEGE_EMAIL_DOMAINS || process.env.COLLEGE_EMAIL_DOMAIN;
@@ -11,12 +11,14 @@ export function getAllowedCollegeDomains(): string[] {
       .map((d) => d.trim().toLowerCase())
       .filter(Boolean);
   }
-  return ['vectorone.edu'];
+  return ['tsecmumbai.in', '.edu', 'vectorone.edu'];
 }
 
 /**
  * Checks if a given email address belongs to one of the authorized college domains.
- * Performs exact domain matching on the portion after '@'.
+ * Extract actual domain portion after '@'.
+ * Handles exact matches (e.g., 'tsecmumbai.in'), subdomains (e.g., 'student.tsecmumbai.in'),
+ * and wildcard suffix entries (e.g., '.edu').
  */
 export function isAllowedCollegeEmail(email: string): boolean {
   if (!email || typeof email !== 'string') return false;
@@ -25,8 +27,17 @@ export function isAllowedCollegeEmail(email: string): boolean {
   if (parts.length !== 2) return false;
 
   const domain = parts[1];
-  const allowedDomains = getAllowedCollegeDomains();
-  return allowedDomains.includes(domain);
+  if (!domain) return false;
+
+  const allowedEntries = getAllowedCollegeDomains();
+
+  return allowedEntries.some((entry) => {
+    const cleanEntry = entry.toLowerCase();
+    if (cleanEntry.startsWith('.')) {
+      return domain.endsWith(cleanEntry);
+    }
+    return domain === cleanEntry || domain.endsWith('.' + cleanEntry);
+  });
 }
 
 /**
@@ -44,11 +55,11 @@ export function isVerifiedCollegeGoogleAccount(payload: {
 
   const isVerified = payload.email_verified === true || payload.email_verified === 'true';
   if (!isVerified) {
-    return { allowed: false, reason: 'Only verified college email accounts can use Google Sign-In.' };
+    return { allowed: false, reason: 'Only verified college email addresses are allowed.' };
   }
 
   if (!isAllowedCollegeEmail(payload.email)) {
-    return { allowed: false, reason: 'Only verified college email accounts can use Google Sign-In.' };
+    return { allowed: false, reason: 'Only verified college email addresses are allowed.' };
   }
 
   return { allowed: true };
