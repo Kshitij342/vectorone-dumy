@@ -16,6 +16,12 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PROD_SEED) {
+    console.log('⚠️ Production environment detected (NODE_ENV=production). Skipping demo data seeding.');
+    console.log('👉 To create a production admin account, run: npm run create-admin');
+    return;
+  }
+
   console.log('🌱 Seeding VectorOne database...');
 
   // ── 1. Departments ──────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 /**
  * Helper to validate whether an email address belongs to an authorized college domain.
  * Domain list is driven by COLLEGE_EMAIL_DOMAINS env var (comma-separated).
- * Defaults to 'tsecmumbai.in, .edu, vectorone.edu' if no env var is specified.
+ * Defaults to 'tsecmumbai.in' if no env var is specified.
  */
 export function getAllowedCollegeDomains(): string[] {
   const envVal = process.env.COLLEGE_EMAIL_DOMAINS || process.env.COLLEGE_EMAIL_DOMAIN;
@@ -11,7 +11,7 @@ export function getAllowedCollegeDomains(): string[] {
       .map((d) => d.trim().toLowerCase())
       .filter(Boolean);
   }
-  return ['tsecmumbai.in', '.edu', 'vectorone.edu'];
+  return ['tsecmumbai.in', '.edu'];
 }
 
 /**

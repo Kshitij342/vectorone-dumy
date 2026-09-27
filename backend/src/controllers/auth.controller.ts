@@ -229,7 +229,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
 
     if (!user) {
       console.error('[googleAuth] Stage 4: User not registered in database —', email);
-      sendError(res, 'Your college account is not registered in VectorOne. Contact the administrator.', 403);
+      sendError(res, 'Your college account is not registered in VectorOne. Please register first or contact the administrator.', 403);
       return;
     }
 

@@ -776,6 +776,33 @@ describe('VectorOne API Core Endpoints', () => {
       expect(res.body.data).toBeNull();
       expect(res.body.debugToken).toBeUndefined();
     });
+
+    it('GET /api/admin/dashboard calculates zero stats cleanly when tables are empty', async () => {
+      const adminToken = signToken({
+        userId: 'admin-test-id',
+        email: 'admin@vectorone.edu',
+        role: Role.ADMIN,
+      });
+
+      const res = await request(app)
+        .get('/api/admin/dashboard')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.stats).toBeDefined();
+
+      const attendanceStat = res.body.data.stats.find((s: any) => s.label === 'Attendance %');
+      if (attendanceStat) {
+        expect(typeof attendanceStat.value).toBe('number');
+      }
+
+      const storageStat = res.body.data.stats.find((s: any) => s.label === 'Storage Used');
+      if (storageStat) {
+        expect(storageStat.value).toBe(0);
+        expect(storageStat.trend).toContain('0 GB');
+      }
+    });
   });
 });
 

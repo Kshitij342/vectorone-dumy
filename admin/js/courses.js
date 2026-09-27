@@ -106,7 +106,7 @@
     fetch(API_BASE + '/admin/courses', { headers: getAuthHeader() })
       .then(function (res) { return res.json(); })
       .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res.success && Array.isArray(res.data)) {
           courses.length = 0;
           res.data.forEach(function (c) { courses.push(c); });
           populateFilters();

@@ -140,7 +140,7 @@
     fetch(API_BASE + '/admin/faculty?limit=100', { headers: getAuthHeader() })
       .then(function (res) { return res.json(); })
       .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res.success && Array.isArray(res.data)) {
           faculty.length = 0;
           res.data.forEach(function (f) { faculty.push(f); });
           populateFilters();

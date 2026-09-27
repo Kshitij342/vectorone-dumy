@@ -167,7 +167,7 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res.success && Array.isArray(res.data)) {
           records.length = 0;
           res.data.forEach(function (d) {
             const studentId = d.studentId || d.id;
