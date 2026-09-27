@@ -754,11 +754,13 @@ describe('VectorOne API Core Endpoints', () => {
       const adminUser = await prisma.user.findFirst({ where: { role: Role.ADMIN } });
       if (!adminUser) return;
 
+      const adminPassword = process.env.ADMIN_PASSWORD || 'AdminSecret@123';
+
       const res = await request(app)
         .post('/api/auth/login')
         .send({
           email: adminUser.email,
-          password: 'Admin@123',
+          password: adminPassword,
           role: 'admin',
         });
 
