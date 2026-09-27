@@ -131,6 +131,8 @@
     const token = localStorage.getItem('vectorone_token');
     if (!token || !statsGrid) return;
 
+    console.log('[Perf Log] first API request');
+
     fetch(API_BASE + '/admin/dashboard', {
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
     })
@@ -149,6 +151,8 @@
             }).join('');
           }
         }
+        console.log('[Perf Log] dashboard data rendered');
+        try { console.timeEnd('[Perf Log] Total Login Flow'); } catch (e) {}
       })
       .catch(function () {});
   })();

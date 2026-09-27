@@ -19,11 +19,11 @@
   var TOKEN_KEY = 'vectorone_token';
   var USER_KEY  = 'vectorone_user';
 
+  console.log('[Perf Log] Dashboard loaded');
+
   /* ── 1. Helpers ─────────────────────────────────────────── */
 
   function resolveApiBase() {
-    // Prefer the value set by api.js if it has already run,
-    // otherwise fall back to a safe local default.
     if (window.VECTORONE_API_URL) return window.VECTORONE_API_URL;
     var h = window.location.hostname;
     if (h === 'localhost' || h === '127.0.0.1') {
@@ -33,7 +33,6 @@
   }
 
   function resolveLoginHref() {
-    // Works whether the page lives at root or inside /admin/
     var depth = window.location.pathname.split('/').filter(Boolean).length;
     if (depth > 1) return '../login.html';
     return 'login.html';
@@ -45,22 +44,43 @@
     window.location.replace(resolveLoginHref());
   }
 
-  /* ── 2. Immediate token check (synchronous, blocking) ─────
-     Runs before the rest of the page parses, so the user never
-     sees a flash of protected content.                        */
+  /* ── 2. Immediate token check (synchronous, blocking) ───── */
 
   var token = localStorage.getItem(TOKEN_KEY);
 
   if (!token) {
-    // Stop parsing; nothing else should run.
     window.location.replace(resolveLoginHref());
-    // Use document.write to halt further script execution on
-    // browsers that continue after location.replace.
     document.write('');
     throw new Error('VectorOne: unauthenticated — redirecting to login');
   }
 
-  /* ── 3. Async backend verification ────────────────────────
+  /* ── 3. Synchronous UI Hydration from stored user state ────
+     Populates user menu name, avatar, and welcome heading immediately
+     at zero-latency before any async network requests resolve.   */
+  function hydrateCachedUser() {
+    try {
+      var rawUser = localStorage.getItem(USER_KEY);
+      if (!rawUser) return;
+      var user = JSON.parse(rawUser);
+      if (!user) return;
+
+      var fullName = user.fullName || user.student?.fullName || user.admin?.fullName || (user.email ? user.email.split('@')[0] : '');
+      if (fullName) {
+        var initials = fullName.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
+        document.querySelectorAll('.user-menu-name').forEach(function (el) { el.textContent = fullName; });
+        document.querySelectorAll('.avatar, .user-menu-btn .avatar').forEach(function (el) { el.textContent = initials; });
+        document.querySelectorAll('.welcome-user-name').forEach(function (el) { el.textContent = ', ' + fullName; });
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrateCachedUser);
+  } else {
+    hydrateCachedUser();
+  }
+
+  /* ── 4. Async backend verification ────────────────────────
      Non-blocking: the page renders normally, but if the backend
      rejects the token we wipe it and redirect.                */
 
@@ -74,28 +94,16 @@
       }
     })
     .catch(function () {
-      /* Network unavailable — do NOT log the user out.
-         Let the page work with the locally-stored token. */
+      /* Network unavailable — do NOT log the user out. */
     });
 
-  /* ── 4. Centralised logout handler (event delegation) ─────
-     Covers:
-       • #logoutLink          (sidebar footer on all pages)
-       • .user-dropdown-danger (top-right user dropdown)
-
-     Using document-level delegation means this works even if
-     the DOM hasn't fully loaded yet (events bubble up from
-     any depth).  The guard flag prevents double-registration
-     in case this file is accidentally included twice.         */
+  /* ── 5. Centralised logout handler ─────────────────────── */
 
   if (!window.__vectoroneLogoutHandlerRegistered) {
     window.__vectoroneLogoutHandlerRegistered = true;
 
     document.addEventListener('click', function (event) {
       var target = event.target;
-
-      // Walk up from the click target to see if any ancestor
-      // is a logout trigger.
       var node = target;
       while (node && node !== document) {
         var id  = node.id;
@@ -111,7 +119,7 @@
         }
         node = node.parentNode;
       }
-    }, true /* useCapture — fires before any inline onclick */);
+    }, true);
   }
 
 })();

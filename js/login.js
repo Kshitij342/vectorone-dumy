@@ -128,6 +128,9 @@
         return;
       }
 
+      console.time('[Perf Log] Total Login Flow');
+      console.log('[Perf Log] Login started');
+
       submitBtn.classList.add('is-loading');
       submitBtn.disabled = true;
 
@@ -135,6 +138,7 @@
       const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
       const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/login';
 
+      console.log('[Perf Log] authentication request sent');
       fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,11 +154,15 @@
           submitBtn.disabled = false;
 
           if (result.ok && result.data.success) {
+            console.log('[Perf Log] authentication successful');
             if (result.data.data?.token) {
               localStorage.setItem('vectorone_token', result.data.data.token);
               localStorage.setItem('vectorone_user', JSON.stringify(result.data.data.user));
+              console.log('[Perf Log] token saved');
             }
-            window.location.href = selectedRole === 'admin' ? 'admin/admin-dashboard.html' : 'dashboard.html';
+            console.log('[Perf Log] redirect started');
+            const target = selectedRole === 'admin' ? 'admin/admin-dashboard.html' : 'dashboard.html';
+            window.location.replace(target);
           } else {
             const errMsg = result.data.message || 'Invalid email or password.';
             setFieldError(passwordInput, passwordError, errMsg);
@@ -235,10 +243,14 @@
       return;
     }
 
+    console.time('[Perf Log] Total Login Flow');
+    console.log('[Perf Log] Login started');
+
     const defaultApiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
     const apiUrl = (window.VECTORONE_API_URL || defaultApiBase) + '/auth/google';
 
     try {
+      console.log('[Perf Log] authentication request sent');
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -263,6 +275,7 @@
       }
 
       if (res.ok && data.success) {
+        console.log('[Perf Log] authentication successful');
         if (data.data?.token) {
           localStorage.setItem(
             'vectorone_token',
@@ -273,12 +286,14 @@
             'vectorone_user',
             JSON.stringify(data.data.user)
           );
+          console.log('[Perf Log] token saved');
         }
 
-        window.location.href =
-          data.data.user?.role === 'ADMIN'
-            ? 'admin/admin-dashboard.html'
-            : 'dashboard.html';
+        console.log('[Perf Log] redirect started');
+        const target = data.data.user?.role === 'ADMIN'
+          ? 'admin/admin-dashboard.html'
+          : 'dashboard.html';
+        window.location.replace(target);
 
         return;
       }

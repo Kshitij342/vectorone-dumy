@@ -216,58 +216,22 @@
     });
   }
 
-  // Live User Info & Notification Sync
+  // Parallelized Live Data Loading
   (function syncLiveUserState() {
     const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
     const token = localStorage.getItem('vectorone_token');
     if (!token) return;
 
-    fetch(API_BASE + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
-      .then(function (r) {
-        if (r.status === 401) {
-          localStorage.removeItem('vectorone_token');
-          localStorage.removeItem('vectorone_user');
-          if (!window.location.pathname.endsWith('login.html')) {
-            window.location.href = 'login.html';
-          }
-          return null;
-        }
-        return r.json();
-      })
-      .then(function (res) {
-        if (res && res.success && res.data) {
-          const user = res.data;
-          const student = user.student;
-          const fullName = student?.fullName || user.email.split('@')[0];
-          const initials = fullName.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
-
-          document.querySelectorAll('.user-menu-name').forEach(function (el) { el.textContent = fullName; });
-          document.querySelectorAll('.avatar, .user-menu-btn .avatar').forEach(function (el) { el.textContent = initials; });
-
-          // If on profile.html, update profile layout
-          const profileHero = document.querySelector('.profile-identity');
-          if (profileHero) {
-            const h2 = profileHero.querySelector('h2');
-            if (h2) h2.textContent = fullName;
-            const p = profileHero.querySelector('p');
-            if (p && student?.department) p.textContent = (student.department.name || 'Computer Science') + ' · Semester ' + (student.semester || 1);
-            const avatar = document.querySelector('.profile-avatar');
-            if (avatar) avatar.textContent = initials;
-          }
-        }
-      })
-      .catch(function () { });
-
-    // Notifications
+    // Notifications fetch (runs in parallel with notices fetch below)
     fetch(API_BASE + '/notifications', { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function (r) { return r.json(); })
       .then(function (res) {
-        if (res.success && Array.isArray(res.data) && notificationBadge) {
+        if (res.success && Array.isArray(res.data) && typeof notificationBadge !== 'undefined' && notificationBadge) {
           const unreadCount = res.data.filter(function (n) { return !n.isRead; }).length;
           notificationBadge.textContent = String(unreadCount);
           notificationBadge.classList.toggle('is-hidden', unreadCount === 0);
 
-          if (notificationList && res.data.length > 0) {
+          if (typeof notificationList !== 'undefined' && notificationList && res.data.length > 0) {
             notificationList.innerHTML = res.data.map(function (n) {
               return '<li class="notification-item' + (!n.isRead ? ' is-unread' : '') + '">' +
                 '<p class="notification-title">' + n.title + '</p>' +
@@ -679,6 +643,7 @@
     // Live API notices fetch
     (function loadLiveStudentDashboard() {
       const API_BASE = window.VECTORONE_API_URL || 'http://localhost:5000/api';
+      console.log('[Perf Log] first API request');
       fetch(API_BASE + '/notices?limit=10')
         .then(function (r) { return r.json(); })
         .then(function (res) {
@@ -693,6 +658,8 @@
                 '</tr>';
             }).join('');
           }
+          console.log('[Perf Log] dashboard data rendered');
+          try { console.timeEnd('[Perf Log] Total Login Flow'); } catch (e) {}
         })
         .catch(function () { });
     })();

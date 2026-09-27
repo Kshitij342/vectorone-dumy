@@ -23,6 +23,8 @@
   var TOKEN_KEY = 'vectorone_token';
   var USER_KEY  = 'vectorone_user';
 
+  console.log('[Perf Log] Dashboard loaded');
+
   /* ── 1. Helpers ─────────────────────────────────────────── */
 
   function resolveApiBase() {
@@ -34,7 +36,6 @@
     return window.location.origin + '/api';
   }
 
-  /* All admin pages live inside /admin/, so login.html is one level up. */
   var LOGIN_HREF = '../login.html';
 
   function clearAuthAndRedirect() {
@@ -44,14 +45,10 @@
   }
 
   function redirectToLogin() {
-    /* Redirect without clearing the token — used when a student tries to
-       access an admin page.  Their student session should remain intact. */
     window.location.replace(LOGIN_HREF);
   }
 
-  /* ── 2. Immediate synchronous token check ──────────────────
-     Runs while the page is still parsing, before body content
-     renders, so the user never sees a flash of admin UI.     */
+  /* ── 2. Immediate synchronous token & role check ─────────── */
 
   var token = localStorage.getItem(TOKEN_KEY);
 
@@ -61,9 +58,43 @@
     throw new Error('VectorOne Admin: unauthenticated — redirecting to login');
   }
 
-  /* ── 3. Async backend verification + role check ────────────
-     Non-blocking: renders the page shell, but redirects if the
-     backend rejects the token or if the role is not ADMIN.   */
+  // Fast-path synchronous role check from cached user object
+  var userRaw = localStorage.getItem(USER_KEY);
+  if (userRaw) {
+    try {
+      var cachedUser = JSON.parse(userRaw);
+      if (cachedUser && cachedUser.role && cachedUser.role.toUpperCase() !== 'ADMIN') {
+        window.location.replace(LOGIN_HREF);
+        document.write('');
+        throw new Error('VectorOne Admin: unauthorized role — redirecting to login');
+      }
+    } catch (e) {}
+  }
+
+  /* ── 3. Synchronous Admin UI Hydration from stored user state ─ */
+  function hydrateCachedAdminUser() {
+    try {
+      var rawUser = localStorage.getItem(USER_KEY);
+      if (!rawUser) return;
+      var user = JSON.parse(rawUser);
+      if (!user) return;
+
+      var fullName = user.fullName || user.admin?.fullName || user.student?.fullName || (user.email ? user.email.split('@')[0] : '');
+      if (fullName) {
+        var initials = fullName.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase();
+        document.querySelectorAll('.user-menu-name').forEach(function (el) { el.textContent = fullName; });
+        document.querySelectorAll('.avatar, .user-menu-btn .avatar').forEach(function (el) { el.textContent = initials; });
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrateCachedAdminUser);
+  } else {
+    hydrateCachedAdminUser();
+  }
+
+  /* ── 4. Async backend verification + role check ──────────── */
 
   fetch(resolveApiBase() + '/auth/me', {
     method: 'GET',
@@ -71,38 +102,26 @@
   })
     .then(function (response) {
       if (response.status === 401) {
-        /* Token is invalid / expired — wipe everything. */
         clearAuthAndRedirect();
         return null;
       }
       return response.json();
     })
     .then(function (data) {
-      if (!data) return; /* already redirected */
+      if (!data) return;
 
-      /* data shape: { success, data: { role, ... } }
-         The backend may put role directly on data or nested in data.data. */
       var user = (data.data) || data;
       var role = (user.role || '').toUpperCase();
 
       if (role !== 'ADMIN') {
-        /* Student (or other) is trying to access admin — bounce them back.
-           Do NOT remove their token; their own session is still valid. */
         redirectToLogin();
       }
-      /* else: role === 'ADMIN' — allow the page to stay. */
     })
     .catch(function () {
-      /* Network unavailable — do NOT log the user out.
-         The page keeps working with the locally stored token. */
+      /* Network unavailable — do NOT log the user out. */
     });
 
-  /* ── 4. Centralised logout handler (event delegation) ─────
-     Admin sidebar uses .sidebar-link--danger (no ID).
-     Top-right dropdown uses .user-dropdown-danger.
-     Both are covered here via capture-phase delegation.
-     The guard flag prevents double-registration if this file
-     is ever accidentally included twice.                     */
+  /* ── 5. Centralised logout handler ─────────────────────── */
 
   if (!window.__vectoroneAdminLogoutHandlerRegistered) {
     window.__vectoroneAdminLogoutHandlerRegistered = true;
@@ -125,7 +144,7 @@
         }
         node = node.parentNode;
       }
-    }, true /* useCapture — fires before any inline onclick */);
+    }, true);
   }
 
 })();

@@ -274,7 +274,7 @@
             localStorage.setItem('vectorone_token', result.data.data.token);
             localStorage.setItem('vectorone_user', JSON.stringify(result.data.data.user));
           }
-          window.location.href = 'dashboard.html';
+          window.location.replace('dashboard.html');
         } else {
           const errMsg = result.data.message || (result.data.errors && result.data.errors[0]) || 'Registration failed.';
           const errorEl = document.getElementById('emailError');
@@ -373,7 +373,7 @@
           localStorage.setItem('vectorone_user', JSON.stringify(data.data.user));
         }
         // Google registration always creates a student — always go to dashboard
-        window.location.href = 'dashboard.html';
+        window.location.replace('dashboard.html');
         return;
       }
 
