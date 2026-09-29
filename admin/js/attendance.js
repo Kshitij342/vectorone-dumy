@@ -6,14 +6,7 @@
   const statGlyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.attendance) || '';
 
 
-  const records = [
-    { id: 'VO2024001', name: 'Aarav Mehta', department: 'Computer Science', year: '2', division: 'A', present: 22, absent: 2, percentage: 91, status: 'Excellent' },
-    { id: 'VO2024002', name: 'Diya Sharma', department: 'Information Technology', year: '3', division: 'B', present: 21, absent: 3, percentage: 88, status: 'Good' },
-    { id: 'VO2024003', name: 'Rohan Iyer', department: 'Mechanical Engineering', year: '4', division: 'A', present: 18, absent: 5, percentage: 78, status: 'Warning' },
-    { id: 'VO2024004', name: 'Ananya Gupta', department: 'Computer Science', year: '1', division: 'C', present: 23, absent: 1, percentage: 96, status: 'Excellent' },
-    { id: 'VO2024005', name: 'Kabir Khan', department: 'Electronics', year: '2', division: 'B', present: 15, absent: 8, percentage: 65, status: 'Critical' },
-    { id: 'VO2024006', name: 'Meera Nair', department: 'Business Administration', year: '4', division: 'A', present: 19, absent: 3, percentage: 86, status: 'Good' }
-  ];
+  const records = [];
 
   const attendanceStats = document.getElementById('attendanceStats');
   const attendanceTableBody = document.getElementById('attendanceTableBody');
@@ -25,10 +18,10 @@
   const attendanceVisual = document.getElementById('attendanceVisual');
 
   function renderStats() {
-    let overallPct = '91.4%';
-    let presentTotal = '1,964';
-    let absentTotal = '182';
-    let atRiskTotal = '46';
+    let overallPct = '—';
+    let presentTotal = '—';
+    let absentTotal = '—';
+    let atRiskTotal = '—';
 
     if (records.length > 0) {
       const sumPresent = records.reduce(function (acc, r) { return acc + (Number(r.present) || 0); }, 0);

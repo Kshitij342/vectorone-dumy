@@ -313,6 +313,8 @@
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: handleGoogleCallback,
+      auto_select: false,
+      cancel_on_tap_outside: true,
     });
 
     if (googleBtn) {

@@ -20,15 +20,20 @@
 
   if (!editBtn || !modal) return;
 
+  // Initialise from localStorage so the real admin name/email shows immediately
+  // before the API response arrives. Falls back to generic placeholders.
+  var _storedUser = (function () {
+    try { return JSON.parse(localStorage.getItem('vectorone_user') || '{}'); } catch (e) { return {}; }
+  })();
   const profile = {
-    name: 'College Administrator',
+    name: _storedUser.fullName || _storedUser.name || 'Administrator',
     title: 'System Administrator',
-    office: 'Operations Office',
-    employeeId: 'ADM-2048',
-    department: 'Operations & Student Services',
+    office: 'Administration',
+    employeeId: _storedUser.adminId || '—',
+    department: 'Administration & Student Services',
     access: 'Full admin',
-    email: 'admin@vectorone.edu',
-    phone: '+91 98765 44012'
+    email: _storedUser.email || '—',
+    phone: '—'
   };
 
   const fields = [

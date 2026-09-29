@@ -6,19 +6,13 @@
   const statGlyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.departments) || '';
 
 
-  const departments = [
-    { id: 'DEP-101', name: 'Computer Science', hod: 'Dr. Neha Sharma', faculty: 26, students: 1275, courses: 12, status: 'Active' },
-    { id: 'DEP-102', name: 'Electronics', hod: 'Prof. Rohan Verma', faculty: 18, students: 860, courses: 9, status: 'Active' },
-    { id: 'DEP-103', name: 'Mechanical', hod: 'Dr. Meera Nair', faculty: 21, students: 904, courses: 10, status: 'Under Review' },
-    { id: 'DEP-104', name: 'Business Administration', hod: 'Mr. Kavish Joshi', faculty: 14, students: 640, courses: 8, status: 'Active' },
-    { id: 'DEP-105', name: 'Civil Engineering', hod: 'Dr. Aisha Khan', faculty: 17, students: 740, courses: 7, status: 'Inactive' }
-  ];
+  const departments = [];
 
   const stats = [
-    { label: 'Total Departments', value: 18, trend: 'All active', tone: 'blue' },
-    { label: 'Total Students', value: 4826, trend: '+8.4%', tone: 'green' },
-    { label: 'Total Faculty', value: 312, trend: '+12 this month', tone: 'purple' },
-    { label: 'Courses', value: 86, trend: '+4 new', tone: 'orange' }
+    { label: 'Total Departments', value: 0, trend: 'No departments yet', tone: 'blue' },
+    { label: 'Total Students', value: 0, trend: '—', tone: 'green' },
+    { label: 'Total Faculty', value: 0, trend: '—', tone: 'purple' },
+    { label: 'Courses', value: 0, trend: '—', tone: 'orange' }
   ];
 
   const departmentStats = document.getElementById('departmentStats');

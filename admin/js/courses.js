@@ -6,13 +6,7 @@
   const statGlyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.courses) || '';
 
 
-  const courses = [
-    { code: 'CS201', name: 'Data Structures', department: 'Computer Science', faculty: 'Dr. Neha Sharma', semester: '3', credits: 4, students: 148, status: 'Active' },
-    { code: 'EC204', name: 'Signals and Systems', department: 'Electronics', faculty: 'Prof. Rohan Verma', semester: '4', credits: 4, students: 116, status: 'Active' },
-    { code: 'ME303', name: 'Thermodynamics', department: 'Mechanical', faculty: 'Dr. Meera Nair', semester: '5', credits: 3, students: 98, status: 'Draft' },
-    { code: 'BA110', name: 'Financial Accounting', department: 'Business Administration', faculty: 'Mr. Kavish Joshi', semester: '2', credits: 3, students: 86, status: 'Active' },
-    { code: 'IT410', name: 'Database Management', department: 'Information Technology', faculty: 'Prof. Vikas Malhotra', semester: '6', credits: 4, students: 122, status: 'Archived' }
-  ];
+  const courses = [];
 
   const courseStats = document.getElementById('courseStats');
   const courseTableBody = document.getElementById('courseTableBody');
@@ -29,10 +23,10 @@
 
   function renderStats() {
     const stats = [
-      { label: 'Total Courses', value: 86, trend: '+4 new', tone: 'blue' },
-      { label: 'Active', value: 64, trend: '74.4%', tone: 'green' },
-      { label: 'Departments', value: 18, trend: 'All active', tone: 'purple' },
-      { label: 'Enrolled Students', value: 4826, trend: '+3.1%', tone: 'orange' }
+      { label: 'Total Courses', value: 0, trend: 'No courses yet', tone: 'blue' },
+      { label: 'Active', value: 0, trend: '—', tone: 'green' },
+      { label: 'Departments', value: 0, trend: '—', tone: 'purple' },
+      { label: 'Enrolled Students', value: 0, trend: '—', tone: 'orange' }
     ];
     courseStats.innerHTML = stats.map(function (item) {
       return '<article class="stat-card stat-card--' + item.tone + '"><div class="stat-card-top"><div class="stat-icon stat-icon--' + item.tone + '">' + statGlyph + '</div></div><p class="stat-value">' + item.value + '</p><p class="stat-label">' + item.label + '</p><span class="stat-trend stat-trend--up">↗ ' + item.trend + '</span></article>';

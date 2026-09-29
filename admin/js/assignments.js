@@ -5,14 +5,7 @@
   if (!window.VectorOneAdmin || !window.VectorOneAdmin.createTablePage) return;
   const esc = window.VectorOneAdmin.escapeHtml;
 
-  const assignments = [
-    { id: 'ASG-01', title: 'DBMS Normalization Lab', course: 'Database Systems', faculty: 'Dr. Neha Sharma', due: '2026-08-28', submitted: 48, total: 52, status: 'Open' },
-    { id: 'ASG-02', title: 'Operating Systems Quiz', course: 'Operating Systems', faculty: 'Prof. Rohan Verma', due: '2026-08-22', submitted: 31, total: 45, status: 'Late' },
-    { id: 'ASG-03', title: 'Thermodynamics Problem Set', course: 'Mechanical Engineering', faculty: 'Dr. Meera Nair', due: '2026-09-02', submitted: 12, total: 40, status: 'Open' },
-    { id: 'ASG-04', title: 'Marketing Case Study', course: 'Business Administration', faculty: 'Mr. Kavish Joshi', due: '2026-08-19', submitted: 38, total: 38, status: 'Reviewed' },
-    { id: 'ASG-05', title: 'Bridge Design Report', course: 'Civil Engineering', faculty: 'Dr. Aisha Khan', due: '2026-08-30', submitted: 22, total: 34, status: 'Submitted' },
-    { id: 'ASG-06', title: 'Web Development Project', course: 'Information Technology', faculty: 'Prof. Vikas Malhotra', due: '2026-09-06', submitted: 27, total: 50, status: 'Open' }
-  ];
+  const assignments = [];
 
   function isOverdue(iso, status) { return status !== 'Reviewed' && new Date(iso).getTime() < Date.now(); }
 
@@ -24,10 +17,10 @@
     data: assignments,
     searchFields: ['title', 'course', 'faculty'],
     stats: [
-      { label: 'Total Assignments', value: 243, trend: '31 awaiting review', tone: 'blue' },
-      { label: 'Open', value: 118, trend: 'Currently active', tone: 'green' },
-      { label: 'Awaiting Review', value: 31, trend: 'Needs grading', tone: 'orange' },
-      { label: 'Avg Submission', value: '82%', trend: '+3% this week', tone: 'purple' }
+      { label: 'Total Assignments', value: 0, trend: 'No assignments yet', tone: 'blue' },
+      { label: 'Open', value: 0, trend: '—', tone: 'green' },
+      { label: 'Awaiting Review', value: 0, trend: '—', tone: 'orange' },
+      { label: 'Avg Submission', value: '—', trend: '—', tone: 'purple' }
     ],
     filters: [
       { id: 'assignmentCourseFilter', field: 'course', label: 'Course', auto: true },

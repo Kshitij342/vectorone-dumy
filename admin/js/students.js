@@ -6,22 +6,13 @@
   const statGlyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.students) || '';
 
 
-  const students = [
-    {id:'VO2024001', name:'Aarav Mehta', dept:'Computer Science', year:'2', division:'A', semester:'3', email:'aarav.mehta@vectorone.edu', phone:'+91 98765 10234', attendance:94, status:'Active'},
-    {id:'VO2024002', name:'Diya Sharma', dept:'Information Technology', year:'3', division:'B', semester:'5', email:'diya.sharma@vectorone.edu', phone:'+91 98765 21879', attendance:91, status:'Active'},
-    {id:'VO2024003', name:'Rohan Iyer', dept:'Mechanical Engineering', year:'4', division:'A', semester:'7', email:'rohan.iyer@vectorone.edu', phone:'+91 98765 33210', attendance:87, status:'Active'},
-    {id:'VO2024004', name:'Ananya Gupta', dept:'Computer Science', year:'1', division:'C', semester:'1', email:'ananya.gupta@vectorone.edu', phone:'+91 98765 44661', attendance:96, status:'Active'},
-    {id:'VO2024005', name:'Kabir Khan', dept:'Electronics', year:'2', division:'B', semester:'3', email:'kabir.khan@vectorone.edu', phone:'+91 98765 55902', attendance:74, status:'Suspended'},
-    {id:'VO2024006', name:'Meera Nair', dept:'Business Administration', year:'4', division:'A', semester:'7', email:'meera.nair@vectorone.edu', phone:'+91 98765 66913', attendance:89, status:'Graduated'},
-    {id:'VO2024007', name:'Vivaan Patel', dept:'Information Technology', year:'1', division:'A', semester:'1', email:'vivaan.patel@vectorone.edu', phone:'+91 98765 77324', attendance:92, status:'Active'},
-    {id:'VO2024008', name:'Ishita Roy', dept:'Computer Science', year:'3', division:'C', semester:'5', email:'ishita.roy@vectorone.edu', phone:'+91 98765 88535', attendance:98, status:'Active'}
-  ];
+  const students = [];
 
   const stats = [
-    { label: 'Total Students', value: '4,826', trend: '+8.4% this term', tone: 'blue' },
-    { label: 'Active Students', value: '4,341', trend: '89.9% enrolled', tone: 'green' },
-    { label: 'Graduated', value: '1,284', trend: '+214 this year', tone: 'purple' },
-    { label: 'New Admissions', value: '218', trend: '+32 this week', tone: 'orange' }
+    { label: 'Total Students', value: 0, trend: 'No students yet', tone: 'blue' },
+    { label: 'Active Students', value: 0, trend: '—', tone: 'green' },
+    { label: 'Graduated', value: 0, trend: '—', tone: 'purple' },
+    { label: 'New Admissions', value: 0, trend: '—', tone: 'orange' }
   ];
 
   const studentStats = document.getElementById('studentStats');

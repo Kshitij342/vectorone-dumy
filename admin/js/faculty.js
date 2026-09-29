@@ -6,16 +6,7 @@
   const statGlyph = (window.VectorOneAdmin && window.VectorOneAdmin.icons && window.VectorOneAdmin.icons.faculty) || '';
 
 
-  const faculty = [
-    { id: 'FAC-201', name: 'Dr. Neha Sharma', department: 'Computer Science', designation: 'Professor', email: 'neha.sharma@vectorone.edu', phone: '+91 98765 20321', courses: 'AI, Data Structures', status: 'Active' },
-    { id: 'FAC-202', name: 'Prof. Rohan Verma', department: 'Electronics', designation: 'Associate Professor', email: 'rohan.verma@vectorone.edu', phone: '+91 98765 20112', courses: 'Signals, Embedded Systems', status: 'Active' },
-    { id: 'FAC-203', name: 'Dr. Meera Nair', department: 'Mechanical', designation: 'HOD', email: 'meera.nair@vectorone.edu', phone: '+91 98765 23145', courses: 'Thermodynamics', status: 'On Leave' },
-    { id: 'FAC-204', name: 'Mr. Kavish Joshi', department: 'Business Administration', designation: 'Assistant Professor', email: 'kavish.joshi@vectorone.edu', phone: '+91 98765 31458', courses: 'Finance, Marketing', status: 'Active' },
-    { id: 'FAC-205', name: 'Dr. Aisha Khan', department: 'Civil Engineering', designation: 'Professor', email: 'aisha.khan@vectorone.edu', phone: '+91 98765 28090', courses: 'Bridge Design', status: 'Active' },
-    { id: 'FAC-206', name: 'Prof. Vikas Malhotra', department: 'Information Technology', designation: 'Senior Lecturer', email: 'vikas.malhotra@vectorone.edu', phone: '+91 98765 34019', courses: 'DBMS, Web Dev', status: 'Suspended' },
-    { id: 'FAC-207', name: 'Dr. Priya Sethi', department: 'Applied Sciences', designation: 'Associate Professor', email: 'priya.sethi@vectorone.edu', phone: '+91 98765 27891', courses: 'Chemistry, Physics', status: 'Active' },
-    { id: 'FAC-208', name: 'Ms. Sanya Iyer', department: 'Design', designation: 'Lecturer', email: 'sanya.iyer@vectorone.edu', phone: '+91 98765 20984', courses: 'Design Thinking', status: 'Active' }
-  ];
+  const faculty = [];
 
   const deptFilter = document.getElementById('deptFilter');
   const designationFilter = document.getElementById('designationFilter');
@@ -31,10 +22,10 @@
   const facultyModalClose = document.getElementById('facultyModalClose');
 
   const defaultStats = [
-    { label: 'Total Faculty', value: 312, trend: '+12 this month', tone: 'blue' },
-    { label: 'Departments', value: 18, trend: 'All active', tone: 'green' },
-    { label: 'Full-Time', value: 248, trend: '79.5%', tone: 'purple' },
-    { label: 'On Leave', value: 14, trend: '4.5%', tone: 'orange' }
+    { label: 'Total Faculty', value: 0, trend: 'No faculty yet', tone: 'blue' },
+    { label: 'Departments', value: 0, trend: '—', tone: 'green' },
+    { label: 'Full-Time', value: 0, trend: '—', tone: 'purple' },
+    { label: 'On Leave', value: 0, trend: '—', tone: 'orange' }
   ];
 
   function renderStats() {

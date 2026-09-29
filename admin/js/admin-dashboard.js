@@ -71,11 +71,11 @@
   window.VectorOneAdmin = window.VectorOneAdmin || {};
   window.VectorOneAdmin.icons = ICONS;
   window.VectorOneAdmin.statIcon = function (name) { return ICONS[name] || icon; };
-  const stats = [{label:'Total Students',value:4826,trend:'+8.4% this term',tone:'blue'},{label:'Total Faculty',value:312,trend:'+12 this month',tone:'green'},{label:'Departments',value:18,trend:'All active',tone:'purple'},{label:'Courses',value:86,trend:'+4 new courses',tone:'orange'},{label:'Assignments',value:243,trend:'31 awaiting review',tone:'blue'},{label:'Resources',value:1268,trend:'+42 this week',tone:'green'},{label:'Notices',value:128,trend:'9 published today',tone:'purple'},{label:'Events',value:34,trend:'6 this month',tone:'orange'},{label:'Attendance %',value:91.6,suffix:'%',trend:'+2.1% this week',tone:'blue'},{label:'Storage Used',value:68,suffix:'%',trend:'136 GB of 200 GB',tone:'green'},{label:'Pending Approvals',value:17,trend:'Needs attention',tone:'orange'},{label:'System Health',value:99.9,suffix:'%',trend:'All systems operational',tone:'purple'}];
+  const stats = [];
   const navigation = [{label:'Dashboard',file:'admin-dashboard.html',key:'dashboard'},{label:'Students',file:'students.html',key:'students'},{label:'Faculty',file:'faculty.html',key:'faculty'},{label:'Departments',file:'departments.html',key:'departments'},{label:'Courses',file:'courses.html',key:'courses'},{label:'Attendance',file:'attendance.html',key:'attendance'},{label:'Notices',file:'notices.html',key:'notices'},{label:'Events',file:'events.html',key:'events'},{label:'Assignments',file:'assignments.html',key:'assignments'},{label:'Resources',file:'resources.html',key:'resources'},{label:'Messages',file:'messages.html',key:'messages'},{label:'Reports',file:'reports.html',key:'reports'},{label:'Analytics',file:'analytics.html',key:'analytics'},{label:'Settings',file:'settings.html',key:'settings'},{label:'Profile',file:'profile.html',key:'profile'}];
-  const registrations = [{name:'Mira Kapoor',meta:'B.Tech Computer Science · 2026',status:'Pending'},{name:'Arjun Nair',meta:'BBA Finance · 2027',status:'Approved'},{name:'Sana Iqbal',meta:'MCA · 2026',status:'Pending'},{name:'Dev Patel',meta:'B.Tech Electronics · 2028',status:'Approved'}];
-  const notifications = ['17 student registrations need approval','Department of Design submitted a new course','Storage usage reached 68%','Attendance report is ready','Two faculty accounts were updated'];
-  const searchData = [{title:'Mira Kapoor',type:'Student'},{title:'Dr. Rohan Mehta',type:'Faculty'},{title:'Cloud Computing Lab Manual',type:'Resource'},{title:'Annual Tech Symposium',type:'Event'},{title:'Semester Examination Notice',type:'Notice'},{title:'DBMS Assignment Review',type:'Assignment'}];
+  const registrations = [];
+  const notifications = [];
+  const searchData = [];
   function applyTheme(theme) {
     root.setAttribute('data-theme', theme);
     localStorage.setItem('cc-theme', theme);
@@ -159,7 +159,9 @@
 
   const registrationsList = document.getElementById('registrationsList');
   if (registrationsList) {
-    registrationsList.innerHTML = registrations.map(function (item) { return '<div class="admin-row"><span class="admin-avatar">' + item.name.split(' ').map(function (part) { return part[0]; }).join('') + '</span><div class="row-copy"><strong>' + item.name + '</strong><span>' + item.meta + '</span></div><span class="status-tag ' + (item.status === 'Pending' ? 'is-pending' : 'is-approved') + '">' + item.status + '</span></div>'; }).join('');
+    registrationsList.innerHTML = registrations.length
+      ? registrations.map(function (item) { return '<div class="admin-row"><span class="admin-avatar">' + item.name.split(' ').map(function (part) { return part[0]; }).join('') + '</span><div class="row-copy"><strong>' + item.name + '</strong><span>' + item.meta + '</span></div><span class="status-tag ' + (item.status === 'Pending' ? 'is-pending' : 'is-approved') + '">' + item.status + '</span></div>'; }).join('')
+      : '<p class="empty-state-msg">No pending registrations.</p>';
   }
   const analyticsGrid = document.getElementById('analyticsGrid');
   const chart = function (title, subtitle, values) { return '<article class="analytic-card"><h4>' + title + '</h4><p>' + subtitle + '</p><div class="bar-chart">' + values.map(function (value) { return '<span style="height:' + value + '%"></span>'; }).join('') + '</div><div class="metric-legend"><span>Current period</span><span>Updated now</span></div></article>'; };
@@ -168,23 +170,25 @@
   }
   const noticesList = document.getElementById('noticesList');
   if (noticesList) {
-    noticesList.innerHTML = ['Examination timetable published','Faculty development workshop','Scholarship application window'].map(function (item, index) { return '<div class="feed-row">' + icon + '<div class="row-copy"><strong>' + item + '</strong><span>' + (index + 1) + ' hour' + (index ? 's' : '') + ' ago · Notice</span></div></div>'; }).join('');
+    noticesList.innerHTML = '<p class="empty-state-msg">No recent notices.</p>';
   }
   const eventsList = document.getElementById('eventsList');
   if (eventsList) {
-    eventsList.innerHTML = ['Innovation Day 2026','Alumni mentorship session','Inter-department sports meet'].map(function (item, index) { return '<div class="feed-row">' + icon + '<div class="row-copy"><strong>' + item + '</strong><span>' + ['Aug 08','Aug 12','Aug 18'][index] + ' · Event</span></div></div>'; }).join('');
+    eventsList.innerHTML = '<p class="empty-state-msg">No upcoming events.</p>';
   }
   function renderFeed(id, items) {
     const list = document.getElementById(id);
     if (!list) return;
-    list.innerHTML = items.map(function (item, index) { return '<div class="feed-row">' + icon + '<div class="row-copy"><strong>' + item + '</strong><span>' + ['Pending review','Updated today','New announcement'][index] + '</span></div></div>'; }).join('');
+    list.innerHTML = (items && items.length)
+      ? items.map(function (item, index) { return '<div class="feed-row">' + icon + '<div class="row-copy"><strong>' + item + '</strong><span>' + ['Pending review','Updated today','New announcement'][index] + '</span></div></div>'; }).join('')
+      : '<p class="empty-state-msg">No recent activity.</p>';
   }
-  renderFeed('reviewsList', ['DBMS Lab 4 · 48 submissions','Operating Systems Quiz · 31 submissions','Design Thinking Case Study · 22 submissions']);
-  renderFeed('facultyActivityList', ['Dr. N. Sethi added attendance','Prof. R. Mehta uploaded a resource','Ms. P. Rao created an assignment']);
-  renderFeed('announcementsList', ['Campus maintenance on Sunday','Library hours extended for exams','Mentorship applications are open']);
+  renderFeed('reviewsList', []);
+  renderFeed('facultyActivityList', []);
+  renderFeed('announcementsList', []);
   const activityTimeline = document.getElementById('activityTimeline');
   if (activityTimeline) {
-    activityTimeline.innerHTML = ['Administrator approved 12 student registrations','Prof. Mehta published Cloud Computing resources','Attendance report generated for Computer Science','New course submitted by the Design department'].map(function (item, index) { return '<li><strong>' + item + '</strong><time>' + (index + 1) + ' hour' + (index ? 's' : '') + ' ago</time></li>'; }).join('');
+    activityTimeline.innerHTML = '<li><p class="empty-state-msg">No recent activity.</p></li>';
   }
   const quickActions = document.getElementById('quickActions');
   if (quickActions) {
@@ -193,23 +197,28 @@
   }
   const loginsList = document.getElementById('loginsList');
   if (loginsList) {
-    loginsList.innerHTML = ['Dr. Neha Sethi · Faculty','Mira Kapoor · Student','Karan Singh · Student'].map(function (item, index) { return '<div class="compact-row"><span class="admin-avatar">' + item[0] + '</span><div class="row-copy"><strong>' + item + '</strong><span>Successful sign-in</span></div><time>' + (index + 2) + 'm</time></div>'; }).join('');
+    loginsList.innerHTML = '<p class="empty-state-msg">No recent logins.</p>';
   }
   const sidebarNotifications = document.getElementById('sidebarNotifications');
   if (sidebarNotifications) {
-    sidebarNotifications.innerHTML = notifications.slice(0, 3).map(function (item, index) { return '<div class="compact-row"><span class="admin-avatar">!</span><div class="row-copy"><strong>' + item + '</strong><span>' + (index + 1) + ' hour ago</span></div></div>'; }).join('');
+    const recentNotifs = notifications.slice(0, 3);
+    sidebarNotifications.innerHTML = recentNotifs.length
+      ? recentNotifs.map(function (item, index) { return '<div class="compact-row"><span class="admin-avatar">!</span><div class="row-copy"><strong>' + item + '</strong><span>' + (index + 1) + ' hour ago</span></div></div>'; }).join('')
+      : '<p class="empty-state-msg">No notifications.</p>';
   }
   const deadlinesList = document.getElementById('deadlinesList');
   if (deadlinesList) {
-    deadlinesList.innerHTML = ['Assignment review · Today, 5:00 PM','Attendance lock · Tomorrow','Resource audit · Aug 05'].map(function (item) { return '<div class="compact-row"><div class="row-copy"><strong>' + item + '</strong><span>Administrative deadline</span></div></div>'; }).join('');
+    deadlinesList.innerHTML = '<p class="empty-state-msg">No upcoming deadlines.</p>';
   }
   const systemStatus = document.getElementById('systemStatus');
   if (systemStatus) {
-    systemStatus.innerHTML = [['Server Health','Operational'],['Database Status','Healthy'],['Storage Usage','68% used']].map(function (item) { return '<div class="status-row"><strong>' + item[0] + '</strong><span class="status-pill">' + item[1] + '</span></div>'; }).join('');
+    systemStatus.innerHTML = [['Server Health','Operational'],['Database Status','Connected']].map(function (item) { return '<div class="status-row"><strong>' + item[0] + '</strong><span class="status-pill">' + item[1] + '</span></div>'; }).join('');
   }
   const notificationList = document.getElementById('notificationList');
   if (notificationList) {
-    notificationList.innerHTML = notifications.map(function (item, index) { return '<li class="notification-item is-unread"><span class="notification-dot" aria-hidden="true"></span><div><p class="notification-text">' + item + '</p><span class="notification-time">' + (index + 1) + ' hour' + (index ? 's' : '') + ' ago</span></div></li>'; }).join('');
+    notificationList.innerHTML = notifications.length
+      ? notifications.map(function (item, index) { return '<li class="notification-item is-unread"><span class="notification-dot" aria-hidden="true"></span><div><p class="notification-text">' + item + '</p><span class="notification-time">' + (index + 1) + ' hour' + (index ? 's' : '') + ' ago</span></div></li>'; }).join('')
+      : '<li class="notification-item"><p class="empty-state-msg" style="padding: 12px 0;">No new notifications.</p></li>';
   }
   function wirePopover(buttonId, panelId) {
     const button = document.getElementById(buttonId), panel = document.getElementById(panelId);

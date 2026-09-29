@@ -5,14 +5,7 @@
   if (!window.VectorOneAdmin || !window.VectorOneAdmin.createTablePage) return;
   const esc = window.VectorOneAdmin.escapeHtml;
 
-  const resources = [
-    { id: 'RES-01', title: 'Cloud Computing Lab Manual', ext: 'PDF', type: 'PDF', department: 'Computer Science', uploader: 'Dr. Neha Sharma', size: '4.2 MB', downloads: 318, status: 'Published' },
-    { id: 'RES-02', title: 'Signals and Systems Lecture Series', ext: 'MP4', type: 'Video', department: 'Electronics', uploader: 'Prof. Rohan Verma', size: '212 MB', downloads: 145, status: 'Published' },
-    { id: 'RES-03', title: 'Thermodynamics Formula Sheet', ext: 'PDF', type: 'PDF', department: 'Mechanical', uploader: 'Dr. Meera Nair', size: '1.1 MB', downloads: 402, status: 'Published' },
-    { id: 'RES-04', title: 'Marketing Strategy Deck', ext: 'PPTX', type: 'Presentation', department: 'Business Administration', uploader: 'Mr. Kavish Joshi', size: '8.6 MB', downloads: 96, status: 'Review' },
-    { id: 'RES-05', title: 'Structural Analysis Notes', ext: 'DOCX', type: 'Document', department: 'Civil Engineering', uploader: 'Dr. Aisha Khan', size: '2.4 MB', downloads: 187, status: 'Published' },
-    { id: 'RES-06', title: 'DBMS Practice Question Bank', ext: 'PDF', type: 'PDF', department: 'Information Technology', uploader: 'Prof. Vikas Malhotra', size: '3.8 MB', downloads: 254, status: 'Draft' }
-  ];
+  const resources = [];
 
   const page = window.VectorOneAdmin.createTablePage({
     prefix: 'resource',
@@ -22,10 +15,10 @@
     data: resources,
     searchFields: ['title', 'type', 'department', 'uploader'],
     stats: [
-      { label: 'Total Resources', value: 1268, trend: '+42 this week', tone: 'blue' },
-      { label: 'Published', value: 1094, trend: '86% live', tone: 'green' },
-      { label: 'Total Downloads', value: '18.4K', trend: '+1.2K this month', tone: 'purple' },
-      { label: 'Storage Used', value: '136 GB', trend: 'of 200 GB', tone: 'orange' }
+      { label: 'Total Resources', value: 0, trend: 'No resources yet', tone: 'blue' },
+      { label: 'Published', value: 0, trend: '—', tone: 'green' },
+      { label: 'Total Downloads', value: 0, trend: '—', tone: 'purple' },
+      { label: 'Storage Used', value: '—', trend: '—', tone: 'orange' }
     ],
     filters: [
       { id: 'resourceTypeFilter', field: 'type', label: 'Type' },

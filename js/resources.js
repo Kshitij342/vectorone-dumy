@@ -1244,8 +1244,8 @@
       fetch(API_BASE + '/resources?limit=50', { headers: headers })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-            const liveResources = res.data.map(function (d, i) {
+          if (res.success && res.data !== undefined && res.data !== null) {
+            const liveResources = (Array.isArray(res.data) ? res.data : []).map(function (d, i) {
               const ext = (d.fileExtension || 'PDF').toLowerCase();
               const dateStr = d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent';
               return {
