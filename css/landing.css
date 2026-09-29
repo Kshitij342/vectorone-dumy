@@ -14,7 +14,7 @@
   --bg: #F8FAFC;
   --surface: #FFFFFF;
   --card: #FFFFFF;
-  --primary: #2563EB;
+  --primary: #12355B;
   --primary-hover: #1D4ED8;
   --primary-press: #1E40AF;
   --border: #E2E8F0;
@@ -25,7 +25,7 @@
 
   --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 10px rgba(15, 23, 42, 0.04), 0 20px 40px -12px rgba(15, 23, 42, 0.12);
   --shadow-btn: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-btn-hover: 0 6px 16px -4px rgba(37, 99, 235, 0.32);
+  --shadow-btn-hover: 0 6px 16px -4px rgba(18, 53, 91, 0.32);
   --shadow-flyout: 0 8px 16px rgba(15, 23, 42, 0.06), 0 24px 48px -12px rgba(15, 23, 42, 0.18);
   --scrim: rgba(15, 23, 42, 0.04);
 
@@ -55,7 +55,7 @@
   --bg: #0F172A;
   --surface: #1E293B;
   --card: #111827;
-  --primary: #2563EB;
+  --primary: #12355B;
   --primary-hover: #3B76F0;
   --primary-press: #1D4ED8;
   --border: #334155;
@@ -66,7 +66,7 @@
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.24), 0 24px 48px -12px rgba(0, 0, 0, 0.55);
   --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-btn-hover: 0 6px 18px -4px rgba(37, 99, 235, 0.45);
+  --shadow-btn-hover: 0 6px 18px -4px rgba(18, 53, 91, 0.45);
   --shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.3), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
   --scrim: rgba(255, 255, 255, 0.03);
 
@@ -179,7 +179,7 @@ img, svg { display: block; }
   white-space: nowrap;
   flex-shrink: 0;
 }
-.tag--academic { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.tag--academic { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .tag--placement { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
 .tag--exam { background: var(--danger-bg); color: var(--danger); }
 
@@ -203,7 +203,7 @@ img, svg { display: block; }
   flex-shrink: 0;
 }
 .status--pending { background: rgba(245, 158, 11, 0.14); color: var(--warning-text); }
-.status--submitted { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.status--submitted { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .status--completed { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 
 /* ---------- Mini calendar (identical to dashboard.css) ---------- */
@@ -373,7 +373,7 @@ img, svg { display: block; }
   animation: rippleAnim 500ms ease-out;
   pointer-events: none;
 }
-.btn-outline .ripple { background: rgba(37, 99, 235, 0.18); }
+.btn-outline .ripple { background: rgba(18, 53, 91, 0.18); }
 
 /* ============================================================
    MOBILE NAV DRAWER (landing-page-only addition — same backdrop
@@ -550,7 +550,7 @@ img, svg { display: block; }
 }
 .mockup-rail-icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--text-secondary); }
 .mockup-rail-icon svg { width: 15px; height: 15px; }
-.mockup-rail-icon.is-active { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.mockup-rail-icon.is-active { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 
 .mockup-main { flex: 1; min-width: 0; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); }
 
@@ -568,7 +568,7 @@ img, svg { display: block; }
 }
 .mockup-stat-icon { width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; margin-bottom: 5px; }
 .mockup-stat-icon svg { width: 12px; height: 12px; }
-.mockup-stat-icon--blue { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.mockup-stat-icon--blue { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .mockup-stat-icon--green { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 .mockup-stat-icon--purple { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
 .mockup-stat strong { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
@@ -620,7 +620,7 @@ img, svg { display: block; }
 }
 .floating-card-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; }
 .floating-card-icon svg { width: 16px; height: 16px; }
-.floating-card-icon--blue { background: rgba(37, 99, 235, 0.14); color: var(--primary); }
+.floating-card-icon--blue { background: rgba(18, 53, 91, 0.14); color: var(--primary); }
 .floating-card-icon--green { background: rgba(22, 163, 74, 0.14); color: var(--success); }
 .floating-card-icon--orange { background: rgba(245, 158, 11, 0.16); color: var(--warning); }
 .floating-card-icon--purple { background: rgba(124, 58, 237, 0.14); color: var(--accent-purple); }
@@ -668,7 +668,7 @@ img, svg { display: block; }
 }
 .feature-tile:hover .feature-tile-icon { transform: scale(1.08) rotate(-4deg); }
 .feature-tile-icon svg { width: 19px; height: 19px; }
-.feature-tile-icon--blue { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.feature-tile-icon--blue { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .feature-tile-icon--green { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 .feature-tile-icon--orange { background: rgba(245, 158, 11, 0.14); color: var(--warning); }
 .feature-tile-icon--purple { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
@@ -711,7 +711,7 @@ img, svg { display: block; }
 .benefit-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
 .benefit-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 12px; }
 .benefit-icon svg { width: 19px; height: 19px; }
-.benefit-icon--blue { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.benefit-icon--blue { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .benefit-icon--green { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 .benefit-icon--orange { background: rgba(245, 158, 11, 0.14); color: var(--warning); }
 .benefit-icon--purple { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
@@ -802,7 +802,7 @@ img, svg { display: block; }
 .mv-event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .mv-event-tile { aspect-ratio: 1; border-radius: 9px; display: grid; place-items: center; box-shadow: var(--shadow-card); }
 .mv-event-tile svg { width: 16px; height: 16px; }
-.mv-event-tile--blue { background: rgba(37, 99, 235, 0.16); color: var(--primary); }
+.mv-event-tile--blue { background: rgba(18, 53, 91, 0.16); color: var(--primary); }
 .mv-event-tile--green { background: rgba(22, 163, 74, 0.16); color: var(--success); }
 .mv-event-tile--orange { background: rgba(245, 158, 11, 0.18); color: var(--warning); }
 .mv-event-tile--purple { background: rgba(124, 58, 237, 0.16); color: var(--accent-purple); }

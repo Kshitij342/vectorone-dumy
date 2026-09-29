@@ -101,7 +101,7 @@
 .assignment-card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .assignment-card-actions .icon-btn { width: 34px; height: 34px; }
 .assignment-card-actions .icon-btn svg { width: 16px; height: 16px; }
-.assignment-card-actions .bookmark-btn.is-bookmarked { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); color: var(--primary); }
+.assignment-card-actions .bookmark-btn.is-bookmarked { border-color: var(--primary); background: rgba(18, 53, 91, 0.08); color: var(--primary); }
 .assignment-card-actions .share-btn.is-copied { color: var(--success); border-color: var(--success); background: rgba(22, 163, 74, 0.08); }
 
 .assignment-subject {
@@ -202,7 +202,7 @@
   flex-shrink: 0;
 }
 .status--pending { background: rgba(245, 158, 11, 0.14); color: var(--warning-text); }
-.status--submitted { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.status--submitted { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .status--overdue { background: var(--danger-bg); color: var(--danger); }
 .status--completed { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 
@@ -320,8 +320,8 @@
   transition: border-color 180ms ease, background-color 180ms ease;
 }
 .upload-dropzone:hover,
-.upload-dropzone:focus-visible { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
-.upload-dropzone.is-dragover { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); }
+.upload-dropzone:focus-visible { border-color: var(--primary); background: rgba(18, 53, 91, 0.05); }
+.upload-dropzone.is-dragover { border-color: var(--primary); background: rgba(18, 53, 91, 0.08); }
 .upload-dropzone svg { width: 34px; height: 34px; color: var(--text-secondary); }
 .upload-dropzone-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
 .upload-dropzone-hint { font-size: 12px; color: var(--text-secondary); }

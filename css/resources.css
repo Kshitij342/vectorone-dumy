@@ -14,7 +14,7 @@
   --bg: #F8FAFC;
   --surface: #FFFFFF;
   --card: #FFFFFF;
-  --primary: #2563EB;
+  --primary: #12355B;
   --primary-hover: #1D4ED8;
   --primary-press: #1E40AF;
   --border: #E2E8F0;
@@ -25,7 +25,7 @@
 
   --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 10px rgba(15, 23, 42, 0.04), 0 20px 40px -12px rgba(15, 23, 42, 0.12);
   --shadow-btn: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-btn-hover: 0 6px 16px -4px rgba(37, 99, 235, 0.32);
+  --shadow-btn-hover: 0 6px 16px -4px rgba(18, 53, 91, 0.32);
   --shadow-flyout: 0 8px 16px rgba(15, 23, 42, 0.06), 0 24px 48px -12px rgba(15, 23, 42, 0.18);
   --scrim: rgba(15, 23, 42, 0.04);
 
@@ -55,7 +55,7 @@
   --bg: #0F172A;
   --surface: #1E293B;
   --card: #111827;
-  --primary: #2563EB;
+  --primary: #12355B;
   --primary-hover: #3B76F0;
   --primary-press: #1D4ED8;
   --border: #334155;
@@ -66,7 +66,7 @@
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.24), 0 24px 48px -12px rgba(0, 0, 0, 0.55);
   --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-btn-hover: 0 6px 18px -4px rgba(37, 99, 235, 0.45);
+  --shadow-btn-hover: 0 6px 18px -4px rgba(18, 53, 91, 0.45);
   --shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.3), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
   --scrim: rgba(255, 255, 255, 0.03);
 
@@ -250,7 +250,7 @@ table { border-collapse: collapse; width: 100%; }
   outline: none;
   border-color: var(--primary);
   background: var(--surface);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 4px rgba(18, 53, 91, 0.14);
 }
 .search-kbd {
   position: absolute;
@@ -342,7 +342,7 @@ table { border-collapse: collapse; width: 100%; }
 /* Highlight wraps a whole matched word — no padding, so it can never
    visually appear to split a word or insert a gap between letters. */
 .search-item mark {
-  background: rgba(37, 99, 235, 0.16);
+  background: rgba(18, 53, 91, 0.16);
   color: var(--primary);
   border-radius: 4px;
   padding: 0;
@@ -514,7 +514,7 @@ table { border-collapse: collapse; width: 100%; }
 .sidebar-link:hover { background: var(--scrim); color: var(--text); }
 .sidebar-link:hover svg { transform: translateX(1px); }
 .sidebar-link.is-active {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(18, 53, 91, 0.1);
   color: var(--primary);
   font-weight: 600;
 }
@@ -693,7 +693,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
   font-weight: 700;
   white-space: nowrap;
 }
-.tag--academic { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.tag--academic { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .tag--placement { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
 .tag--exam { background: var(--danger-bg); color: var(--danger); }
 .tag--sports { background: rgba(22, 163, 74, 0.12); color: var(--success); }
@@ -822,7 +822,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
   animation: rippleAnim 500ms ease-out;
   pointer-events: none;
 }
-.btn-outline .ripple { background: rgba(37, 99, 235, 0.18); }
+.btn-outline .ripple { background: rgba(18, 53, 91, 0.18); }
 @keyframes rippleAnim {
   to { transform: scale(2.6); opacity: 0; }
 }
@@ -887,7 +887,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
 .page-search input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 3px rgba(18, 53, 91, 0.14);
 }
 .page-toolbar .filter-chips { gap: 8px; }
 .page-toolbar .filter-chip { padding: 7px 14px; }
@@ -903,7 +903,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
   background: var(--surface);
   border: 1px solid var(--border);
 }
-.card-actions .bookmark-btn.is-bookmarked { border-color: var(--primary); background: rgba(37, 99, 235, 0.08); }
+.card-actions .bookmark-btn.is-bookmarked { border-color: var(--primary); background: rgba(18, 53, 91, 0.08); }
 .card-actions .share-btn.is-copied { color: var(--success); border-color: var(--success); background: rgba(22, 163, 74, 0.08); }
 
 /* ============================================================
@@ -1109,7 +1109,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
 .stat-trend--flat { color: var(--text-secondary); }
 
 .stat-card--blue { --accent: var(--primary); }
-.stat-icon--blue { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.stat-icon--blue { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .stat-card--green { --accent: var(--success); }
 .stat-icon--green { background: rgba(22, 163, 74, 0.12); color: var(--success); }
 .stat-card--orange { --accent: var(--warning); }
@@ -1202,7 +1202,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
 }
 .file-badge--pdf { background: var(--danger-bg); color: var(--danger); }
 .file-badge--ppt { background: rgba(245, 158, 11, 0.16); color: var(--warning-text); }
-.file-badge--doc { background: rgba(37, 99, 235, 0.12); color: var(--primary); }
+.file-badge--doc { background: rgba(18, 53, 91, 0.12); color: var(--primary); }
 .file-badge--zip { background: rgba(124, 58, 237, 0.12); color: var(--accent-purple); }
 .file-badge--video { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
 .file-badge--xls { background: rgba(22, 163, 74, 0.12); color: var(--success); }
@@ -1688,7 +1688,7 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
 
 @keyframes pulseGlow {
   0%, 100% { box-shadow: var(--shadow-card); }
-  50% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25), var(--shadow-card-hover); }
+  50% { box-shadow: 0 0 0 4px rgba(18, 53, 91, 0.25), var(--shadow-card-hover); }
 }
 .is-pulsing { animation: pulseGlow 600ms ease 2; }
 

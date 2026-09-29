@@ -70,7 +70,7 @@
 .student-filterbar select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+  box-shadow: 0 0 0 3px rgba(18, 53, 91, .12);
 }
 
 .table-scroll {
