@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign in · VectorOne</title>
-  <meta name="description"
-    content="Sign in to VectorOne — your campus notices, events and deadlines in one workspace." />
+  <meta name="description" content="Sign in to VectorOne — College Management System." />
 
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +13,7 @@
 
   <link rel="stylesheet" href="css/login.css" />
 
-  <!-- Prevent theme flash: apply saved theme before paint -->
+  <!-- Anti-flash theme init -->
   <script>
     (function () {
       var saved = localStorage.getItem('cc-theme');
@@ -24,204 +22,38 @@
     })();
   </script>
 </head>
-
 <body>
 
-  <!-- ===================== THEME TOGGLE ===================== -->
-  <button type="button" id="themeToggle" class="theme-toggle" aria-label="Switch to light theme" aria-pressed="false"
-    title="Toggle theme">
-    <!-- Sun icon -->
+  <!-- Theme toggle -->
+  <button type="button" id="themeToggle" class="theme-toggle" aria-label="Switch to light theme" aria-pressed="false" title="Toggle theme">
     <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8" />
-      <path
-        d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4"
-        stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      <path d="M12 2.5V5M12 19V21.5M4.5 12H2M22 12H19.5M5.6 5.6L7.4 7.4M16.6 16.6L18.4 18.4M18.4 5.6L16.6 7.4M7.4 16.6L5.6 18.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
     </svg>
-    <!-- Moon icon -->
     <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8"
-        stroke-linejoin="round" />
+      <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
     </svg>
   </button>
 
   <div class="page">
-
-    <!-- ===================== LEFT: ILLUSTRATION PANEL ===================== -->
-    <section class="showcase" aria-hidden="true">
-      <div class="showcase-inner">
-
-        <svg class="showcase-illustration" viewBox="0 0 520 560" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- dot grid backdrop -->
-          <defs>
-            <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="1.4" class="dot" />
-            </pattern>
-            <clipPath id="cardClip">
-              <rect x="0" y="0" width="220" height="150" rx="14" />
-            </clipPath>
-          </defs>
-          <rect x="0" y="0" width="520" height="560" fill="url(#dotGrid)" />
-
-          <!-- floating notice card: event -->
-          <g transform="translate(48 74) rotate(-6)">
-            <rect x="0" y="0" width="222" height="150" rx="14" class="panel-card" />
-            <rect x="0" y="0" width="222" height="150" rx="14" class="panel-card-stroke" />
-            <rect x="22" y="24" width="46" height="46" rx="10" class="chip-fill" />
-            <text x="45" y="53" text-anchor="middle" class="chip-emoji">15</text>
-            <rect x="82" y="30" width="112" height="10" rx="5" class="line-strong" />
-            <rect x="82" y="48" width="80" height="8" rx="4" class="line-soft" />
-            <rect x="22" y="92" width="178" height="8" rx="4" class="line-soft" />
-            <rect x="22" y="108" width="140" height="8" rx="4" class="line-soft" />
-            <rect x="22" y="126" width="60" height="20" rx="6" class="tag-fill" />
-          </g>
-
-          <!-- floating notice card: notice -->
-          <g transform="translate(268 210) rotate(4)">
-            <rect x="0" y="0" width="204" height="128" rx="14" class="panel-card panel-card--alt" />
-            <rect x="0" y="0" width="204" height="128" rx="14" class="panel-card-stroke" />
-            <circle cx="34" cy="34" r="16" class="chip-fill-alt" />
-            <path d="M34 26v10l6 6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <rect x="62" y="26" width="118" height="9" rx="4.5" class="line-strong" />
-            <rect x="62" y="43" width="90" height="7" rx="3.5" class="line-soft" />
-            <rect x="20" y="72" width="164" height="7" rx="3.5" class="line-soft" />
-            <rect x="20" y="88" width="120" height="7" rx="3.5" class="line-soft" />
-          </g>
-
-          <!-- central calendar module -->
-          <g transform="translate(120 300)">
-            <rect x="0" y="0" width="280" height="220" rx="18" class="cal-body" />
-            <rect x="0" y="0" width="280" height="56" rx="18" class="cal-header" />
-            <rect x="0" y="38" width="280" height="18" class="cal-header" />
-            <rect x="30" y="-14" width="10" height="34" rx="5" class="cal-ring" />
-            <rect x="240" y="-14" width="10" height="34" rx="5" class="cal-ring" />
-            <text x="24" y="35" class="cal-month">October</text>
-
-            <!-- calendar grid dots (days) -->
-            <g class="cal-grid">
-              <!-- row 1 -->
-              <circle cx="34" cy="86" r="3" />
-              <circle cx="64" cy="86" r="3" />
-              <circle cx="94" cy="86" r="3" />
-              <circle cx="124" cy="86" r="3" />
-              <circle cx="154" cy="86" r="3" />
-              <circle cx="184" cy="86" r="3" />
-              <circle cx="214" cy="86" r="3" />
-              <!-- row 2 -->
-              <circle cx="34" cy="118" r="3" />
-              <circle cx="64" cy="118" r="3" />
-              <circle cx="94" cy="118" r="3" />
-              <circle cx="154" cy="118" r="3" />
-              <circle cx="184" cy="118" r="3" />
-              <circle cx="214" cy="118" r="3" />
-              <!-- row 3 -->
-              <circle cx="34" cy="150" r="3" />
-              <circle cx="64" cy="150" r="3" />
-              <circle cx="94" cy="150" r="3" />
-              <circle cx="124" cy="150" r="3" />
-              <circle cx="184" cy="150" r="3" />
-              <circle cx="214" cy="150" r="3" />
-              <!-- row 4 -->
-              <circle cx="34" cy="182" r="3" />
-              <circle cx="94" cy="182" r="3" />
-              <circle cx="124" cy="182" r="3" />
-              <circle cx="154" cy="182" r="3" />
-              <circle cx="184" cy="182" r="3" />
-            </g>
-
-            <!-- highlighted "today / event" marker -->
-            <circle cx="124" cy="118" r="12" class="cal-highlight" />
-            <circle cx="124" cy="118" r="3" fill="var(--card)" />
-          </g>
-
-          <!-- connecting line motif -->
-          <path d="M160 150 C 180 190, 200 210, 230 230" class="connector" stroke-dasharray="1 8" />
-          <path d="M300 340 C 340 320, 360 280, 340 240" class="connector" stroke-dasharray="1 8" />
-        </svg>
-
-        <div class="showcase-copy">
-          <h2>One Platform. Every Update.</h2>
-          <p>VectorOne brings notices, events, workshops, assignments, deadlines, and campus announcements together in
-            one organized workspace, helping students stay informed without switching between multiple WhatsApp groups,
-            emails, or websites.</p>
-        </div>
-
-        <!-- Feature highlights — quiet, single-line cards, not another hero -->
-        <ul class="feature-grid">
-          <li class="feature-card">
-            <span class="feature-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4 18V9a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v9" stroke="currentColor" stroke-width="1.6"
-                  stroke-linecap="round" />
-                <path d="M2.5 18h19M9 21h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
-            </span>
-            <div>
-              <h3>Smart notices</h3>
-              <p>Important announcements land instantly, sorted by relevance.</p>
-            </div>
-          </li>
-          <li class="feature-card">
-            <span class="feature-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6" />
-                <path d="M3.5 9.5h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
-            </span>
-            <div>
-              <h3>Event calendar</h3>
-              <p>Track workshops, hackathons and college events in one view.</p>
-            </div>
-          </li>
-          <li class="feature-card">
-            <span class="feature-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.4L4.5 16h15L17.5 12.4V9A5.5 5.5 0 0 0 12 3.5Z"
-                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                <path d="M9.7 19a2.4 2.4 0 0 0 4.6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
-            </span>
-            <div>
-              <h3>Real-time alerts</h3>
-              <p>Never miss a deadline or last-minute schedule change.</p>
-            </div>
-          </li>
-          <li class="feature-card">
-            <span class="feature-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="8.5" cy="9" r="3" stroke="currentColor" stroke-width="1.6" />
-                <circle cx="16" cy="10.5" r="2.4" stroke="currentColor" stroke-width="1.6" />
-                <path d="M3 19c0-2.8 2.5-4.5 5.5-4.5S14 16.2 14 19M14.5 19c0-2.1 1.7-3.6 4-3.6S21 17.4 21 19"
-                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
-            </span>
-            <div>
-              <h3>Student collaboration</h3>
-              <p>Stay connected with clubs, batches and your campus community.</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- ===================== RIGHT: LOGIN CARD ===================== -->
     <main class="auth">
       <div class="auth-card">
 
         <div class="brand">
-          <!-- Dedicated 80x80 logo slot — transparent, no white square or
-               colored circle behind it, so it drops in cleanly on both
-               themes. Swap the SVG below for the official VectorOne mark
-               when it's provided; nothing else needs to change. -->
-          <div class="brand-logo-slot" aria-hidden="true">
-            <svg class="brand-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="6" stroke-linecap="round"
-                stroke-linejoin="round" />
-              <circle cx="40" cy="14" r="5" class="logo-dot" />
-            </svg>
-          </div>
+          <a href="index.html" class="brand-logo-link" title="VectorOne Home">
+            <div class="brand-logo-slot" aria-hidden="true">
+              <svg class="brand-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 20 L40 62 L66 20" stroke="var(--primary)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="40" cy="14" r="5" class="logo-dot" />
+              </svg>
+            </div>
+          </a>
           <h1 class="brand-name">VectorOne</h1>
-          <p class="brand-tagline">Sign in to your workspace</p>
+          <p class="brand-tagline">College Management System</p>
+        </div>
+
+        <div class="form-title-row">
+          <h2>Sign In</h2>
         </div>
 
         <form id="loginForm" class="login-form" novalidate>
@@ -245,13 +77,10 @@
             <label for="email">Email address</label>
             <div class="input-wrap">
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3.5 6.5h17a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z"
-                  stroke="currentColor" stroke-width="1.6" />
-                <path d="M3.8 7.2 12 13l8.2-5.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                  stroke-linejoin="round" />
+                <path d="M3.5 6.5h17a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" />
+                <path d="M3.8 7.2 12 13l8.2-5.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              <input type="email" id="email" name="email" placeholder="you@college.edu" autocomplete="email"
-                aria-describedby="emailError" aria-invalid="false" required />
+              <input type="email" id="email" name="email" placeholder="you@tsecmumbai.in" autocomplete="email" aria-describedby="emailError" aria-invalid="false" required />
             </div>
             <p class="field-error" id="emailError" role="alert"></p>
           </div>
@@ -267,19 +96,14 @@
                 <rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6" />
                 <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.6" />
               </svg>
-              <input type="password" id="password" name="password" placeholder="Enter your password"
-                autocomplete="current-password" aria-describedby="passwordError" aria-invalid="false" required />
-              <button type="button" class="toggle-visibility" id="togglePassword" aria-label="Show password"
-                aria-pressed="false">
+              <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" aria-describedby="passwordError" aria-invalid="false" required />
+              <button type="button" class="toggle-visibility" id="togglePassword" aria-label="Show password" aria-pressed="false">
                 <svg class="icon icon-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor"
-                    stroke-width="1.6" />
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6" />
                   <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
                 </svg>
                 <svg class="icon icon-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2M6.2 6.4C3.9 8 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.4 4.5-1.1M12 5.5c6 0 9.5 6.5 9.5 6.5a13.4 13.4 0 0 1-2.7 3.6"
-                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                  <path d="M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2M6.2 6.4C3.9 8 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.4 4.5-1.1M12 5.5c6 0 9.5 6.5 9.5 6.5a13.4 13.4 0 0 1-2.7 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
                 </svg>
               </button>
             </div>
@@ -292,8 +116,7 @@
               <input type="checkbox" id="remember" name="remember" />
               <span class="checkbox-box" aria-hidden="true">
                 <svg viewBox="0 0 16 16" fill="none">
-                  <path d="M3.5 8.5l3 3 6-7" stroke="white" stroke-width="1.8" stroke-linecap="round"
-                    stroke-linejoin="round" />
+                  <path d="M3.5 8.5l3 3 6-7" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </span>
               <span>Remember me</span>
@@ -302,13 +125,12 @@
 
           <!-- Submit -->
           <button type="submit" class="btn btn-primary" id="submitBtn">
-            <span class="btn-label">Sign in</span>
+            <span class="btn-label">Sign In</span>
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
 
           <div class="divider"><span>or</span></div>
 
-          <!-- Google -->
           <!-- Google -->
           <div id="googleBtn"></div>
 
@@ -325,10 +147,8 @@
 
   <script src="js/api.js"></script>
   <script>
-    window.GOOGLE_CLIENT_ID =
-      '203276814099-nod7f3763n59g6iilbs3gsgmhi6l6lhr.apps.googleusercontent.com';
+    window.GOOGLE_CLIENT_ID = '203276814099-nod7f3763n59g6iilbs3gsgmhi6l6lhr.apps.googleusercontent.com';
   </script>
   <script src="js/login.js"></script>
 </body>
-
 </html>
