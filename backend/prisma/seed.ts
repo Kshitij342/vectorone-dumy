@@ -448,9 +448,76 @@ async function main() {
   }
   console.log('✅ Attendance records seeded');
 
+  // ── 16. VectorOne Test Accounts ───────────────────────────────────────────
+  // These are TEST-ONLY accounts for login flow verification.
+  // Do NOT use in production. Passwords are bcrypt-hashed via the same
+  // mechanism as all other users in this seed.
+
+  // — Test Students —
+  const testStudents = [
+    { email: 'vectorone.student1@tsecmumbai.in', password: 'VectorStudent@101', studentId: 'VO-TST-001', fullName: 'VectorOne Test Student 1', year: 2, division: 'A', semester: 3 },
+    { email: 'vectorone.student2@tsecmumbai.in', password: 'VectorStudent@102', studentId: 'VO-TST-002', fullName: 'VectorOne Test Student 2', year: 2, division: 'B', semester: 3 },
+    { email: 'vectorone.student3@tsecmumbai.in', password: 'VectorStudent@103', studentId: 'VO-TST-003', fullName: 'VectorOne Test Student 3', year: 2, division: 'C', semester: 3 },
+  ];
+
+  for (const ts of testStudents) {
+    const tsHash = await bcrypt.hash(ts.password, 12);
+    const tsUser = await prisma.user.upsert({
+      where: { email: ts.email },
+      update: {},
+      create: { email: ts.email, passwordHash: tsHash, role: Role.STUDENT }
+    });
+    await prisma.student.upsert({
+      where: { userId: tsUser.id },
+      update: {},
+      create: {
+        userId: tsUser.id,
+        studentId: ts.studentId,
+        fullName: ts.fullName,
+        year: ts.year,
+        division: ts.division,
+        semester: ts.semester,
+        departmentId: deptCS.id,      // reuse existing Computer Science dept
+        status: StudentStatus.Active
+      }
+    });
+    await prisma.userSetting.upsert({ where: { userId: tsUser.id }, update: {}, create: { userId: tsUser.id } });
+  }
+  console.log('✅ Test students seeded  →  vectorone.student[1-3]@tsecmumbai.in');
+
+  // — Test Admins —
+  const testAdmins = [
+    { email: 'vectorone.admin1@vectorone.edu', password: 'VectorAdmin@101', fullName: 'VectorOne Test Admin 1' },
+    { email: 'vectorone.admin2@vectorone.edu', password: 'VectorAdmin@102', fullName: 'VectorOne Test Admin 2' },
+    { email: 'vectorone.admin3@vectorone.edu', password: 'VectorAdmin@103', fullName: 'VectorOne Test Admin 3' },
+  ];
+
+  for (const ta of testAdmins) {
+    const taHash = await bcrypt.hash(ta.password, 12);
+    const taUser = await prisma.user.upsert({
+      where: { email: ta.email },
+      update: {},
+      create: { email: ta.email, passwordHash: taHash, role: Role.ADMIN }
+    });
+    await prisma.admin.upsert({
+      where: { userId: taUser.id },
+      update: {},
+      create: { userId: taUser.id, fullName: ta.fullName }
+    });
+    await prisma.userSetting.upsert({ where: { userId: taUser.id }, update: {}, create: { userId: taUser.id } });
+  }
+  console.log('✅ Test admins seeded   →  vectorone.admin[1-3]@vectorone.edu');
+
   console.log('\n🎉 Seed complete! Demo credentials:');
   console.log('   Admin:   admin@vectorone.edu   / Admin@123');
   console.log('   Student: student@vectorone.edu / Student@123');
+  console.log('\n🧪 Test credentials:');
+  console.log('   Test Student 1: vectorone.student1@tsecmumbai.in / VectorStudent@101');
+  console.log('   Test Student 2: vectorone.student2@tsecmumbai.in / VectorStudent@102');
+  console.log('   Test Student 3: vectorone.student3@tsecmumbai.in / VectorStudent@103');
+  console.log('   Test Admin 1:   vectorone.admin1@vectorone.edu   / VectorAdmin@101');
+  console.log('   Test Admin 2:   vectorone.admin2@vectorone.edu   / VectorAdmin@102');
+  console.log('   Test Admin 3:   vectorone.admin3@vectorone.edu   / VectorAdmin@103');
 }
 
 main()
