@@ -245,8 +245,7 @@
         theme: 'outline',
         size: 'large',
         text: 'continue_with',
-        shape: 'rectangular',
-        width: 350
+        shape: 'rectangular'
       }
     );
   }

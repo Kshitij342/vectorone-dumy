@@ -365,8 +365,24 @@ input[aria-invalid="true"] { border-color: var(--danger); }
 .btn.is-loading .btn-spinner { display: block; position: absolute; }
 .btn.is-loading { pointer-events: none; }
 
-/* Google Container */
-#googleBtn { width: 100%; max-width: 100%; display: flex; justify-content: center; overflow: hidden; }
+/* Google Sign-In centering wrapper */
+.google-login-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* GIS renders an <iframe> inside #googleBtn sized to its offsetWidth.
+   We constrain the width here so the iframe never exceeds the card. */
+#googleBtn {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
 
 /* ---------- Divider ---------- */
 .divider {
