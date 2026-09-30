@@ -50,31 +50,32 @@
 }
 
 [data-theme="dark"] {
-  --bg: #0F172A;
-  --surface: #1E293B;
-  --card: #111827;
-  --primary: #1B6CA8;
-  --primary-hover: #2E86C1;
-  --primary-press: #12355B;
-  --border: #334155;
-  --text: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --danger: #F87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
+  --bg: #080808;
+  --surface: #101010;
+  --card: #151515;
+  --border: #292929;
+  --primary: #8B5CF6;
+  --primary-hover: #A855F7;
+  --primary-press: #7C3AED;
+  --text: #F5F5F5;
+  --text-secondary: #A1A1AA;
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.15);
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.24), 0 24px 48px -12px rgba(0, 0, 0, 0.55);
-  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-btn-hover: 0 6px 18px -4px rgba(18, 53, 91, 0.45);
-  --shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.3), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
-  --scrim: rgba(255, 255, 255, 0.03);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4), 0 12px 24px -6px rgba(0, 0, 0, 0.5);
+  --shadow-btn: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-btn-hover: 0 4px 14px -2px rgba(139, 92, 246, 0.35);
+  --shadow-flyout: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px #292929;
+  --scrim: rgba(255, 255, 255, 0.04);
 
-  --success: #4ADE80;
-  --warning: #FBBF24;
+  --success: #22C55E;
+  --warning: #F59E0B;
   --warning-text: #FBBF24;
-  --accent-purple: #A78BFA;
-  --accent-teal: #2DD4BF;
+  --accent-purple: #A855F7;
+  --accent-bright: #C084FC;
+  --accent-teal: #14B8A6;
 
-  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.25), 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px #383838;
 }
 
 /* ---------- Reset ---------- */
@@ -178,9 +179,7 @@ img, svg { display: block; }
   justify-content: space-between;
   gap: 20px;
   padding: 0 24px;
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  backdrop-filter: saturate(180%) blur(10px);
-  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
   transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
