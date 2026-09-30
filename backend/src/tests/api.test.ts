@@ -714,40 +714,21 @@ describe('VectorOne API Core Endpoints', () => {
       expect(res.status).toBe(401);
     });
 
-    it('registration with existing email returns unified error message', async () => {
-      const student = await prisma.user.findFirst({ where: { role: Role.STUDENT } });
-      if (!student) return;
-
+    it('public student registration endpoint is disabled and returns 403', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          fullName: 'Duplicate Test',
-          email: student.email,
-          studentId: 'VO999999',
-          year: 1,
-          department: 'Computer Science',
-          password: 'Password@123',
-        });
-
-      expect(res.status).toBe(409);
-      expect(res.body.message).toBe('Registration failed. An account with these credentials already exists.');
-    });
-
-    it('registration with non-college email domain is rejected with 400', async () => {
-      const res = await request(app)
-        .post('/api/auth/register')
-        .send({
-          fullName: 'Personal Email User',
-          email: 'user@gmail.com',
+          fullName: 'Test User',
+          email: 'user@tsecmumbai.in',
           studentId: 'VO888888',
           year: 1,
           department: 'Computer Science',
           password: 'Password@123',
         });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(403);
       expect(res.body.success).toBe(false);
-      expect(res.body.message).toMatch(/restricted to official college email/i);
+      expect(res.body.message).toMatch(/Public student registration is disabled/i);
     });
 
     it('g) admin login remains unaffected', async () => {

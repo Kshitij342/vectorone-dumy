@@ -7,89 +7,14 @@ import { prisma } from '../config/database';
 import { signToken } from '../config/jwt';
 import { sendSuccess, sendError } from '../utils/apiResponse';
 import { Role } from '@prisma/client';
-import { isAllowedCollegeEmail, isVerifiedCollegeGoogleAccount } from '../utils/emailValidator';
+import { isVerifiedCollegeGoogleAccount } from '../utils/emailValidator';
 
 /**
  * POST /api/auth/register
- * Registers a new STUDENT account.
+ * Public student registration is disabled. College accounts are provided by your institution.
  */
-export async function register(req: Request, res: Response): Promise<void> {
-  try {
-    const { fullName, email, studentId, year, department, password, role } = req.body;
-
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // Check college email domain restriction
-    if (!isAllowedCollegeEmail(normalizedEmail)) {
-      sendError(res, 'Registration is restricted to official college email accounts.', 400);
-      return;
-    }
-
-    // Check if email already exists
-    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (existing) {
-      sendError(res, 'Registration failed. An account with these credentials already exists.', 409);
-      return;
-    }
-
-    // Check studentId uniqueness
-    const existingStudentId = await prisma.student.findUnique({ where: { studentId } });
-    if (existingStudentId) {
-      sendError(res, 'Registration failed. An account with these credentials already exists.', 409);
-      return;
-    }
-
-    // Resolve department
-    const dept = await prisma.department.findFirst({
-      where: { name: { contains: department, mode: 'insensitive' } }
-    });
-    if (!dept) {
-      sendError(res, 'Department not found', 400);
-      return;
-    }
-
-    const passwordHash = await bcrypt.hash(password, 12);
-
-    // Determine role — default to STUDENT; only allow ADMIN via secret flag (for seeding)
-    const userRole: Role = (role === 'ADMIN' && process.env.ALLOW_ADMIN_REGISTER === 'true')
-      ? Role.ADMIN
-      : Role.STUDENT;
-
-    const user = await prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        passwordHash,
-        role: userRole,
-        student: {
-          create: {
-            studentId,
-            fullName,
-            year: parseInt(year, 10) || 1,
-            semester: (parseInt(year, 10) * 2) - 1 || 1,
-            division: 'A',
-            departmentId: dept.id,
-          }
-        },
-        settings: { create: {} }
-      },
-      include: { student: true }
-    });
-
-    const token = signToken({ userId: user.id, role: user.role, email: user.email });
-
-    sendSuccess(res, {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        fullName: user.student?.fullName,
-        studentId: user.student?.studentId,
-      }
-    }, 'Registration successful', 201);
-  } catch (err) {
-    sendError(res, 'Registration failed', 500);
-  }
+export async function register(_req: Request, res: Response): Promise<void> {
+  sendError(res, 'Public student registration is disabled. College accounts are provided by your institution.', 403);
 }
 
 /**
@@ -212,7 +137,6 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
 
     const googleId = payload.sub;
     const email = payload.email.toLowerCase().trim();
-    const fullName = payload.name || payload.given_name || email.split('@')[0];
     const picture = payload.picture;
 
     // Stage 4: database user lookup (Roster Verification)
@@ -229,7 +153,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
 
     if (!user) {
       console.error('[googleAuth] Stage 4: User not registered in database —', email);
-      sendError(res, 'Your college account is not registered in VectorOne. Please register first or contact the administrator.', 403);
+      sendError(res, 'This Google account is not registered with VectorOne. Please use your college account.', 403);
       return;
     }
 
@@ -270,7 +194,6 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
       }
     }, 'Google authentication successful');
   } catch (err: any) {
-    // Log the full error so it appears in Vercel runtime logs
     console.error('[googleAuth] UNCAUGHT ERROR —', err.message);
     console.error('[googleAuth] stack —', err.stack);
     sendError(res, 'Google authentication failed: ' + (err.message || String(err)), 500);
