@@ -33,6 +33,20 @@
     });
   }
 
+  /* ---------------- Role Pre-selection from URL ---------------- */
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role') || urlParams.get('type');
+    if (roleParam === 'admin' || window.location.search.indexOf('admin') !== -1) {
+      const adminRadio = document.querySelector('input[name="loginRole"][value="admin"]');
+      if (adminRadio) {
+        adminRadio.checked = true;
+      }
+    }
+  } catch (e) {
+    /* ignore parsing errors */
+  }
+
   /* ---------------- Password visibility ---------------- */
   const passwordInput = document.getElementById('password');
   const toggleVisibility = document.getElementById('togglePassword');
