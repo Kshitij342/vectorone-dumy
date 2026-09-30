@@ -5,6 +5,10 @@ backend/node_modules/
 # Environment / secrets
 .env
 backend/.env
+.env.vercel.*
+*.env.production
+*.env.preview
+*.env.development.local
 
 # Build output
 backend/dist/
@@ -22,3 +26,5 @@ backend/uploads/
 .DS_Store
 Thumbs.db
 .vscode/
+.vercel
+.env*
