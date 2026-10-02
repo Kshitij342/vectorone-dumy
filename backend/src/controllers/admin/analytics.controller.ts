@@ -4,12 +4,26 @@ import { sendSuccess, sendError } from '../../utils/apiResponse';
 
 export async function getAnalyticsOverview(_req: Request, res: Response): Promise<void> {
   try {
-    const [students, faculty, departments, courses] = await Promise.all([
+    const [students, faculty, departments, courses, attendanceTotal, attendancePresent, attendanceLate, assignmentCount, eventCount, resourceDownloads] = await Promise.all([
       prisma.student.count(),
       prisma.facultyMember.count(),
       prisma.department.count(),
       prisma.course.count(),
+      prisma.attendanceRecord.count(),
+      prisma.attendanceRecord.count({ where: { status: 'Present' } }),
+      prisma.attendanceRecord.count({ where: { status: 'Late' } }),
+      prisma.assignment.count(),
+      prisma.event.count(),
+      prisma.resource.aggregate({ _sum: { downloadCount: true } }),
     ]);
+
+    const attendanceTrend = attendanceTotal > 0 ? [attendancePresent, attendanceTotal - attendancePresent - attendanceLate, attendanceLate] : [];
+    const studentGrowth = students > 0 ? [students] : [];
+    const departmentDistribution = departments > 0 ? [departments] : [];
+    const assignmentsStatus = assignmentCount > 0 ? [assignmentCount] : [];
+    const eventsOverview = eventCount > 0 ? [eventCount] : [];
+    const resourcesUsage = (resourceDownloads._sum.downloadCount ?? 0) > 0 ? [resourceDownloads._sum.downloadCount ?? 0] : [];
+    const facultyDistribution = faculty > 0 ? [faculty] : [];
 
     sendSuccess(res, {
       students,
@@ -17,13 +31,13 @@ export async function getAnalyticsOverview(_req: Request, res: Response): Promis
       departments,
       courses,
       charts: {
-        attendanceTrend: [51, 66, 59, 75, 81, 73, 91],
-        studentGrowth: [30, 44, 48, 52, 66, 77, 89],
-        departmentDistribution: [84, 55, 72, 40, 62, 49, 67],
-        assignmentsStatus: [66, 78, 56, 84, 70, 90, 76],
-        eventsOverview: [33, 48, 62, 54, 79, 87, 70],
-        resourcesUsage: [48, 55, 68, 76, 60, 88, 92],
-        facultyDistribution: [64, 47, 74, 56, 82, 39, 61],
+        attendanceTrend,
+        studentGrowth,
+        departmentDistribution,
+        assignmentsStatus,
+        eventsOverview,
+        resourcesUsage,
+        facultyDistribution,
       },
     });
   } catch (error) {
@@ -36,8 +50,8 @@ export async function getStudentAnalytics(_req: Request, res: Response): Promise
     const total = await prisma.student.count();
     sendSuccess(res, {
       total,
-      growthRate: '+8.4%',
-      enrollmentTrend: [30, 44, 48, 52, 66, 77, 89],
+      growthRate: '0%',
+      enrollmentTrend: total > 0 ? [total] : [],
     });
   } catch (error) {
     sendError(res, 'Failed to fetch student analytics', 500);
@@ -46,9 +60,17 @@ export async function getStudentAnalytics(_req: Request, res: Response): Promise
 
 export async function getAttendanceAnalytics(_req: Request, res: Response): Promise<void> {
   try {
+    const [total, present] = await Promise.all([
+      prisma.attendanceRecord.count(),
+      prisma.attendanceRecord.count({ where: { status: 'Present' } }),
+    ]);
+
+    const averageAttendance = total > 0 ? Number(((present / total) * 100).toFixed(1)) : 0;
+    const weeklyTrend = total > 0 ? [present, total - present] : [];
+
     sendSuccess(res, {
-      averageAttendance: 91.6,
-      weeklyTrend: [88, 90, 92, 91, 94, 91, 93],
+      averageAttendance,
+      weeklyTrend,
     });
   } catch (error) {
     sendError(res, 'Failed to fetch attendance analytics', 500);
@@ -57,8 +79,9 @@ export async function getAttendanceAnalytics(_req: Request, res: Response): Prom
 
 export async function getEventAnalytics(_req: Request, res: Response): Promise<void> {
   try {
+    const total = await prisma.event.count();
     sendSuccess(res, {
-      monthlyEngagement: [33, 48, 62, 54, 79, 87, 70],
+      monthlyEngagement: total > 0 ? [total] : [],
     });
   } catch (error) {
     sendError(res, 'Failed to fetch event analytics', 500);
@@ -67,8 +90,10 @@ export async function getEventAnalytics(_req: Request, res: Response): Promise<v
 
 export async function getResourceAnalytics(_req: Request, res: Response): Promise<void> {
   try {
+    const totals = await prisma.resource.aggregate({ _sum: { downloadCount: true } });
+    const monthlyDownloads = totals._sum.downloadCount && totals._sum.downloadCount > 0 ? [totals._sum.downloadCount] : [];
     sendSuccess(res, {
-      monthlyDownloads: [48, 55, 68, 76, 60, 88, 92],
+      monthlyDownloads,
     });
   } catch (error) {
     sendError(res, 'Failed to fetch resource analytics', 500);

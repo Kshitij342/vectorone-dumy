@@ -260,21 +260,9 @@
     // Skip dashboard-only search setup on those pages instead of crashing.
   } else {
 
-    // Small mock dataset the search filters against — frontend only.
-    // Each entry carries the same fields a real notice would (title,
-    // description, category, author) so search can rank across all of them.
-    const SEARCH_INDEX = [
-      { title: 'Campus Drive — TCS NQT registrations', description: 'On-campus recruitment drive for final-year students via the National Qualifier Test.', category: 'Placement', author: 'Placement Cell', type: 'Notice' },
-      { title: 'Semester 5 internal exam schedule', description: 'Internal assessment timetable released for all Semester 5 subjects.', category: 'Academic', author: 'Academic Office', type: 'Notice' },
-      { title: 'Revised datesheet for practicals', description: 'Updated practical examination schedule due to lab availability.', category: 'Examination', author: 'Examination Cell', type: 'Notice' },
-      { title: 'Code Sprint 2026', description: 'A 24-hour competitive programming and hackathon event.', category: 'Event', author: 'Coding Club', type: 'Event' },
-      { title: 'Intro to UI/UX Workshop', description: 'Hands-on workshop covering design fundamentals and Figma basics.', category: 'Workshop', author: 'Design Cell', type: 'Event' },
-      { title: 'Inter-Dept Football Trials', description: 'Trials for the annual inter-department football tournament.', category: 'Sports', author: 'Sports Committee', type: 'Event' },
-      { title: 'Alumni Talk: Careers in Product', description: 'A talk by alumni currently working in product management roles.', category: 'Event', author: 'Alumni Cell', type: 'Event' },
-      { title: 'Robotics Club', description: 'Student club focused on robotics and embedded systems.', category: 'Club', author: 'Robotics Club', type: 'Club' },
-      { title: 'Design Cell', description: 'Campus design and UI/UX student community.', category: 'Club', author: 'Design Cell', type: 'Club' },
-      { title: 'Photography Society', description: 'Club for photography enthusiasts across campus.', category: 'Club', author: 'Photography Society', type: 'Club' }
-    ];
+    // Search results are intentionally empty until real application data is
+    // available. This prevents demo/mock records from being shipped in the UI.
+    const SEARCH_INDEX = [];
 
     // Match tiers: 0 = exact, 1 = starts-with (word boundary), 2 = contains (mid-word).
     // The highlighted range is always snapped outward to full word boundaries,

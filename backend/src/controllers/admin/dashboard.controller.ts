@@ -33,18 +33,16 @@ export async function getAdminDashboard(_req: Request, res: Response): Promise<v
     const attendancePct = totalAttendance > 0 ? Number(((presentAttendance / totalAttendance) * 100).toFixed(1)) : 0;
 
     const stats = [
-      { label: 'Total Students', value: totalStudents, trend: totalStudents > 0 ? '+8.4% this term' : 'No active students', tone: 'blue' },
-      { label: 'Total Faculty', value: totalFaculty, trend: totalFaculty > 0 ? '+12 this month' : 'No faculty records', tone: 'green' },
-      { label: 'Departments', value: totalDepartments, trend: totalDepartments > 0 ? 'All active' : 'No departments', tone: 'purple' },
-      { label: 'Courses', value: totalCourses, trend: totalCourses > 0 ? '+4 new courses' : 'No courses cataloged', tone: 'orange' },
-      { label: 'Assignments', value: totalAssignments, trend: totalAssignments > 0 ? 'Active catalog' : 'No assignments', tone: 'blue' },
-      { label: 'Resources', value: totalResources, trend: totalResources > 0 ? 'Library assets' : 'No resources uploaded', tone: 'green' },
-      { label: 'Notices', value: totalNotices, trend: totalNotices > 0 ? 'Published & scheduled' : 'No notices published', tone: 'purple' },
-      { label: 'Events', value: totalEvents, trend: totalEvents > 0 ? 'Campus events' : 'No upcoming events', tone: 'orange' },
-      { label: 'Attendance %', value: attendancePct, suffix: '%', trend: totalAttendance > 0 ? '+2.1% this week' : 'No attendance logged', tone: 'blue' },
-      { label: 'Storage Used', value: 0, suffix: '%', trend: '0 GB of 200 GB', tone: 'green' },
-      { label: 'Pending Approvals', value: pendingStudents, trend: pendingStudents > 0 ? 'Needs attention' : 'All approved', tone: 'orange' },
-      { label: 'System Health', value: 100, suffix: '%', trend: 'All systems operational', tone: 'purple' },
+      { label: 'Total Students', value: totalStudents, trend: totalStudents === 0 ? 'No students enrolled' : `${totalStudents} enrolled`, tone: 'blue' },
+      { label: 'Total Faculty', value: totalFaculty, trend: totalFaculty === 0 ? 'No faculty records' : `${totalFaculty} faculty members`, tone: 'green' },
+      { label: 'Departments', value: totalDepartments, trend: totalDepartments === 0 ? 'No departments' : `${totalDepartments} active departments`, tone: 'purple' },
+      { label: 'Courses', value: totalCourses, trend: totalCourses === 0 ? 'No courses cataloged' : `${totalCourses} courses available`, tone: 'orange' },
+      { label: 'Assignments', value: totalAssignments, trend: totalAssignments === 0 ? 'No assignments' : `${totalAssignments} assignments in system`, tone: 'blue' },
+      { label: 'Resources', value: totalResources, trend: totalResources === 0 ? 'No resources uploaded' : `${totalResources} resources available`, tone: 'green' },
+      { label: 'Notices', value: totalNotices, trend: totalNotices === 0 ? 'No notices published' : `${totalNotices} notices published`, tone: 'purple' },
+      { label: 'Events', value: totalEvents, trend: totalEvents === 0 ? 'No upcoming events' : `${totalEvents} events scheduled`, tone: 'orange' },
+      { label: 'Attendance %', value: attendancePct, suffix: '%', trend: totalAttendance === 0 ? 'No attendance logged' : `${attendancePct}% present`, tone: 'blue' },
+      { label: 'Pending Approvals', value: pendingStudents, trend: pendingStudents === 0 ? 'No pending approvals' : `${pendingStudents} pending approvals`, tone: 'orange' },
     ];
 
     const recentStudents = await prisma.student.findMany({

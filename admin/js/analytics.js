@@ -1,6 +1,5 @@
-/* Admin analytics — page logic moved out of the inline <script> in analytics.html.
-   Frontend-only demo data held in memory. All lookups are guarded so this file is
-   inert if loaded on a page that does not have the analytics markup. */
+/* Admin analytics — data is loaded from the live API when available.
+   The page starts empty so it never ships demo/mock analytics to production. */
 (function () {
   'use strict';
 
@@ -21,45 +20,11 @@
   // Not the analytics page — do nothing.
   if (!summaryHost && !enrollmentHost && !departmentHost) return;
 
-  /* ---------- demo data ---------- */
-  const summary = [
-    { label: 'Student Retention', value: '91.8%', trend: '+2.4% this term', tone: 'blue', icon: 'students' },
-    { label: 'Faculty Productivity', value: '86.7%', trend: '+4.1% this month', tone: 'green', icon: 'faculty' },
-    { label: 'Resource Usage', value: '68.3%', trend: 'Healthy capacity', tone: 'purple', icon: 'resources' },
-    { label: 'Campus Satisfaction', value: '4.7/5', trend: '+0.3 since last cycle', tone: 'orange', icon: 'analytics' }
-  ];
-
-  const enrollment = [
-    { label: 'Jan', applied: 38, admitted: 52, retained: 60 },
-    { label: 'Feb', applied: 49, admitted: 60, retained: 67 },
-    { label: 'Mar', applied: 60, admitted: 68, retained: 74 },
-    { label: 'Apr', applied: 71, admitted: 76, retained: 81 },
-    { label: 'May', applied: 82, admitted: 84, retained: 88 },
-    { label: 'Jun', applied: 93, admitted: 92, retained: 95 },
-    { label: 'Jul', applied: 100, admitted: 96, retained: 98 }
-  ];
-
-  const departments = [
-    { label: 'Computer Science', attendance: 92, results: 88, placement: 84 },
-    { label: 'Electronics', attendance: 89, results: 84, placement: 76 },
-    { label: 'Mechanical', attendance: 86, results: 81, placement: 71 },
-    { label: 'Business', attendance: 90, results: 86, placement: 79 },
-    { label: 'Design', attendance: 84, results: 83, placement: 68 }
-  ];
-
-  const keyMetrics = [
-    { label: 'Attendance', value: '91.6%', note: 'Across all departments' },
-    { label: 'Course Completion', value: '84.2%', note: 'Current semester' },
-    { label: 'Placements', value: '73.4%', note: 'Final-year batch' },
-    { label: 'Portal Engagement', value: '88.1%', note: 'Weekly active students' }
-  ];
-
-  const focusAreas = [
-    { label: 'Improve lab attendance', note: 'Mechanical & Civil below target' },
-    { label: 'Expand mentorship coverage', note: '18 students unassigned' },
-    { label: 'Optimize resource allocation', note: 'Lab Block C at 96% usage' },
-    { label: 'Track placement readiness', note: 'Mock interviews pending' }
-  ];
+  const summary = [];
+  const enrollment = [];
+  const departments = [];
+  const keyMetrics = [];
+  const focusAreas = [];
 
   /* ---------- renderers ---------- */
   function icon(key) {
@@ -68,6 +33,10 @@
 
   function renderSummary() {
     if (!summaryHost) return;
+    if (!summary.length) {
+      summaryHost.innerHTML = '<div class="empty-state">No analytics summary yet. Add records to populate this section.</div>';
+      return;
+    }
     summaryHost.innerHTML = summary.map(function (item) {
       return '<article class="stat-card stat-card--' + item.tone + '">' +
         '<div class="stat-card-top"><div class="stat-icon stat-icon--' + item.tone + '">' + icon(item.icon) + '</div></div>' +
@@ -92,6 +61,10 @@
 
   function renderEnrollment() {
     if (!enrollmentHost) return;
+    if (!enrollment.length) {
+      enrollmentHost.innerHTML = '<div class="empty-state">No enrollment data available yet.</div>';
+      return;
+    }
     enrollmentHost.innerHTML = enrollment.map(function (m) {
       return chartCard(m.label, 'Applied / Admitted / Retained', [
         { name: 'Applied', value: m.applied },
@@ -103,6 +76,10 @@
 
   function renderDepartments() {
     if (!departmentHost) return;
+    if (!departments.length) {
+      departmentHost.innerHTML = '<div class="empty-state">No department analytics available yet.</div>';
+      return;
+    }
     departmentHost.innerHTML = departments.map(function (d) {
       return chartCard(d.label, 'Attendance / Results / Placement', [
         { name: 'Attendance', value: d.attendance },
@@ -114,6 +91,10 @@
 
   function renderList(host, items) {
     if (!host) return;
+    if (!items.length) {
+      host.innerHTML = '<div class="empty-state">No records available.</div>';
+      return;
+    }
     host.innerHTML = items.map(function (item) {
       return '<div class="compact-row"><div class="row-copy">' +
         '<strong>' + esc(item.label) + (item.value ? ': ' + esc(item.value) : '') + '</strong>' +

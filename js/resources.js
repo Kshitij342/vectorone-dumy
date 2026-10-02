@@ -158,15 +158,7 @@
   const searchEmpty = document.getElementById('searchEmpty');
   const recentSearchList = document.getElementById('recentSearchList');
 
-  const SEARCH_INDEX = [
-    { title: 'DBMS Unit 4 — Normalization Notes', description: 'Lecture notes covering functional dependencies and normal forms up to BCNF.', category: 'Notes', author: 'Dr. Ananya Rao', type: 'Resource' },
-    { title: 'Operating Systems — Chapter 5 PDF', description: 'Memory management chapter from the Silberschatz textbook.', category: 'PDF', author: 'Prof. Manish Verma', type: 'Resource' },
-    { title: 'CS301 DBMS — Previous Year Papers', description: 'Question papers from the last five years for CS301.', category: 'Previous Papers', author: 'Examination Cell', type: 'Resource' },
-    { title: 'Introduction to Algorithms (CLRS)', description: 'Full reference ebook for algorithm design and analysis.', category: 'Ebooks', author: 'Library', type: 'Resource' },
-    { title: 'Campus Drive — TCS NQT registrations', description: 'On-campus recruitment drive for final-year students.', category: 'Placement', author: 'Placement Cell', type: 'Notice' },
-    { title: 'Code Sprint 2026', description: 'A 24-hour competitive programming and hackathon event.', category: 'Event', author: 'Coding Club', type: 'Event' },
-    { title: 'Robotics Club', description: 'Student club focused on robotics and embedded systems.', category: 'Club', author: 'Robotics Club', type: 'Club' }
-  ];
+  const SEARCH_INDEX = [];
 
   function isWordChar(ch) {
     return !!ch && /[a-z0-9]/i.test(ch);
@@ -429,26 +421,9 @@
   /* ============================================================
      RESOURCE DATA (dummy — replace with GET /api/resources later)
      ============================================================ */
-  const NOW = new Date(2026, 6, 29); // Jul 29, 2026 — matches the rest of the app's demo "today"
+  const NOW = new Date();
 
-  const RESOURCES = [
-    { id: 'r1', title: 'DBMS Unit 4 — Normalization Notes', subject: 'Database Management Systems', courseCode: 'CS301', faculty: 'Dr. Ananya Rao', type: 'notes', format: 'pdf', fileName: 'DBMS_Unit4_Normalization.pdf', size: '2.1 MB', uploadDate: 'Jul 20, 2026', uploadDateISO: '2026-07-20', downloads: 342, rating: 4.6, ratingCount: 128, description: 'Lecture notes covering functional dependencies, decomposition and normal forms up to BCNF, with worked examples.', tags: ['Normalization', 'ER Model', '3NF'] },
-    { id: 'r2', title: 'Operating Systems — Chapter 5 (Memory Management)', subject: 'Operating Systems', courseCode: 'CS302', faculty: 'Prof. Manish Verma', type: 'pdf', format: 'pdf', fileName: 'OS_Silberschatz_Ch5.pdf', size: '6.4 MB', uploadDate: 'Jun 15, 2026', uploadDateISO: '2026-06-15', downloads: 289, rating: 4.4, ratingCount: 95, description: 'Textbook chapter on paging, segmentation and virtual memory, scanned and OCR-searchable.', tags: ['Textbook', 'Memory Management'] },
-    { id: 'r3', title: 'Agile Methodologies — SE Slide Deck', subject: 'Software Engineering', courseCode: 'CS308', faculty: 'Prof. Divya Menon', type: 'ppt', format: 'pptx', fileName: 'SE_Agile_Methodologies.pptx', size: '3.8 MB', uploadDate: 'Jul 22, 2026', uploadDateISO: '2026-07-22', downloads: 156, rating: 4.2, ratingCount: 54, description: 'Lecture slides covering Scrum, Kanban and the SDLC comparison used in the mid-term case study.', tags: ['Agile', 'Scrum', 'SDLC'] },
-    { id: 'r4', title: 'DBMS Lab Manual — All Experiments', subject: 'Database Management Systems', courseCode: 'CS301', faculty: 'Dr. Ananya Rao', type: 'lab-manual', format: 'pdf', fileName: 'DBMS_Lab_Manual_Full.pdf', size: '4.5 MB', uploadDate: 'Jul 5, 2026', uploadDateISO: '2026-07-05', downloads: 410, rating: 4.8, ratingCount: 201, description: 'Complete lab manual with all 10 experiments, sample schemas and expected SQL output.', tags: ['Lab', 'SQL', 'Experiments'] },
-    { id: 'r5', title: 'Python Assignment Brief — Expense Tracker', subject: 'Programming in Python', courseCode: 'CS210', faculty: 'Prof. Rakesh Iyer', type: 'assignments', format: 'docx', fileName: 'Python_ExpenseTracker_Brief.docx', size: '220 KB', uploadDate: 'Jul 1, 2026', uploadDateISO: '2026-07-01', downloads: 198, rating: 4.3, ratingCount: 61, description: 'Original assignment brief and grading rubric for the Python mini-project.', tags: ['Mini Project', 'Python'] },
-    { id: 'r6', title: 'CS301 DBMS — Previous Year Papers (2021–2025)', subject: 'Database Management Systems', courseCode: 'CS301', faculty: 'Examination Cell', type: 'previous-papers', format: 'pdf', fileName: 'CS301_PYQ_2021_2025.pdf', size: '5.2 MB', uploadDate: 'Jun 28, 2026', uploadDateISO: '2026-06-28', downloads: 512, rating: 4.7, ratingCount: 243, description: 'Compiled question papers from the last five academic years, with the current syllabus mapping noted.', tags: ['PYQ', 'Exam Prep'] },
-    { id: 'r7', title: 'Introduction to Algorithms (CLRS) — Ebook', subject: 'Data Structures & Algorithms', courseCode: 'CS205', faculty: 'Library', type: 'ebooks', format: 'pdf', fileName: 'CLRS_Intro_to_Algorithms.pdf', size: '18.6 MB', uploadDate: 'May 10, 2026', uploadDateISO: '2026-05-10', downloads: 620, rating: 4.9, ratingCount: 340, description: 'Full reference ebook for algorithm design, complexity analysis and proofs.', tags: ['Reference', 'Algorithms'] },
-    { id: 'r8', title: 'Computer Networks Question Bank', subject: 'Computer Networks', courseCode: 'CS304', faculty: 'Dr. Neha Kapoor', type: 'question-bank', format: 'pdf', fileName: 'CN_Question_Bank.pdf', size: '1.4 MB', uploadDate: 'Jul 18, 2026', uploadDateISO: '2026-07-18', downloads: 233, rating: 4.5, ratingCount: 88, description: 'Unit-wise question bank with previous internal assessment questions and model answers.', tags: ['Exam Prep', 'Routing'] },
-    { id: 'r9', title: 'AVL Tree Rotations — Video Lecture', subject: 'Data Structures & Algorithms', courseCode: 'CS205', faculty: 'Dr. Priya Deshmukh', type: 'video', format: 'mp4', fileName: 'AVL_Rotations_Lecture.mp4', size: '142 MB', uploadDate: 'Jul 24, 2026', uploadDateISO: '2026-07-24', downloads: 175, rating: 4.6, ratingCount: 72, description: 'Recorded lecture walking through all four AVL rotation cases with worked examples on the whiteboard.', tags: ['Video', 'Trees'] },
-    { id: 'r10', title: 'OS Practical File — Shell Scripting', subject: 'Operating Systems', courseCode: 'CS302', faculty: 'Prof. Manish Verma', type: 'practical', format: 'zip', fileName: 'OS_Practical_ShellScripting.zip', size: '890 KB', uploadDate: 'Jul 12, 2026', uploadDateISO: '2026-07-12', downloads: 121, rating: 4.1, ratingCount: 39, description: 'Sample shell scripts and the practical file template for the process-management lab set.', tags: ['Practical', 'Shell'] },
-    { id: 'r11', title: 'AI Faculty Notes — Search Algorithms', subject: 'Artificial Intelligence', courseCode: 'CS405', faculty: 'Dr. Sameer Joshi', type: 'faculty-notes', format: 'pdf', fileName: 'AI_Search_Algorithms_FacultyNotes.pdf', size: '1.9 MB', uploadDate: 'Jul 26, 2026', uploadDateISO: '2026-07-26', downloads: 143, rating: 4.7, ratingCount: 56, description: "Dr. Joshi's own annotated notes on Minimax and Alpha-Beta pruning, shared ahead of the research paper deadline.", tags: ['Minimax', 'Alpha-Beta'] },
-    { id: 'r12', title: 'Cloud Computing — IaaS / PaaS / SaaS Notes', subject: 'Cloud Computing', courseCode: 'CS407', faculty: 'Prof. Kavita Nair', type: 'notes', format: 'docx', fileName: 'Cloud_ServiceModels_Notes.docx', size: '640 KB', uploadDate: 'Jul 27, 2026', uploadDateISO: '2026-07-27', downloads: 98, rating: 4.0, ratingCount: 28, description: 'Concise notes comparing the three cloud service models with real provider examples.', tags: ['Cloud', 'Virtualization'] },
-    { id: 'r13', title: 'Web Technologies — Full Stack Slide Deck', subject: 'Web Technologies', courseCode: 'CS311', faculty: 'Dr. Arjun Malhotra', type: 'ppt', format: 'pptx', fileName: 'WebTech_FullStack_Deck.pptx', size: '5.1 MB', uploadDate: 'Jun 5, 2026', uploadDateISO: '2026-06-05', downloads: 267, rating: 4.3, ratingCount: 77, description: 'Slide deck covering the HTML/CSS/JS fundamentals used across the major project.', tags: ['HTML', 'CSS', 'JavaScript'] },
-    { id: 'r14', title: 'Cyber Security — Previous Year Papers', subject: 'Cyber Security', courseCode: 'CS420', faculty: 'Examination Cell', type: 'previous-papers', format: 'pdf', fileName: 'CyberSec_PYQ.pdf', size: '2.7 MB', uploadDate: 'Jun 20, 2026', uploadDateISO: '2026-06-20', downloads: 187, rating: 4.4, ratingCount: 65, description: 'Past examination papers for Cyber Security with the current weightage distribution highlighted.', tags: ['PYQ', 'Security'] },
-    { id: 'r15', title: 'Flutter Practical Assignments Bundle', subject: 'Mobile App Development', courseCode: 'CS412', faculty: 'Prof. Rohan Bhatt', type: 'practical', format: 'zip', fileName: 'Flutter_Practical_Bundle.zip', size: '12.3 MB', uploadDate: 'Jul 15, 2026', uploadDateISO: '2026-07-15', downloads: 134, rating: 4.2, ratingCount: 41, description: 'Starter Flutter projects for each practical session, ready to open in Android Studio.', tags: ['Flutter', 'UI'] },
-    { id: 'r16', title: 'Data Structures Question Bank — Unit Wise', subject: 'Data Structures & Algorithms', courseCode: 'CS205', faculty: 'Dr. Priya Deshmukh', type: 'question-bank', format: 'pdf', fileName: 'DSA_Question_Bank.pdf', size: '1.1 MB', uploadDate: 'Jul 8, 2026', uploadDateISO: '2026-07-08', downloads: 276, rating: 4.6, ratingCount: 102, description: 'Unit-wise question bank spanning arrays through graphs, aligned with the internal assessment pattern.', tags: ['Exam Prep', 'Trees', 'Graphs'] }
-  ];
+  const RESOURCES = [];
 
   const FILTER_LABELS = {
     notes: 'Notes', pdf: 'PDF', ppt: 'PPT', 'lab-manual': 'Lab Manual', assignments: 'Assignments',
@@ -516,8 +491,8 @@
   /* ============================================================
      SESSION STATE — downloads this session (frontend-only)
      ============================================================ */
-  const downloadedIds = new Set(['r4', 'r6']); // pre-seeded so "Recent Downloads" isn't empty on first load
-  let downloadedTodayCount = 18; // mock batch-wide counter
+  const downloadedIds = new Set();
+  let downloadedTodayCount = 0;
   const downloadCountsById = {}; // per-resource downloads, overrides the static seed count once incremented
 
   /* ============================================================

@@ -16,9 +16,8 @@
     searchFields: ['title', 'type', 'department', 'uploader'],
     stats: [
       { label: 'Total Resources', value: 0, trend: 'No resources yet', tone: 'blue' },
-      { label: 'Published', value: 0, trend: '—', tone: 'green' },
-      { label: 'Total Downloads', value: 0, trend: '—', tone: 'purple' },
-      { label: 'Storage Used', value: '—', trend: '—', tone: 'orange' }
+      { label: 'Published', value: 0, trend: 'No published resources', tone: 'green' },
+      { label: 'Total Downloads', value: 0, trend: 'No downloads recorded', tone: 'purple' }
     ],
     filters: [
       { id: 'resourceTypeFilter', field: 'type', label: 'Type' },

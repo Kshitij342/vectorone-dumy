@@ -34,7 +34,7 @@ export async function getAttendanceReport(_req: Request, res: Response): Promise
       prisma.attendanceRecord.count(),
     ]);
 
-    const rate = total > 0 ? Number(((present / total) * 100).toFixed(1)) : 91.6;
+    const rate = total > 0 ? Number(((present / total) * 100).toFixed(1)) : 0;
 
     sendSuccess(res, {
       totalRecords: total,
@@ -56,11 +56,13 @@ export async function getAssignmentsReport(_req: Request, res: Response): Promis
       prisma.assignment.count({ where: { status: 'Active' } }),
     ]);
 
+    const submissionRate = totalAssignments > 0 ? `${Math.round((totalSubmissions / totalAssignments) * 100)}%` : '0%';
+
     sendSuccess(res, {
       totalAssignments,
       totalSubmissions,
       activeAssignments: active,
-      submissionRate: totalAssignments > 0 ? `${Math.round((totalSubmissions / (totalAssignments * 50)) * 100)}%` : '78%',
+      submissionRate,
     });
   } catch (error) {
     sendError(res, 'Failed to generate assignments report', 500);
@@ -79,7 +81,7 @@ export async function getEventsReport(_req: Request, res: Response): Promise<voi
       totalEvents,
       upcomingEvents,
       totalRegistrations,
-      averageParticipation: totalEvents > 0 ? Math.round(totalRegistrations / totalEvents) : 45,
+      averageParticipation: totalEvents > 0 ? Math.round(totalRegistrations / totalEvents) : 0,
     });
   } catch (error) {
     sendError(res, 'Failed to generate events report', 500);
@@ -96,7 +98,7 @@ export async function getResourcesReport(_req: Request, res: Response): Promise<
 
     sendSuccess(res, {
       totalResources,
-      totalDownloads: downloadsAggregate._sum.downloadCount || 1268,
+      totalDownloads: downloadsAggregate._sum.downloadCount ?? 0,
       byType: byType.map((t) => ({ type: t.type, count: t._count.id })),
     });
   } catch (error) {
@@ -117,110 +119,78 @@ export async function getAdminReportsOverview(_req: Request, res: Response): Pro
       prisma.attendanceRecord.count({ where: { status: 'Present' } }),
     ]);
 
-    const attRate = attendanceTotal > 0 ? ((attendancePresent / attendanceTotal) * 100).toFixed(1) + '%' : '91.6%';
+    const complianceScore = attendanceTotal > 0 ? `${((attendancePresent / attendanceTotal) * 100).toFixed(1)}%` : '0%';
 
     const reports = [
       {
         id: 'RPT-01',
         title: 'Student Enrollment Summary',
-        summary: 'Intake, conversions and retention by department',
+        summary: 'Current student, department and course totals from the live database.',
         category: 'Academic',
         owner: 'Admissions Office',
-        period: 'Monthly',
+        period: 'Current',
         updated: new Date().toISOString().slice(0, 10),
         status: 'Ready',
         metrics: [
-          { label: 'Total Students', value: studentCount.toLocaleString() },
+          { label: 'Total Students', value: String(studentCount) },
           { label: 'Departments', value: String(deptCount) },
           { label: 'Courses', value: String(courseCount) },
         ],
       },
       {
         id: 'RPT-02',
-        title: 'Faculty Workload Review',
-        summary: 'Teaching hours and load distribution per faculty',
+        title: 'Faculty Profile Summary',
+        summary: 'Current faculty records and departmental coverage.',
         category: 'Operations',
         owner: 'Academic Affairs',
-        period: 'Quarterly',
+        period: 'Current',
         updated: new Date().toISOString().slice(0, 10),
         status: 'Ready',
         metrics: [
-          { label: 'Faculty Count', value: facultyCount.toLocaleString() },
-          { label: 'Avg Hours', value: '17.4/wk' },
-          { label: 'Courses Taught', value: String(courseCount) },
+          { label: 'Faculty Count', value: String(facultyCount) },
+          { label: 'Departments', value: String(deptCount) },
+          { label: 'Courses', value: String(courseCount) },
         ],
       },
       {
         id: 'RPT-03',
         title: 'Attendance Compliance',
-        summary: 'Departments below the 75% attendance threshold',
+        summary: 'Present attendance percentage based on live attendance records.',
         category: 'Academic',
         owner: 'Student Services',
-        period: 'Monthly',
+        period: 'Current',
         updated: new Date().toISOString().slice(0, 10),
         status: 'Ready',
         metrics: [
-          { label: 'Overall Rate', value: attRate },
-          { label: 'Total Records', value: attendanceTotal.toLocaleString() },
-          { label: 'Present Count', value: attendancePresent.toLocaleString() },
+          { label: 'Overall Rate', value: complianceScore },
+          { label: 'Total Records', value: String(attendanceTotal) },
+          { label: 'Present Count', value: String(attendancePresent) },
         ],
       },
       {
         id: 'RPT-04',
-        title: 'Resource Utilization',
-        summary: 'Library, lab and storage consumption against capacity',
-        category: 'Finance',
+        title: 'Resource Inventory',
+        summary: 'Current count of uploaded resources and downloadable assets.',
+        category: 'Operations',
         owner: 'Administration',
-        period: 'Quarterly',
+        period: 'Current',
         updated: new Date().toISOString().slice(0, 10),
         status: 'Ready',
         metrics: [
           { label: 'Total Resources', value: String(resourceCount) },
-          { label: 'Active Courses', value: String(courseCount) },
-          { label: 'Storage Used', value: '136 GB' },
-        ],
-      },
-      {
-        id: 'RPT-05',
-        title: 'Assignments & Evaluation',
-        summary: 'Submission rates, evaluation turnarounds, and pending reviews',
-        category: 'Academic',
-        owner: 'Academic Committee',
-        period: 'Monthly',
-        updated: new Date().toISOString().slice(0, 10),
-        status: 'Ready',
-        metrics: [
           { label: 'Assignments', value: String(assignmentCount) },
-          { label: 'Completion Rate', value: '88.5%' },
-          { label: 'Pending Review', value: '12' },
-        ],
-      },
-      {
-        id: 'RPT-06',
-        title: 'Fee Collection Statement',
-        summary: 'Instalment recovery and outstanding dues',
-        category: 'Finance',
-        owner: 'Accounts Office',
-        period: 'Monthly',
-        updated: new Date().toISOString().slice(0, 10),
-        status: 'Review',
-        metrics: [
-          { label: 'Collected', value: '94.1%' },
-          { label: 'Outstanding', value: '₹42.6 L' },
-          { label: 'Defaulters', value: '117' },
+          { label: 'Courses', value: String(courseCount) },
         ],
       },
     ];
 
     const totalReports = reports.length;
     const readyReports = reports.filter((r) => r.status === 'Ready').length;
-    const complianceScore = attendanceTotal > 0 ? ((attendancePresent / attendanceTotal) * 100).toFixed(1) + '%' : '98.4%';
-
     const stats = [
-      { label: 'System Reports', value: String(totalReports), trend: 'Calculated from DB', tone: 'blue' },
-      { label: 'Ready to View', value: String(readyReports), trend: 'All verified', tone: 'green' },
-      { label: 'Data Source', value: 'PostgreSQL', trend: 'Real-time', tone: 'purple' },
-      { label: 'Compliance Score', value: complianceScore, trend: 'Verified from attendance', tone: 'orange' },
+      { label: 'System Reports', value: String(totalReports), trend: 'Generated from DB', tone: 'blue' },
+      { label: 'Ready to View', value: String(readyReports), trend: 'Live records only', tone: 'green' },
+      { label: 'Data Source', value: 'PostgreSQL', trend: 'Current snapshot', tone: 'purple' },
+      { label: 'Compliance Score', value: complianceScore, trend: attendanceTotal > 0 ? 'Verified from attendance' : 'No attendance data', tone: 'orange' },
     ];
 
     sendSuccess(res, reports, undefined, 200, { stats });

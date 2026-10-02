@@ -1,22 +1,13 @@
 /* ============================================================
    VectorOne — Student Calendar Page Logic
-   Self-contained script for calendar.html. Ships the same app-shell
-   behaviors as dashboard.js / notices.js / events.js (theme, sidebar,
-   popovers, global search) plus the Calendar-page-specific modules:
+   Self-contained script for calendar.html. It keeps the page shell and
+   navigation behavior intact while leaving the calendar empty until the
+   backend provides live events or academic records.
 
-     DATA        — mock dataset + a thin Api layer shaped to match
-                   the real backend routes this will call later
-                   (GET /api/calendar, /events, /today, /upcoming,
-                   /holidays, /date/:id) — see the Api object below.
+     DATA        — empty default state with live API fallback support.
      UTILITIES   — date math / formatting helpers.
-     RENDER      — pure DOM-building functions (summary cards, the
-                   month/week/day grid, sidebar panels, drawer, modal).
-     EVENT HANDLING — listeners that call RENDER after DATA changes
-                   (navigation, filters, search, clicks).
-
-   No backend calls yet — Api.* functions resolve from the local
-   mock dataset via a Promise, so swapping in real fetch() calls
-   later is a one-line change per function.
+     RENDER      — pure DOM-building functions for the calendar views.
+     EVENT HANDLING — listeners that call RENDER after DATA changes.
    ============================================================ */
 
 (function () {
@@ -150,21 +141,9 @@
   const searchEmpty = document.getElementById('searchEmpty');
   const recentSearchList = document.getElementById('recentSearchList');
 
-  // Small mock dataset the search filters against — frontend only.
-  // Each entry carries the same fields a real notice would (title,
-  // description, category, author) so search can rank across all of them.
-  const SEARCH_INDEX = [
-    { title: 'Campus Drive — TCS NQT registrations', description: 'On-campus recruitment drive for final-year students via the National Qualifier Test.', category: 'Placement', author: 'Placement Cell', type: 'Notice' },
-    { title: 'Semester 5 internal exam schedule', description: 'Internal assessment timetable released for all Semester 5 subjects.', category: 'Academic', author: 'Academic Office', type: 'Notice' },
-    { title: 'Revised datesheet for practicals', description: 'Updated practical examination schedule due to lab availability.', category: 'Examination', author: 'Examination Cell', type: 'Notice' },
-    { title: 'Code Sprint 2026', description: 'A 24-hour competitive programming and hackathon event.', category: 'Event', author: 'Coding Club', type: 'Event' },
-    { title: 'Intro to UI/UX Workshop', description: 'Hands-on workshop covering design fundamentals and Figma basics.', category: 'Workshop', author: 'Design Cell', type: 'Event' },
-    { title: 'Inter-Dept Football Trials', description: 'Trials for the annual inter-department football tournament.', category: 'Sports', author: 'Sports Committee', type: 'Event' },
-    { title: 'Alumni Talk: Careers in Product', description: 'A talk by alumni currently working in product management roles.', category: 'Event', author: 'Alumni Cell', type: 'Event' },
-    { title: 'Robotics Club', description: 'Student club focused on robotics and embedded systems.', category: 'Club', author: 'Robotics Club', type: 'Club' },
-    { title: 'Design Cell', description: 'Campus design and UI/UX student community.', category: 'Club', author: 'Design Cell', type: 'Club' },
-    { title: 'Photography Society', description: 'Club for photography enthusiasts across campus.', category: 'Club', author: 'Photography Society', type: 'Club' }
-  ];
+  // The search index starts empty. Real records are loaded from the backend when
+  // they exist; the page should never ship demo/mock entries in a production build.
+  const SEARCH_INDEX = [];
 
   // Match tiers: 0 = exact, 1 = starts-with (word boundary), 2 = contains (mid-word).
   // The highlighted range is always snapped outward to full word boundaries,
@@ -403,12 +382,11 @@
   }
 
   /* ============================================================
-     DATA — mock dataset + Api layer
+     DATA — live API surfaces with empty default state
      ============================================================
-     The functions below are shaped exactly like what a real fetch()
-     call would return, so wiring this to a backend later means
-     replacing the body of each Api.* function with a fetch() call —
-     nothing in RENDER or EVENT HANDLING needs to change.
+     The page starts empty and only fills once real backend records are
+     available. The API layer stays compatible with the REST routes below,
+     while keeping the default front-end state free of demo content.
 
        Api.getCalendar()        -> GET /api/calendar
        Api.getEvents(range)     -> GET /api/calendar/events?from=&to=
@@ -418,8 +396,9 @@
        Api.getDate(dateKey)     -> GET /api/calendar/date/:id
      ============================================================ */
 
-  // Fixed "today" for this demo build so the seed data reads naturally.
-  const TODAY = new Date(2026, 6, 30); // July 30, 2026
+  // Keep the calendar empty by default and let the API populate it when real
+  // records are available. No fixed mock data or synthetic "today" dates.
+  const TODAY = new Date();
   TODAY.setHours(0, 0, 0, 0);
 
   const EVENT_TYPES = {
@@ -431,38 +410,11 @@
     reminder: { label: 'Reminder', tag: 'tag--reminder', dot: 'event-dot--reminder', chip: 'calendar-chip--reminder' }
   };
 
-  // One-off events — assignments, events, exams, holidays, reminders.
-  const RAW_EVENTS = [
-    { id: 'ev-01', date: '2026-07-29', type: 'exam', title: 'Data Structures Quiz', time: '10:00 AM', location: 'Room 302', faculty: 'Prof. Sharma', status: 'Completed', description: 'A short in-class quiz covering trees, graphs and hashing.', attachment: null },
-    { id: 'ev-02', date: '2026-07-30', type: 'reminder', title: 'Library Book Return Due', time: 'All day', location: 'Central Library', faculty: 'Library Office', status: 'Due today', description: 'Return borrowed books to avoid a late fee. Renewals available online.', attachment: null },
-    { id: 'ev-03', date: '2026-07-31', type: 'assignment', title: 'DBMS Lab 5 Submission', time: '11:59 PM', location: 'Online Portal', faculty: 'Prof. Sharma', status: 'Upcoming', description: 'Submit the normalized schema and sample queries for Lab 5 on the course portal.', attachment: 'DBMS_Lab5_Guidelines.pdf' },
-    { id: 'ev-04', date: '2026-08-02', type: 'cal-event', title: 'Coding Club Open Meetup', time: '5:00 PM – 6:30 PM', location: 'Innovation Lab, Block C', faculty: 'Coding Club', status: 'Upcoming', description: 'A casual monthly meetup — lightning talks, pair programming, and planning the next hackathon.', attachment: null },
-    { id: 'ev-05', date: '2026-08-03', type: 'reminder', title: 'Submit Medical Certificate', time: 'All day', location: 'Admin Office', faculty: 'Admin Office', status: 'Upcoming', description: 'Students who missed the Data Structures Quiz on medical grounds must submit a certificate.', attachment: null },
-    { id: 'ev-06', date: '2026-08-05', type: 'assignment', title: 'OS Assignment 3 Due', time: '11:59 PM', location: 'Online Portal', faculty: 'Dr. Mehta', status: 'Upcoming', description: 'Implement and report on the producer–consumer problem using semaphores.', attachment: 'OS_Assignment3_Spec.pdf' },
-    { id: 'ev-07', date: '2026-08-06', type: 'cal-event', title: 'Resume Building & LinkedIn Masterclass', time: '3:00 PM – 5:00 PM', location: 'Seminar Hall 1', faculty: 'Training & Placement Cell', status: 'Upcoming', description: 'Learn how to structure a recruiter-ready resume and optimize your LinkedIn profile.', attachment: null },
-    { id: 'ev-08', date: '2026-08-08', type: 'cal-event', title: 'CodeSprint 2026 Hackathon', time: '9:00 AM – Aug 9, 9:00 AM', location: 'Innovation Lab, Block C', faculty: 'Coding Club', status: 'Upcoming', description: 'Build a working product in 24 hours across open, fintech and climate tracks.', attachment: 'CodeSprint_Rulebook.pdf' },
-    { id: 'ev-09', date: '2026-08-10', type: 'exam', title: 'DBMS Internal Exam', time: '10:00 AM – 12:00 PM', location: 'Exam Hall 1', faculty: 'Examination Cell', status: 'Upcoming', description: 'Covers normalization, transactions, and SQL query optimization. Bring your admit card.', attachment: 'DBMS_Exam_Syllabus.pdf' },
-    { id: 'ev-10', date: '2026-08-12', type: 'exam', title: 'Operating Systems Mid-Sem', time: '10:00 AM – 12:00 PM', location: 'Exam Hall 2', faculty: 'Examination Cell', status: 'Upcoming', description: 'Covers process scheduling, deadlocks, and memory management.', attachment: 'OS_Exam_Syllabus.pdf' },
-    { id: 'ev-11', date: '2026-08-15', type: 'holiday', title: 'Independence Day', time: 'All day', location: 'College Closed', faculty: '—', status: 'Holiday', description: 'National holiday. The campus, library and hostel mess will follow the holiday schedule.', attachment: null },
-    { id: 'ev-12', date: '2026-08-16', type: 'cal-event', title: 'Cultural Fest — Rangotsav 2026', time: '4:00 PM – 10:00 PM', location: 'Main Amphitheatre', faculty: 'Cultural Committee', status: 'Upcoming', description: 'A day of music, dance, drama and art competitions celebrating campus talent.', attachment: null },
-    { id: 'ev-13', date: '2026-08-18', type: 'assignment', title: 'Web Dev Project Milestone 1', time: '11:59 PM', location: 'Online Portal', faculty: 'Prof. Iyer', status: 'Upcoming', description: 'Submit the wireframes and component breakdown for your team project.', attachment: null },
-    { id: 'ev-14', date: '2026-08-21', type: 'exam', title: 'Web Development Quiz', time: '11:00 AM', location: 'Lab 3', faculty: 'Prof. Iyer', status: 'Upcoming', description: 'A short quiz on semantic HTML, flexbox/grid, and accessibility basics.', attachment: null },
-    { id: 'ev-15', date: '2026-08-25', type: 'reminder', title: 'Fee Payment Deadline', time: 'All day', location: 'Accounts Office', faculty: 'Accounts Office', status: 'Upcoming', description: 'Semester 5 tuition fee payment closes today. A late fee applies after this date.', attachment: 'Fee_Structure_2026.pdf' },
-    { id: 'ev-16', date: '2026-08-28', type: 'holiday', title: 'Raksha Bandhan', time: 'All day', location: 'College Closed', faculty: '—', status: 'Holiday', description: 'National holiday observed across the campus.', attachment: null }
-  ];
+  const RAW_EVENTS = [];
 
-  // Recurring weekly timetable (day: 0=Sun … 6=Sat) — generates "class" events.
-  const TIMETABLE = [
-    { day: 1, time: '09:00 AM', endTime: '10:00 AM', title: 'Data Structures', location: 'Room 302', faculty: 'Prof. Sharma' },
-    { day: 1, time: '11:00 AM', endTime: '01:00 PM', title: 'Database Systems Lab', location: 'Lab 1', faculty: 'Dr. Mehta' },
-    { day: 2, time: '10:00 AM', endTime: '11:00 AM', title: 'Operating Systems', location: 'Room 205', faculty: 'Dr. Mehta' },
-    { day: 2, time: '02:00 PM', endTime: '03:00 PM', title: 'Web Development', location: 'Room 210', faculty: 'Prof. Iyer' },
-    { day: 3, time: '09:00 AM', endTime: '10:00 AM', title: 'Data Structures', location: 'Room 302', faculty: 'Prof. Sharma' },
-    { day: 3, time: '01:00 PM', endTime: '02:00 PM', title: 'Mentor Meeting', location: 'Admin Block', faculty: 'Prof. Sharma' },
-    { day: 4, time: '10:00 AM', endTime: '11:00 AM', title: 'Operating Systems', location: 'Room 205', faculty: 'Dr. Mehta' },
-    { day: 4, time: '11:00 AM', endTime: '01:00 PM', title: 'Database Systems Lab', location: 'Lab 1', faculty: 'Dr. Mehta' },
-    { day: 5, time: '02:00 PM', endTime: '03:00 PM', title: 'Web Development', location: 'Room 210', faculty: 'Prof. Iyer' }
-  ];
+  // Recurring weekly timetable (day: 0=Sun … 6=Sat). Empty by default until
+  // the app is populated with real academic data from the backend.
+  const TIMETABLE = [];
 
   function dateKey(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -492,8 +444,9 @@
 
     // Generate class occurrences across a wide window so every visible
     // month (however far the user navigates) has its recurring classes.
-    const rangeStart = new Date(2026, 5, 1);
-    const rangeEnd = new Date(2026, 11, 31);
+    const today = new Date();
+    const rangeStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const rangeEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
     for (let d = new Date(rangeStart); d <= rangeEnd; d.setDate(d.getDate() + 1)) {
       const key = dateKey(d);
       if (holidayDates.has(key)) continue;
