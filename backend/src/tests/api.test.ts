@@ -780,10 +780,9 @@ describe('VectorOne API Core Endpoints', () => {
         expect(typeof attendanceStat.value).toBe('number');
       }
 
-      const storageStat = res.body.data.stats.find((s: any) => s.label === 'Storage Used');
-      if (storageStat) {
-        expect(storageStat.value).toBe(0);
-        expect(storageStat.trend).toContain('0 GB');
+      const pendingApprovalsStat = res.body.data.stats.find((s: any) => s.label === 'Pending Approvals');
+      if (pendingApprovalsStat) {
+        expect(pendingApprovalsStat.value).toBe(0);
       }
     });
   });
