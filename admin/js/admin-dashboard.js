@@ -72,7 +72,7 @@
   window.VectorOneAdmin.icons = ICONS;
   window.VectorOneAdmin.statIcon = function (name) { return ICONS[name] || icon; };
   const stats = [];
-  const navigation = [{label:'Dashboard',file:'admin-dashboard.html',key:'dashboard'},{label:'Students',file:'students.html',key:'students'},{label:'Faculty',file:'faculty.html',key:'faculty'},{label:'Departments',file:'departments.html',key:'departments'},{label:'Courses',file:'courses.html',key:'courses'},{label:'Attendance',file:'attendance.html',key:'attendance'},{label:'Notices',file:'notices.html',key:'notices'},{label:'Events',file:'events.html',key:'events'},{label:'Assignments',file:'assignments.html',key:'assignments'},{label:'Resources',file:'resources.html',key:'resources'},{label:'Messages',file:'messages.html',key:'messages'},{label:'Reports',file:'reports.html',key:'reports'},{label:'Analytics',file:'analytics.html',key:'analytics'},{label:'Settings',file:'settings.html',key:'settings'},{label:'Profile',file:'profile.html',key:'profile'}];
+  const navigation = [{label:'Dashboard',file:'admin-dashboard.html',key:'dashboard'},{label:'Students',file:'students.html',key:'students'},{label:'Faculty',file:'faculty.html',key:'faculty'},{label:'Departments',file:'departments.html',key:'departments'},{label:'Courses',file:'courses.html',key:'courses'},{label:'Attendance',file:'attendance.html',key:'attendance'},{label:'Notices',file:'notices.html',key:'notices'},{label:'Events',file:'events.html',key:'events'},{label:'Assignments',file:'assignments.html',key:'assignments'},{label:'Resources',file:'resources.html',key:'resources'},{label:'Reports',file:'reports.html',key:'reports'},{label:'Analytics',file:'analytics.html',key:'analytics'},{label:'Settings',file:'settings.html',key:'settings'},{label:'Profile',file:'profile.html',key:'profile'}];
   const registrations = [];
   const notifications = [];
   const searchData = [];
@@ -192,7 +192,7 @@
   }
   const quickActions = document.getElementById('quickActions');
   if (quickActions) {
-    const actions = ['Create Student','Create Faculty','Publish Notice','Create Event','Upload Resource','Create Assignment','Generate Report','Broadcast Message'];
+    const actions = ['Create Student','Create Faculty','Publish Notice','Create Event','Upload Resource','Create Assignment','Generate Report'];
     quickActions.innerHTML = actions.map(function (action) { return '<button type="button" class="quick-action" data-action="' + action + '"><span class="nav-icon">' + (QUICK_ACTION_ICONS[action] || ICONS.plus) + '</span><span>' + action + '</span></button>'; }).join('');
   }
   const loginsList = document.getElementById('loginsList');

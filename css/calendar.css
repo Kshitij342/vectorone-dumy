@@ -1794,7 +1794,9 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .calendar-month-grid { grid-auto-rows: minmax(78px, 1fr); }
-  .calendar-week-grid { grid-template-columns: repeat(7, minmax(120px, 1fr)); overflow-x: auto; }
+  /* Week view: allow horizontal scroll inside the panel; override the base overflow:hidden */
+  .calendar-panel { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+  .calendar-week-grid { grid-template-columns: repeat(7, minmax(110px, 1fr)); min-width: 770px; }
 }
 @media (max-width: 768px) {
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -1810,7 +1812,10 @@ body.sidebar-collapsed .sidebar-link.is-active::before { left: -12px; }
   .calendar-cell-date { width: 20px; height: 20px; font-size: 11px; }
   .calendar-chip { font-size: 9px; padding: 1px 4px; }
 
-  .calendar-week-grid { grid-template-columns: repeat(7, minmax(110px, 1fr)); }
+  /* Week view: 7 columns need a minimum width to be legible — they scroll
+     horizontally inside the panel rather than overflowing the page. */
+  .calendar-panel { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+  .calendar-week-grid { grid-template-columns: repeat(7, minmax(90px, 1fr)); min-width: 630px; }
   .date-drawer { width: 100vw; }
 }
 @media (max-width: 480px) {
